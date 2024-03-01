@@ -13,7 +13,7 @@ const RoomFrame = () => {
     const { roomId } = useParams();
     const [imageData, setImageData] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
-    const [startApiCall, setStartApiCall] = useState(false)
+    const [isCapturing, setIsCapturing] = useState(false);
     const navigate = useNavigate();
 
 
@@ -29,7 +29,7 @@ const RoomFrame = () => {
     // };
     // testConnection();
 
-    const [isCapturing, setIsCapturing] = useState(true);
+
 
 
 
@@ -86,32 +86,35 @@ const RoomFrame = () => {
         }
     };
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (isCapturing) {
-                captureImage();
-            }
-        }, 3000); // Capture image every 3 seconds
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (isCapturing) {
+    //             captureImage();
+    //         }
+    //     }, 3000); // Capture image every 3 seconds
 
-        if (isCapturing) {
-            setTimeout(() => {
-                setIsCapturing(false); // Pause capturing during emotion detection
-                emotionDetect().then(() => {
-                    setIsCapturing(true); // Resume capturing after emotion detection
-                });
-            }, 15000); // Wait for 15 seconds before emotion detection
-        }
+    //     if (isCapturing) {
+    //         setTimeout(() => {
+    //             setIsCapturing(false); // Pause capturing during emotion detection
+    //             emotionDetect().then(() => {
+    //                 setIsCapturing(true); // Resume capturing after emotion detection
+    //             });
+    //         }, 15000); // Wait for 15 seconds before emotion detection
+    //     }
 
-        // Cleanup interval
-        return () => clearInterval(interval);
-    }, [isCapturing]); // Re-run effect when 'isCapturing' changes
+    //     // Cleanup interval
+    //     return () => clearInterval(interval);
+    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
     const emotionDetect = async () => {
         console.log('Detecting .....');
+        const sliceData = imageData.slice(-3);
+        console.log('we have data....', imageData);
+        console.log('Sliced data....', sliceData);
 
         try {
             const response = await axios.post('https://mood-lens-server.onrender.com/api/predict_gemini/images_to_emotions', {
-                imgUrls: imageData.slice(-5)
+                imgUrls: sliceData
             });
 
             console.log('Response from API:', response.data);
@@ -122,6 +125,35 @@ const RoomFrame = () => {
 
 
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isCapturing) {
+                console.log('Image capturing');
+                captureImage();
+            }
+        }, 3000); // Capture image every 3 seconds
+
+        const runEmotionDetection = async () => {
+            if (isCapturing) {
+                setIsCapturing(false); // Pause capturing during emotion detection
+                try {
+                    await emotionDetect();
+                    setIsCapturing(true);
+                } catch (error) {
+                    console.error('Error in emotion detection:', error);
+                }
+            }
+        };
+
+        const timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
+
+        // Cleanup interval and timeout
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+        };
+    }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
 
 
@@ -134,12 +166,6 @@ const RoomFrame = () => {
 
     //     }
     // }, [imageData]);
-
-
-
-
-
-
 
 
     const meetingUI = async (element) => {
@@ -170,23 +196,28 @@ const RoomFrame = () => {
             scenario: {
                 mode: ZegoUIKitPrebuilt.VideoConference,
             },
-            onJoinRoom: async () => {
-                // setStartApiCall(true)
-
-
-                // console.log('Calling captureImage...');
-                // const captureImageTimeout = setInterval(() => {
-                //     captureImage();
-                // }, 5000); // Capture image every 3 seconds
+            onJoinRoom: () => {
+                setIsCapturing(true);
+                console.log('Joined the roommm');
+            },
+            onLeaveRoom: () => {
+                setIsCapturing(false);
+                console.log('room leave....');
 
             },
+
             onInRoomMessageReceived: (data) => {
                 setChatMessages(prevMessages => [...prevMessages, data.message]);
+            },
+            onReturnToHomeScreenClicked: () => {
+                setIsCapturing(false);
+                navigate('/')
             }
         });
     };
 
     console.log(imageData);
+    console.log('Is caaptur bool...', isCapturing);
     // console.log(chatMessages);
 
 
