@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import './AuthPage.css';
 import { useFormik } from 'formik';
 import { registerSchema } from '../YupSchema';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const initialValues = {
@@ -14,6 +14,7 @@ const initialValues = {
 }
 
 const Register = () => {
+  const navigate = useNavigate();
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -27,12 +28,12 @@ const Register = () => {
   })
 
   const registerUser = async (values) => {
-    console.log('in regsterUser', values);
     try {
       console.log(`${process.env.REACT_APP_URL} APP URL`);
 
-      const response = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/register`, values);
-      console.log('response', response.data.data);
+      const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/register`, values);
+      console.log('response in register', data.data);
+      navigate('/login');
 
     } catch (error) {
       console.log('Error in registerUSer', error);

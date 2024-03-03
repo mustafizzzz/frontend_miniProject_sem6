@@ -1,11 +1,16 @@
-import React from 'react'
-import GoogleIcon from '@mui/icons-material/Google';
+import React, { useContext, useEffect } from 'react'
+// import GoogleIcon from '@mui/icons-material/Google';
 import { Button } from '@mui/material';
 import './AuthPage.css';
 import { useFormik } from 'formik';
 import { loginSchema } from '../YupSchema';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { UserContext } from '../../ContextApi/userContex';
+import GoogleButton from 'react-google-button';
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from '../../firbaseConfig';
+
 
 
 const initialValues = {
@@ -14,6 +19,9 @@ const initialValues = {
 }
 
 const Login = () => {
+  const { setCurrentUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const provider = new GoogleAuthProvider();
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -25,15 +33,18 @@ const Login = () => {
     }
   })
 
-  const navigate = useNavigate();
+
+
+
   const loginUser = async (values) => {
     console.log('in LoginUSre', values);
     try {
       console.log(`${process.env.REACT_APP_URL} APP URL`);
 
       const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/login`, values);
+      setCurrentUser(data.data);
       navigate('/home');
-      console.log('response', data);
+      console.log('response', data.data);
 
     } catch (error) {
       console.log('Error in loginUser', error);
@@ -43,8 +54,27 @@ const Login = () => {
   }
   console.log(values);
 
+  //google login
+  const googleLoginHandle = async () => {
+    try {
+      const { user } = await signInWithPopup(auth, provider)
+      console.log('after sign inn goolgle', user);
+      const googleUser = user;
+      const googleData = {
+        displayName: googleUser?.displayName,
+        email: googleUser?.email
+      }
+      console.log('google data format', googleData);
+      const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/google-sign-in`, googleData);
+      setCurrentUser(data.data);
+      console.log('google data', data.data);
+      navigate('/home');
+    } catch (error) {
+      console.log('error in google login', error);
 
+    }
 
+  }
 
   return (
     <>
@@ -120,12 +150,7 @@ const Login = () => {
                             )
                             : null
                         }
-
-
-
                       </div>
-
-
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>
@@ -135,9 +160,7 @@ const Login = () => {
                       {/* Register buttons */}
                       <div className="text-center">
                         <p>or sign up with:</p>
-                        <button className="btn btn-light btn-lg w-75 shadow-sm" type="submit"><GoogleIcon className='me-1 mb-1' /> Sign in with google
-                        </button>
-
+                        <GoogleButton className='m-auto' onClick={googleLoginHandle} />
                       </div>
 
                     </form>

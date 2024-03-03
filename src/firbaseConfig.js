@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
+import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,6 +21,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Get a reference to the Firebase Realtime Database
 const db = getDatabase(firebaseApp);
 export const storage = getStorage(firebaseApp);
+export const auth = getAuth(firebaseApp);
 
 export default db;
 
