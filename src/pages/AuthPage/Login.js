@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import './AuthPage.css';
 import { useFormik } from 'formik';
 import { loginSchema } from '../YupSchema';
+import { NavLink } from 'react-router-dom';
 
 
 const initialValues = {
@@ -109,6 +110,9 @@ const Login = () => {
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>
+                      <div class="text-center">
+                        <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
+                      </div>
                       {/* Register buttons */}
                       <div className="text-center">
                         <p>or sign up with:</p>

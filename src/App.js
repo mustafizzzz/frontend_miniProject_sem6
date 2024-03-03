@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import RoomFrame from './components/RoomFrame';
 import Login from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
-import Home from './pages/Home';
+import Home from './pages/Home/Home';
 
 function App() {
   return (

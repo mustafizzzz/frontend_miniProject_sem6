@@ -16,3 +16,14 @@
 
 
 /* Regiter Css */
+.register-mainbox {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-content-box {
+  border-radius: 1rem;
+}
