@@ -4,7 +4,8 @@ import { Button } from '@mui/material';
 import './AuthPage.css';
 import { useFormik } from 'formik';
 import { loginSchema } from '../YupSchema';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 
 const initialValues = {
@@ -17,13 +18,31 @@ const Login = () => {
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
     validationSchema: loginSchema,
-    onSubmit: (values, action) => {
+    onSubmit: async (values, action) => {
       console.log('Formik values', values);
+      await loginUser(values);
       action.resetForm();
     }
-
   })
+
+  const navigate = useNavigate();
+  const loginUser = async (values) => {
+    console.log('in LoginUSre', values);
+    try {
+      console.log(`${process.env.REACT_APP_URL} APP URL`);
+
+      const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/login`, values);
+      navigate('/home');
+      console.log('response', data);
+
+    } catch (error) {
+      console.log('Error in loginUser', error);
+
+    }
+
+  }
   console.log(values);
+
 
 
 
@@ -110,7 +129,7 @@ const Login = () => {
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>
-                      <div class="text-center">
+                      <div className="text-center">
                         <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
                       </div>
                       {/* Register buttons */}

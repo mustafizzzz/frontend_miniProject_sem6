@@ -5,23 +5,41 @@ import './AuthPage.css';
 import { useFormik } from 'formik';
 import { registerSchema } from '../YupSchema';
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 
 const initialValues = {
-  name: '',
+  username: '',
   email: '',
   password: ''
 }
 
 const Register = () => {
+
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
     validationSchema: registerSchema,
-    onSubmit: (values, action) => {
+    onSubmit: async (values, action) => {
       console.log('Formik values', values);
+      await registerUser(values);
       action.resetForm();
     }
 
   })
+
+  const registerUser = async (values) => {
+    console.log('in regsterUser', values);
+    try {
+      console.log(`${process.env.REACT_APP_URL} APP URL`);
+
+      const response = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/register`, values);
+      console.log('response', response.data.data);
+
+    } catch (error) {
+      console.log('Error in registerUSer', error);
+
+    }
+
+  }
   console.log(values);
 
 
@@ -58,16 +76,16 @@ const Register = () => {
                           className="form-control"
                           id="floatingName"
                           placeholder="john doe"
-                          name='name'
-                          value={values.name}
+                          name='username'
+                          value={values.username}
                           onChange={handleChange}
                           onBlur={handleBlur} />
                         <label htmlFor="floatingName">User name</label>
 
-                        {errors.name && touched.name ?
+                        {errors.username && touched.username ?
                           (
                             <p className='text-danger ms-1 my-1'>
-                              {errors.name}
+                              {errors.username}
                             </p>
 
                           ) : null}
