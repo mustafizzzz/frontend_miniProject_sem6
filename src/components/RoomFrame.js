@@ -9,27 +9,18 @@ import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { push, set } from 'firebase/database';
 
+//speech to text
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+
 const RoomFrame = () => {
     const { roomId } = useParams();
     const [imageData, setImageData] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
+    const [capturedText, setCapturedText] = useState('');
     const navigate = useNavigate();
 
-
-    // Function to test the connection by writing data to the database
-    // const testConnection = async () => {
-    //     try {
-    //         const dataRef = ref(db, 'testData');
-    //         await set(dataRef, 'Hello, Firebase!');
-    //         console.log('Data written successfully.');
-    //     } catch (error) {
-    //         console.error('Error writing data:', error);
-    //     }
-    // };
-    // testConnection();
-
-
+    const { transcript, resetTranscript } = useSpeechRecognition();
 
 
 
@@ -107,10 +98,10 @@ const RoomFrame = () => {
     // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
     const emotionDetect = async () => {
-        console.log('Detecting .....');
+        // console.log('Detecting .....');
         const sliceData = imageData.slice(-3);
-        console.log('we have data....', imageData);
-        console.log('Sliced data....', sliceData);
+        // console.log('we have data....', imageData);
+        // console.log('Sliced data....', sliceData);
 
         try {
             const response = await axios.post('https://mood-lens-server.onrender.com/api/predict_gemini/images_to_emotions', {
@@ -156,17 +147,42 @@ const RoomFrame = () => {
         };
     }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
+    //text to speech
+    useEffect(() => {
+        if (transcript !== '') {
+            // console.log('iam transcripted......', transcript);
+            setCapturedText(prevText => prevText + ' ' + transcript);
+            resetTranscript();
+        }
+    }, [transcript]);
 
 
-
-    // useEffect(() => {
-    //     if (imageData.length > 5) {
-
-    //         setTimeout(emotionDetect, 8000);
-
-
+    // Function to send captured text to API when the user leaves the meeting
+    // const sendCapturedTextToAPI = async () => {
+    //     try {
+    //         // const response = await axios.post('YOUR_API_ENDPOINT_HERE', {
+    //         //     text: capturedText
+    //         // });
+    //         console.log('Data of text: ', capturedText);
+    //         // Process the API response as needed
+    //     } catch (error) {
+    //         console.error('Error sending captured text to API:', error);
     //     }
-    // }, [imageData]);
+    // };
+
+    const handleStartRecognition = () => {
+        if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
+            alert("Your browser doesn't support speech recognition. Please use a supported browser.");
+            return;
+        }
+        SpeechRecognition.startListening({ continuous: true, language: 'en-IN' }); // Start continuous listening
+        console.log('Speech recognition started....');
+    };
+
+    const handleStopRecognition = () => {
+        SpeechRecognition.stopListening();
+        console.log('Speech recognition stopped....');
+    };
 
 
     const meetingUI = async (element) => {
@@ -197,12 +213,16 @@ const RoomFrame = () => {
             scenario: {
                 mode: ZegoUIKitPrebuilt.VideoConference,
             },
+
             onJoinRoom: () => {
                 setIsCapturing(true);
+                handleStartRecognition();
+                // SpeechRecognition.startListening();// start speech recognition when user join
                 console.log('Joined the roommm');
             },
             onLeaveRoom: () => {
                 setIsCapturing(false);
+                handleStopRecognition();
                 console.log('room leave....');
 
             },
@@ -219,7 +239,7 @@ const RoomFrame = () => {
 
     console.log(imageData);
     console.log('Is capture bool...', isCapturing);
-    // console.log(chatMessages);
+    console.log(capturedText);
 
 
 
@@ -227,6 +247,7 @@ const RoomFrame = () => {
         <>
             <div className="mainFrame" ref={meetingUI} style={{ width: '100%', height: '100vh' }} >
             </div>
+            {<p>Transcribed text: {transcript}</p>}
 
             {/* <div className='image-display p-5 border'>
                 <h2>Captured Images:</h2>
