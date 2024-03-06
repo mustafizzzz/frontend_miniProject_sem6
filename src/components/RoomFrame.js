@@ -150,6 +150,7 @@ const RoomFrame = () => {
 
         // Cleanup interval and timeout
         return () => {
+            console.log('interval cleaning');
             clearInterval(interval);
             clearTimeout(timeout);
         };
@@ -217,7 +218,7 @@ const RoomFrame = () => {
     };
 
     console.log(imageData);
-    console.log('Is caaptur bool...', isCapturing);
+    console.log('Is capture bool...', isCapturing);
     // console.log(chatMessages);
 
 
