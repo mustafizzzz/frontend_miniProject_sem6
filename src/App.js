@@ -5,6 +5,7 @@ import RoomFrame from './components/RoomFrame';
 import Login from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
 import Home from './pages/Home/Home';
+import TestPage from './pages/TestPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/home' element={<Home />} />
+        <Route path='/testSpeech' element={<TestPage />} />
 
 
 

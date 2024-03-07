@@ -9,22 +9,17 @@ import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { push, set } from 'firebase/database';
 
-//speech to text
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 const RoomFrame = () => {
     const { roomId } = useParams();
     const [imageData, setImageData] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
-    const [capturedText, setCapturedText] = useState('');
+    const [userIsTeacher, setUserIsTeacher] = useState(false)
     const navigate = useNavigate();
 
-    const { transcript, resetTranscript } = useSpeechRecognition();
-
-
-
     const captureImage = async () => {
+        if (!isCapturing) return;
         const mainFrame = document.querySelector('.mainFrame');
         if (mainFrame) {
             const videoElement = mainFrame.querySelector('video');
@@ -118,15 +113,15 @@ const RoomFrame = () => {
     };
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             if (isCapturing) {
                 console.log('Image capturing');
-                captureImage();
+                await captureImage();
             }
-        }, 3000); // Capture image every 3 seconds
+        }, 5000); // Capture image every 3 seconds
 
         const runEmotionDetection = async () => {
-            if (isCapturing) {
+            if (isCapturing && userIsTeacher === true) {
                 setIsCapturing(false); // Pause capturing during emotion detection
                 try {
                     await emotionDetect();
@@ -136,55 +131,84 @@ const RoomFrame = () => {
                 }
             }
         };
+        let timeout;
+        if (userIsTeacher === false) {
+            timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
+        }
 
-        const timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
+
 
         // Cleanup interval and timeout
         return () => {
             console.log('interval cleaning');
             clearInterval(interval);
-            clearTimeout(timeout);
+            if (!userIsTeacher) {
+                clearTimeout(timeout);
+            }
         };
     }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
     //text to speech
+
+    // Speech-to-text functionality
+    const [isListening, setIsListening] = useState(false);
+    const [recognizedText, setRecognizedText] = useState('');
+
     useEffect(() => {
-        if (transcript !== '') {
-            // console.log('iam transcripted......', transcript);
-            setCapturedText(prevText => prevText + ' ' + transcript);
-            resetTranscript();
-        }
-    }, [transcript]);
-
-
-    // Function to send captured text to API when the user leaves the meeting
-    // const sendCapturedTextToAPI = async () => {
-    //     try {
-    //         // const response = await axios.post('YOUR_API_ENDPOINT_HERE', {
-    //         //     text: capturedText
-    //         // });
-    //         console.log('Data of text: ', capturedText);
-    //         // Process the API response as needed
-    //     } catch (error) {
-    //         console.error('Error sending captured text to API:', error);
-    //     }
-    // };
-
-    const handleStartRecognition = () => {
-        if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
-            alert("Your browser doesn't support speech recognition. Please use a supported browser.");
+        if (!('webkitSpeechRecognition' in window)) {
+            console.log('Speech recognition is not supported by this browser.');
             return;
         }
-        SpeechRecognition.startListening({ continuous: true, language: 'en-IN' }); // Start continuous listening
-        console.log('Speech recognition started....');
+
+        const recognition = new window.webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+            console.log('Listening...');
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+            console.log('Stopped listening.');
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map((result) => result[0])
+                .map((result) => result.transcript)
+                .join('');
+
+            setRecognizedText(transcript);
+        };
+
+        if (isListening) {
+            recognition.start();
+        } else {
+            recognition.stop();
+        }
+
+        return () => {
+            recognition.stop();
+        };
+    }, [isListening]);
+
+    useEffect(() => {
+        if (!isListening) {
+            console.log('Saved text:', recognizedText);
+        }
+    }, [isListening, recognizedText]);
+
+    const startListen = () => {
+        setIsListening(true);
+    };
+    const stopListen = () => {
+        setIsListening(false);
     };
 
-    const handleStopRecognition = () => {
-        SpeechRecognition.stopListening();
-        console.log('Speech recognition stopped....');
-    };
 
-
+    //Meeting UI Code
     const meetingUI = async (element) => {
         // Generate Kit Token (unchanged)
         const appID = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
@@ -216,13 +240,12 @@ const RoomFrame = () => {
 
             onJoinRoom: () => {
                 setIsCapturing(true);
-                handleStartRecognition();
-                // SpeechRecognition.startListening();// start speech recognition when user join
+                startListen();
                 console.log('Joined the roommm');
             },
             onLeaveRoom: () => {
                 setIsCapturing(false);
-                handleStopRecognition();
+                stopListen();
                 console.log('room leave....');
 
             },
@@ -232,6 +255,7 @@ const RoomFrame = () => {
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
+                stopListen();
                 navigate('/')
             }
         });
@@ -239,7 +263,7 @@ const RoomFrame = () => {
 
     console.log(imageData);
     console.log('Is capture bool...', isCapturing);
-    console.log(capturedText);
+    // console.log(capturedText);
 
 
 
@@ -247,7 +271,7 @@ const RoomFrame = () => {
         <>
             <div className="mainFrame" ref={meetingUI} style={{ width: '100%', height: '100vh' }} >
             </div>
-            {<p>Transcribed text: {transcript}</p>}
+            {<p>Transcribed text: {recognizedText}</p>}
 
             {/* <div className='image-display p-5 border'>
                 <h2>Captured Images:</h2>
