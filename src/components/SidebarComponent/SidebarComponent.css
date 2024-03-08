@@ -7,6 +7,16 @@
   font-family: 'Lexend', sans-serif;
 }
 
+/* .sidebar-nav {
+  position: fixed;
+  top: 10%;
+  bottom: 0;
+  left: 0;
+  width: 275px;
+  overflow-y: auto;
+  z-index: 1000;
+} */
+
 .sidebar.expanded {
   width: 35%;
 }
