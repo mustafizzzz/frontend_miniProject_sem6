@@ -6,6 +6,9 @@ import Login from './pages/AuthPage/Login';
 import Register from './pages/AuthPage/Register';
 import Home from './pages/Home/Home';
 import TestPage from './pages/TestPage';
+import AboutUs from './pages/AboutUs/AboutUs';
+import ContactUs from './pages/ContactUs/ContactUs';
+import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 
 function App() {
   return (
@@ -16,8 +19,11 @@ function App() {
         <Route path='/home' element={<Home />} />
         <Route path='/testSpeech' element={<TestPage />} />
 
-
-
+        {/* Nested layout */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="about-us" element={<AboutUs />} />
+          <Route path="contact" element={<ContactUs />} />
+        </Route>
 
 
         {/* Video Pages */}
