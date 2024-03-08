@@ -7,7 +7,7 @@ import { loginSchema } from '../YupSchema';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../../ContextApi/userContex';
-import GoogleButton from 'react-google-button';
+import GoogleButton from 'react-google-button'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
 
@@ -32,8 +32,6 @@ const Login = () => {
       action.resetForm();
     }
   })
-
-
 
 
   const loginUser = async (values) => {
@@ -99,9 +97,10 @@ const Login = () => {
 
               <div className="col-lg-6 mb-5 mb-lg-0">
                 <div className="card">
-                  <div className="card-body py-5 px-md-5">
-                    <form onSubmit={handleSubmit}>
 
+                  <div className="card-body py-4 px-md-5">
+                    <h1 className="card-title mb-4">Login</h1>
+                    <form onSubmit={handleSubmit}>
                       {/* Email input */}
                       <div className="form-floating mb-3">
                         <input
@@ -160,7 +159,7 @@ const Login = () => {
                       {/* Register buttons */}
                       <div className="text-center">
                         <p>or sign up with:</p>
-                        <GoogleButton className='m-auto' onClick={googleLoginHandle} />
+                        <GoogleButton className='m-auto' onClick={googleLoginHandle} label='Sign up with Google' />
                       </div>
 
                     </form>

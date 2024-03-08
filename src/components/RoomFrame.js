@@ -142,7 +142,7 @@ const RoomFrame = () => {
         return () => {
             console.log('interval cleaning');
             clearInterval(interval);
-            if (!userIsTeacher) {
+            if (userIsTeacher === false) {
                 clearTimeout(timeout);
             }
         };

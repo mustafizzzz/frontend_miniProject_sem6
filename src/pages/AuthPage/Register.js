@@ -6,8 +6,10 @@ import { useFormik } from 'formik';
 import { registerSchema } from '../YupSchema';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import GoogleButton from 'react-google-button';
 
 const initialValues = {
+  role: '',
   username: '',
   email: '',
   password: ''
@@ -68,7 +70,36 @@ const Register = () => {
 
               <div className="col-lg-6 mb-5 mb-lg-0">
                 <div className="card">
-                  <div className="card-body py-5 px-md-5">
+                  <div className="card-body py-4 px-md-5">
+                    <h1 className="card-title mb-4">Create a new account</h1>
+
+
+                    <div className="button-role d-flex mb-3">
+                      <button
+                        type="button"
+                        className={`btn btn-outline-primary me-3 ${values.role === 'teacher' ? 'active' : ''}`}
+                        onClick={() => handleChange('role')('teacher')}
+                      >
+                        Teacher
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-outline-primary ${values.role === 'student' ? 'active' : ''}`}
+                        onClick={() => handleChange('role')('student')}
+                      >
+                        Student
+                      </button>
+                      {errors.role && touched.role ?
+                        (
+                          <p className='text-danger ms-3 mt-2 p-0 m-0'>
+                            {errors.role}
+                          </p>
+
+                        ) : null}
+
+                    </div>
+
+
                     <form onSubmit={handleSubmit}>
                       {/* userName input */}
                       <div className="form-floating mb-3">
@@ -141,9 +172,6 @@ const Register = () => {
                             )
                             : null
                         }
-
-
-
                       </div>
 
 
@@ -156,8 +184,7 @@ const Register = () => {
                       {/* Register buttons */}
                       <div className="text-center">
                         <p>or sign up with:</p>
-                        <button className="btn btn-light btn-lg w-75 shadow-sm" type="submit"><GoogleIcon className='me-1 mb-1' /> Sign in with google
-                        </button>
+                        <GoogleButton className='m-auto' onClick={() => { console.log('Google Clicked'); }} label='Sign up with Google' />
 
                       </div>
 
