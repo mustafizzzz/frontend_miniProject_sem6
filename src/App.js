@@ -9,6 +9,7 @@ import TestPage from './pages/TestPage';
 import AboutUs from './pages/AboutUs/AboutUs';
 import ContactUs from './pages/ContactUs/ContactUs';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
+import ReportsPage from './pages/ReportsPage/ReportsPage';
 
 function App() {
   return (
@@ -16,11 +17,12 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route path='/home' element={<Home />} />
         <Route path='/testSpeech' element={<TestPage />} />
 
         {/* Nested layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path='home' element={<Home />} />
+          <Route path='reports' element={<ReportsPage />} />
           <Route path="about-us" element={<AboutUs />} />
           <Route path="contact" element={<ContactUs />} />
         </Route>
