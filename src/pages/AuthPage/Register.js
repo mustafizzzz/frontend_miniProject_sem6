@@ -12,8 +12,10 @@ const initialValues = {
   role: '',
   pid: '',
   username: '',
-  email: '',
-  password: ''
+  disability: '',
+  ImageData: ''
+  // email: '',
+  // password: ''
 }
 
 const Register = () => {
@@ -126,8 +128,33 @@ const Register = () => {
 
                       </div>
 
+                      {/* Disablilty ask */}
+                      <div className="from-floating mb-3">
+                        <select
+                          className="form-select mb-3 p-3"
+                          aria-label=".form-select-lg example"
+                          name="disability"
+                          value={values.disability}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        >
+                          <option value="">Select your disability type</option>
+                          <option value="One">One</option>
+                          <option value="Two">Two</option>
+                          <option value="Three">Three</option>
+                        </select>
+                        {errors.disability && touched.disability ?
+                          (
+                            <p className='text-danger ms-3 mt-2 p-0 m-0'>
+                              {errors.disability}
+                            </p>
+
+                          ) : null}
+                      </div>
+
+
                       {/* Email input */}
-                      <div className="form-floating mb-3">
+                      {/* <div className="form-floating mb-3">
                         <input
                           type="email"
                           className="form-control"
@@ -147,7 +174,7 @@ const Register = () => {
 
                           ) : null}
 
-                      </div>
+                      </div> */}
 
                       {/* PID INput */}
                       <div className="form-floating mb-3">
@@ -172,8 +199,35 @@ const Register = () => {
 
                       </div>
 
+                      {/* ImageData */}
+                      <div className="image-field mb-4">
+                        <label htmlFor="floatingName">Choose a image</label>
+                        <input
+                          className="form-control form-control-lg"
+                          type="file"
+                          id="formFile"
+                          placeholder="Choose a Image"
+                          name='imageData'
+                          value={values.ImageData}
+                          onChange={(event) => {
+                            const file = event.target.files[0];
+                            // setFieldValue("imageData", file);
+                          }}
+                          onBlur={handleBlur} />
+
+
+                        {errors.ImageData && touched.ImageData ?
+                          (
+                            <p className='text-danger ms-1 my-1'>
+                              {errors.ImageData}
+                            </p>
+
+                          ) : null}
+
+                      </div>
+
                       {/* Password input */}
-                      <div className="form-floating mb-4">
+                      {/* <div className="form-floating mb-4">
 
                         <input
                           type="password"
@@ -195,7 +249,7 @@ const Register = () => {
                             )
                             : null
                         }
-                      </div>
+                      </div> */}
 
 
 
