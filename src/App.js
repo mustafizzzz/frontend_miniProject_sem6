@@ -13,6 +13,7 @@ import ReportsPage from './pages/ReportsPage/ReportsPage';
 import MeetingPage from './pages/MeetingPage/MeetingPage';
 import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
 import SettingPage from './pages/SettingPage/SettingPage';
+import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path='/' element={<VideoFrame />} />
         <Route path='/room/:roomId' element={<RoomFrame />} />
       </Routes>
+      <AlanAiContainer />
     </div>
   );
 }
