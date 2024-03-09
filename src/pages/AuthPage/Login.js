@@ -157,10 +157,10 @@ const Login = () => {
                         <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
                       </div>
                       {/* Register buttons */}
-                      <div className="text-center">
+                      {/* <div className="text-center">
                         <p>or sign up with:</p>
                         <GoogleButton className='m-auto' onClick={googleLoginHandle} label='Sign up with Google' />
-                      </div>
+                      </div> */}
 
                     </form>
                   </div>

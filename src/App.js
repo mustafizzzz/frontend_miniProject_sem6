@@ -10,6 +10,9 @@ import AboutUs from './pages/AboutUs/AboutUs';
 import ContactUs from './pages/ContactUs/ContactUs';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import ReportsPage from './pages/ReportsPage/ReportsPage';
+import MeetingPage from './pages/MeetingPage/MeetingPage';
+import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
+import SettingPage from './pages/SettingPage/SettingPage';
 
 function App() {
   return (
@@ -22,9 +25,11 @@ function App() {
         {/* Nested layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route path='home' element={<Home />} />
+          <Route path="meetings" element={<MeetingPage />} />
           <Route path='reports' element={<ReportsPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="setting" element={<SettingPage />} />
           <Route path="about-us" element={<AboutUs />} />
-          <Route path="contact" element={<ContactUs />} />
         </Route>
 
 

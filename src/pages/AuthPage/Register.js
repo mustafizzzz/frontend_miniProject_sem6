@@ -10,6 +10,7 @@ import GoogleButton from 'react-google-button';
 
 const initialValues = {
   role: '',
+  pid: '',
   username: '',
   email: '',
   password: ''
@@ -55,7 +56,7 @@ const Register = () => {
           <div className="container">
             <div className="row gx-lg-5 align-items-center">
 
-              <div className="col-lg-6 mb-5 mb-lg-0">
+              <div className="d-none d-md-block col-lg-6 mb-5 mb-lg-0">
                 <h1 className="my-5 display-3 fw-bold ls-tight">
                   Video Calls<br />
                   <span className="text-primary">MoodLens Login</span>
@@ -101,6 +102,7 @@ const Register = () => {
 
 
                     <form onSubmit={handleSubmit}>
+
                       {/* userName input */}
                       <div className="form-floating mb-3">
                         <input
@@ -147,7 +149,28 @@ const Register = () => {
 
                       </div>
 
+                      {/* PID INput */}
+                      <div className="form-floating mb-3">
+                        <input
+                          type="number"
+                          className="form-control"
+                          id="floatingName"
+                          placeholder="211103"
+                          name='pid'
+                          value={values.pid}
+                          onChange={handleChange}
+                          onBlur={handleBlur} />
+                        <label htmlFor="floatingName">PID</label>
 
+                        {errors.pid && touched.pid ?
+                          (
+                            <p className='text-danger ms-1 my-1'>
+                              {errors.pid}
+                            </p>
+
+                          ) : null}
+
+                      </div>
 
                       {/* Password input */}
                       <div className="form-floating mb-4">
@@ -182,11 +205,11 @@ const Register = () => {
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
                       </div>
                       {/* Register buttons */}
-                      <div className="text-center">
+                      {/* <div className="text-center">
                         <p>or sign up with:</p>
                         <GoogleButton className='m-auto' onClick={() => { console.log('Google Clicked'); }} label='Sign up with Google' />
 
-                      </div>
+                      </div> */}
 
                     </form>
                   </div>

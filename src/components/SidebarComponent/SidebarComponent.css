@@ -1,3 +1,10 @@
+/* ICON CSS */
+
+.sidebar-nav li a i {
+  font-size: 1.75rem;
+  margin-right: 1rem;
+}
+
 .sidebar {
   /* border: 2px solid orange; */
   width: 100%;
@@ -48,8 +55,10 @@
   /* border: 1px solid #ec1515; */
   text-decoration: none;
   color: black;
-  display: block;
-  padding: 0.85rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.16rem;
+  padding: 0.45rem;
   padding-left: 1.6rem;
   border-radius: 0.8rem;
   width: 100%;
