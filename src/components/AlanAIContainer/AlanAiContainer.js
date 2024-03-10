@@ -16,7 +16,7 @@ const AlanAiContainer = () => {
 
     useEffect(() => {
         window.alanBtnInstance = alanBtn({
-            key: 'bbcf90b2a7afac791638d0fe654eafe92e956eca572e1d8b807a3e2338fdd0dc/stage',
+            key: '604046f361fd8463cd587654400759792e956eca572e1d8b807a3e2338fdd0dc/stage',
             onButtonState: async (status) => {
 
                 if (status === "ONLINE" && !window.welcomeMsgPlayed) {

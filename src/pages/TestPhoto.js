@@ -22,7 +22,7 @@ const style = {
     p: 4,
 };
 
-const TestPhoto = () => {
+const TestPhoto = ({ setLoginImage }) => {
     // const [open, setOpen] = React.useState(false);
     // const handleOpen = () => setOpen(true);
     // const handleClose = () => setOpen(false);
@@ -69,7 +69,8 @@ const TestPhoto = () => {
             // Get the download URL
             const downloadURL = await getDownloadURL(snapshot.ref);
             console.log('File available at', downloadURL);
-            // Save the download URL to state or use it as needed
+            setLoginImage(downloadURL);
+
 
         } catch (error) {
             console.error('Error uploading image:', error);

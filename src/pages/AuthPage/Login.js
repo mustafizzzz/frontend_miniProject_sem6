@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 // import GoogleIcon from '@mui/icons-material/Google';
 import { Button } from '@mui/material';
 import './AuthPage.css';
@@ -15,20 +15,23 @@ import TestPhoto from '../TestPhoto';
 
 
 
-const initialValues = {
-  username: '',
-  // password: ''
-}
 
 const Login = () => {
   const { setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const { loginUserName, setLoginUserName } = useContext(AlanContext);
+  const [loginImage, setLoginImage] = useState('');
+  const [loginName, setLoginName] = useState('');
+
+  const initialValues = {
+    username: loginUserName || '',
+    // password: ''
+  }
 
 
 
-  const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = useFormik({
     initialValues: initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, action) => {
@@ -37,17 +40,34 @@ const Login = () => {
       action.resetForm();
     }
   })
+  console.log("in form", errors);
+
+  useEffect(() => {
+    setLoginName(loginUserName);
+    console.log('changeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+  }, [loginUserName])
 
 
-  const loginUser = async (values) => {
-    console.log('in LoginUSre', values);
+  const loginUser = async () => {
+    console.log('in LoginUSre', loginName);
+    console.log('in LoginUSre', loginImage);
     try {
-      console.log(`${process.env.REACT_APP_URL} APP URL`);
+      console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
 
-      const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/login`, values);
-      setCurrentUser(data.data);
-      navigate('/home');
-      console.log('response', data.data);
+      const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/face_id_login`,
+        {
+          username: loginUserName,
+          imageUrl: loginImage
+        });
+      // setCurrentUser(data.data);
+      console.log('response of login ', response);
+      if (response.data.message === 'Face ID do not match') {
+
+        alert('Face did not match');
+      } else {
+
+        navigate('/');
+      }
 
     } catch (error) {
       console.log('Error in loginUser', error);
@@ -78,6 +98,7 @@ const Login = () => {
     }
 
   }
+
 
   return (
     <>
@@ -115,7 +136,7 @@ const Login = () => {
                           placeholder="name@example.com"
                           name='uesrname'
                           value={loginUserName}
-                          onChange={handleChange}
+
                           onBlur={handleBlur} />
                         <label htmlFor="floatingInput">User name</label>
 
@@ -171,7 +192,7 @@ const Login = () => {
                       </div>
 
 
-                      <TestPhoto />
+                      <TestPhoto setLoginImage={setLoginImage} />
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>

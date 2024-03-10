@@ -45,6 +45,7 @@ const Register = () => {
 
   console.log("in form", errors);
 
+  
   const registerUser = async (values) => {
     try {
       if (!imageFile) return;
