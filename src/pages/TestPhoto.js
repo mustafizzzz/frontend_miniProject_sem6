@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useRef } from 'react';
 import { AlanContext } from '../ContextApi/AlanContext';
+import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import { storage } from '../firbaseConfig';
 
 const style = {
     position: 'absolute',
@@ -16,7 +18,7 @@ const style = {
     width: 400,
     bgcolor: 'background.paper',
     border: '2px solid #000',
-    boxShadow: 24,
+    boxShadow: 15,
     p: 4,
 };
 
@@ -27,6 +29,7 @@ const TestPhoto = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const { open, setOpen, handleClose } = React.useContext(AlanContext);
+
     React.useEffect(() => {
         if (open) {
             startCamera();
@@ -48,7 +51,7 @@ const TestPhoto = () => {
             });
     };
 
-    const captureImage = () => {
+    const captureImage = async () => {
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -57,6 +60,20 @@ const TestPhoto = () => {
 
         // Convert canvas image to base64
         const imageData = canvas.toDataURL('image/png');
+        try {
+            // Create a reference to the storage location
+            const storageRef = ref(storage, `loginDump/`);
+            // Upload the file
+            const snapshot = await uploadString(storageRef, imageData, 'data_url');
+            console.log('Uploaded a data URL string!');
+            // Get the download URL
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log('File available at', downloadURL);
+            // Save the download URL to state or use it as needed
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
         console.log('Captured image:', imageData);
 
         // Stop the media stream
@@ -78,8 +95,8 @@ const TestPhoto = () => {
             >
                 <Box sx={style}>
                     <div>
-                        <button onClick={startCamera}>Start Camera</button>
-                        <button onClick={captureImage}>Capture Image</button>
+                        {/* <button onClick={startCamera}>Start Camera</button>
+                        <button onClick={captureImage}>Capture Image</button> */}
                         <div>
                             <video ref={videoRef} width="400" height="300" autoPlay muted></video>
                         </div>
