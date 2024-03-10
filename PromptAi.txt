@@ -1,0 +1,56 @@
+intent('Hey Alan active', (p) => {
+    p.play({ command: 'activate' });
+});
+
+intent('Hey Alan quit', (p) => {
+    p.play({ command: 'deactivate' });
+});
+
+intent("start login", async p => {
+    p.play({command:'start login'})
+    let usernameConfirmed = false;
+//     let passwordConfirmed = false;
+    
+    while (!usernameConfirmed) {
+        p.play("Sure! Please provide your username.");
+        const username = await p.then(getEmail);
+        p.play(`You provided the username: ${username}. Is that correct?`);
+        const confirmation = await p.then(confirm);
+        if (confirmation.value === "yes") {
+            usernameConfirmed = true;
+            p.play({ command: 'getUsername' ,data:username});
+            
+        } else {
+            p.play("Okay, let's try again.");
+        }
+    }
+    p.play("wait few moment for image verification.");
+     p.play({command:'captureLogin'})
+    
+    
+//     while (!passwordConfirmed) {
+//         p.play("Great! Now, please enter your password.");
+//         const password = await p.then(getPassword);
+//         p.play(`You entered the password: ${password}. Is that correct?`);
+//         const confirmation = await p.then(confirm);
+//         if (confirmation.value.toLowerCase() === "yes") {
+//             passwordConfirmed = true;
+//         } else {
+//             p.play("Okay, let's try again.");
+//         }
+//     }
+    
+//     p.play("You are logged in!");
+});
+
+const getEmail = context(() => {
+    intent("$(USERNAME* .+)", p => p.resolve(p.USERNAME));
+});
+
+// const getPassword = context(() => {
+//     intent("$(PASSWORD* .+)", p => p.resolve(p.PASSWORD));
+// });
+
+const confirm = context(() => {
+    intent("$(ANSWER* .+)", p => p.resolve(p.ANSWER));
+});
