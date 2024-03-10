@@ -14,8 +14,8 @@ import { auth } from '../../firbaseConfig';
 
 
 const initialValues = {
-  email: '',
-  password: ''
+  username: '',
+  // password: ''
 }
 
 const Login = () => {
@@ -104,20 +104,20 @@ const Login = () => {
                       {/* Email input */}
                       <div className="form-floating mb-3">
                         <input
-                          type="email"
+                          type="text"
                           className="form-control"
                           id="floatingInput"
                           placeholder="name@example.com"
-                          name='email'
-                          value={values.email}
+                          name='uesrname'
+                          value={values.username}
                           onChange={handleChange}
                           onBlur={handleBlur} />
-                        <label htmlFor="floatingInput">Email address</label>
+                        <label htmlFor="floatingInput">User name</label>
 
-                        {errors.email && touched.email ?
+                        {errors.username && touched.username ?
                           (
                             <p className='text-danger ms-1 my-1'>
-                              {errors.email}
+                              {errors.username}
                             </p>
 
                           ) : null}
@@ -127,7 +127,7 @@ const Login = () => {
 
 
                       {/* Password input */}
-                      <div className="form-floating mb-4">
+                      {/* <div className="form-floating mb-4">
 
                         <input
                           type="password"
@@ -149,6 +149,23 @@ const Login = () => {
                             )
                             : null
                         }
+                      </div> */}
+
+                      {/* Image verify */}
+                      <div className="labels-main">
+                        <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between">
+                          <div className="text-div d-flex align-items-center">
+                            <i className="bi bi-card-image fs-4 me-3"></i>
+                            <p className='p-0  mb-0'>Image verification</p>
+                          </div>
+                          <div className="icon-div d-flex">
+                            <i className="bi bi-x fs-2"></i>
+                            <i className="bi bi-patch-check fs-3"></i>
+
+                          </div>
+
+
+                        </div>
                       </div>
 
                       {/* Submit button */}

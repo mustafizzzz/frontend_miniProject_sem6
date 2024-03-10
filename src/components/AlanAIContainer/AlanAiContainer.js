@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import alanBtn from '@alan-ai/alan-sdk-web';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AlanAiContainer = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const [isAlanActive, setIsAlanActive] = useState(false);
     useEffect(() => {
         window.alanBtnInstance = alanBtn({
             key: 'bbcf90b2a7afac791638d0fe654eafe92e956eca572e1d8b807a3e2338fdd0dc/stage',
@@ -11,11 +13,18 @@ const AlanAiContainer = () => {
 
                 if (status === "ONLINE" && !window.welcomeMsgPlayed) {
                     window.alanBtnInstance.activate();
-                    window.alanBtnInstance.playText('Hello, I am your voice virtual assistant. You can give me commands for your login and registrations.');
+                    window.alanBtnInstance.playText('You are online now. You can give me commands for your login just say start login.');
                     window.welcomeMsgPlayed = true;
                 }
             },
             onCommand: (commandData) => {
+                if (commandData.command === 'start login') {
+                    navigate('/login');
+                }
+                if (commandData.command === 'deactivate') {
+
+                    window.alanBtnInstance.deactivate();
+                }
                 console.log(commandData);
             }
         });
@@ -25,6 +34,27 @@ const AlanAiContainer = () => {
         window.alanBtnInstance.setVisualState({ "path": location.pathname })
         console.log(location.pathname);
     }, [location])
+
+    useEffect(() => {
+        const handleKeyPress = (event) => {
+            console.log('pressssssssssssssssssss');
+            if (event.code === 'Space') {
+                if (isAlanActive) {
+                    setIsAlanActive(false);
+                    window.alanBtnInstance.deactivate();
+                } else {
+                    setIsAlanActive(true);
+                    window.alanBtnInstance.activate();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyPress);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress);
+        };
+    }, [isAlanActive]);
 
 
     return (
