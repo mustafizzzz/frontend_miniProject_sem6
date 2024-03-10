@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import alanBtn from '@alan-ai/alan-sdk-web';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AlanContext } from '../../ContextApi/AlanContext';
+import { set } from 'firebase/database';
 
 const AlanAiContainer = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isAlanActive, setIsAlanActive] = useState(false);
+
+    //context import
+    const { loginUserName, setLoginUserName } = useContext(AlanContext);
+    console.log('context.....', loginUserName);
+
     useEffect(() => {
         window.alanBtnInstance = alanBtn({
             key: 'bbcf90b2a7afac791638d0fe654eafe92e956eca572e1d8b807a3e2338fdd0dc/stage',
@@ -22,8 +29,13 @@ const AlanAiContainer = () => {
                     navigate('/login');
                 }
                 if (commandData.command === 'deactivate') {
+                    console.warn('iam dataaaaa');
 
                     window.alanBtnInstance.deactivate();
+                }
+                if (commandData.command === 'getUsername') {
+
+                    setLoginUserName(commandData.data.value);
                 }
                 console.log(commandData);
             }

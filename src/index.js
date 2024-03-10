@@ -5,14 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import UserProvider from './ContextApi/userContex';
+import AlanProvider from './ContextApi/AlanContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
    <BrowserRouter>
 
-      <UserProvider>
-         <App />
-      </UserProvider>
+      <AlanProvider>
+         <UserProvider>
+            <App />
+         </UserProvider>
+      </AlanProvider>
 
    </BrowserRouter>
 

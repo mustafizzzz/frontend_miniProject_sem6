@@ -10,6 +10,7 @@ import { UserContext } from '../../ContextApi/userContex';
 import GoogleButton from 'react-google-button'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
+import { AlanContext } from '../../ContextApi/AlanContext';
 
 
 
@@ -22,6 +23,7 @@ const Login = () => {
   const { setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
+  const { loginUserName, setLoginUserName } = useContext(AlanContext);
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -109,7 +111,7 @@ const Login = () => {
                           id="floatingInput"
                           placeholder="name@example.com"
                           name='uesrname'
-                          value={values.username}
+                          value={loginUserName}
                           onChange={handleChange}
                           onBlur={handleBlur} />
                         <label htmlFor="floatingInput">User name</label>
