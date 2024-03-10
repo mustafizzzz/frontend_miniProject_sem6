@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import GoogleIcon from '@mui/icons-material/Google';
 import { Button } from '@mui/material';
 import './AuthPage.css';
@@ -8,18 +8,29 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GoogleButton from 'react-google-button';
 
+//firebase Imports
+import db, { storage } from '../../firbaseConfig';
+
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref as dbRef, push, set } from 'firebase/database';
+
+
 const initialValues = {
   role: '',
   pid: '',
+  phone: '',
   username: '',
+  name: '',
   disability: '',
-  ImageData: ''
   // email: '',
   // password: ''
 }
 
 const Register = () => {
   const navigate = useNavigate();
+  const [imageFile, setImageFile] = useState(null);
+
+  console.log(imageFile);
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -30,14 +41,51 @@ const Register = () => {
       action.resetForm();
     }
 
-  })
+  });
+
+  console.log("in form", errors);
 
   const registerUser = async (values) => {
     try {
-      console.log(`${process.env.REACT_APP_URL} APP URL`);
+      if (!imageFile) return;
+      console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+      // Upload image to Firebase Storage with the PID as part of the path
+      console.log('Values in register hanle', values);
+      const imageRef = ref(storage, `images/${values.pid}/${imageFile.name}`);
+      await uploadBytes(imageRef, imageFile);
 
-      const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/register`, values);
-      console.log('response in register', data.data);
+      // Get the download URL of the uploaded image
+      const imageUrl = await getDownloadURL(imageRef);
+      console.log(imageUrl);
+
+      // Prepare data to be stored in the database
+      const registrationData = {
+        pid: values.pid,
+        userName: values.username,
+        face_id: imageUrl, // URL of the uploaded image
+        disability: values.disability,
+        phone: values.phone,
+      };
+
+      // const newRef = await push(ref(db, 'users'));
+      // await set(newRef, {
+      //   name: values.username,
+      //   imageURL: imageUrl
+      // });
+
+      const imageDataRef = push(dbRef(db, 'StudentImages'));
+      set(imageDataRef, {
+        Name: values.username,
+        imageUrl: imageUrl
+      }).then(() => {
+        console.log("Image URL saved successfully!");
+      }).catch((error) => {
+        console.error("Error saving image URL: ", error);
+      });
+
+      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/face_id_signup`, registrationData);
+      console.log('response in register', response.data.user);
+
       navigate('/login');
 
     } catch (error) {
@@ -46,7 +94,8 @@ const Register = () => {
     }
 
   }
-  console.log(values);
+
+  // console.log(values);
 
 
 
@@ -108,7 +157,7 @@ const Register = () => {
                       {/* userName input */}
                       <div className="form-floating mb-3">
                         <input
-                          type="name"
+                          type='text'
                           className="form-control"
                           id="floatingName"
                           placeholder="john doe"
@@ -128,10 +177,33 @@ const Register = () => {
 
                       </div>
 
+                      {/* name input */}
+                      <div className="form-floating mb-3">
+                        <input
+                          type='text'
+                          className="form-control"
+                          id="floatingName"
+                          placeholder="john doe"
+                          name='name'
+                          value={values.name}
+                          onChange={handleChange}
+                          onBlur={handleBlur} />
+                        <label htmlFor="floatingName">Enter your name</label>
+
+                        {errors.name && touched.name ?
+                          (
+                            <p className='text-danger ms-1 my-1'>
+                              {errors.name}
+                            </p>
+
+                          ) : null}
+
+                      </div>
+
                       {/* Disablilty ask */}
                       <div className="from-floating mb-3">
                         <select
-                          className="form-select mb-3 p-3"
+                          className="form-select mb-2 p-3"
                           aria-label=".form-select-lg example"
                           name="disability"
                           value={values.disability}
@@ -145,7 +217,7 @@ const Register = () => {
                         </select>
                         {errors.disability && touched.disability ?
                           (
-                            <p className='text-danger ms-3 mt-2 p-0 m-0'>
+                            <p className='text-danger ms-1 p-0 m-0'>
                               {errors.disability}
                             </p>
 
@@ -199,24 +271,47 @@ const Register = () => {
 
                       </div>
 
+                      {/* Phone INput */}
+                      <div className="form-floating mb-3">
+                        <input
+                          type="number"
+                          className="form-control"
+                          id="floatingName"
+                          placeholder="211103"
+                          name='phone'
+                          value={values.phone}
+                          onChange={handleChange}
+                          onBlur={handleBlur} />
+                        <label htmlFor="floatingName">Phone number</label>
+
+                        {errors.phone && touched.phone ?
+                          (
+                            <p className='text-danger ms-1 my-1'>
+                              {errors.phone}
+                            </p>
+
+                          ) : null}
+
+                      </div>
+
                       {/* ImageData */}
                       <div className="image-field mb-4">
-                        <label htmlFor="floatingName">Choose a image</label>
+                        {/* <label htmlFor="floatingName">Choose a image</label> */}
                         <input
                           className="form-control form-control-lg"
                           type="file"
                           id="formFile"
                           placeholder="Choose a Image"
                           name='imageData'
-                          value={values.ImageData}
+                          // value={values.ImageData}
                           onChange={(event) => {
-                            const file = event.target.files[0];
-                            // setFieldValue("imageData", file);
+                            setImageFile(event.target.files[0]);
+                            // setFieldValue('imageData', event.target.files[0]);
                           }}
                           onBlur={handleBlur} />
 
 
-                        {errors.ImageData && touched.ImageData ?
+                        {!imageFile ?
                           (
                             <p className='text-danger ms-1 my-1'>
                               {errors.ImageData}
@@ -254,7 +349,9 @@ const Register = () => {
 
 
                       {/* Submit button */}
-                      <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>SignUp</Button>
+                      <Button type='submit' variant="contained"
+
+                        className='w-100 mb-4 fw-bold'>SignUp</Button>
                       <div className="text-center">
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
                       </div>
