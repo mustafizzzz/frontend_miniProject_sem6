@@ -17,6 +17,8 @@
     "dotenv": "^16.4.5",
     "firebase": "^10.8.1",
     "formik": "^2.4.5",
+    "chart.js": "^4.4.2",
+    "react-chartjs-2": "^5.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-google-button": "^0.7.2",
