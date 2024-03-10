@@ -27,8 +27,18 @@ const TestPhoto = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const { open, setOpen, handleClose } = React.useContext(AlanContext);
+    React.useEffect(() => {
+        if (open) {
+            startCamera();
+            const captureTimeout = setTimeout(captureImage, 4000); // Capture image after 4 seconds
+            return () => clearTimeout(captureTimeout);
+        }
+    }, [open]); // Run when open changes
+
+
 
     const startCamera = () => {
+
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 videoRef.current.srcObject = stream;
@@ -54,6 +64,7 @@ const TestPhoto = () => {
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
         video.style.display = 'none';
+        handleClose();
     };
 
     return (
