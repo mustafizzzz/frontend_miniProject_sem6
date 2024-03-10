@@ -15,6 +15,7 @@ import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
 import SettingPage from './pages/SettingPage/SettingPage';
 import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 import TestPhoto from './pages/TestPhoto';
+import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path='/register' element={<Register />} />
         <Route path='/testSpeech' element={<TestPage />} />
         <Route path='/testPhoto' element={<TestPhoto />} />
+        <Route path='/view' element={<ChrisViewAnalytics />} />
 
         {/* Nested layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
