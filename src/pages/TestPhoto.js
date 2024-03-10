@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useRef } from 'react';
+import { AlanContext } from '../ContextApi/AlanContext';
 
 const style = {
     position: 'absolute',
@@ -20,11 +21,12 @@ const style = {
 };
 
 const TestPhoto = () => {
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    // const [open, setOpen] = React.useState(false);
+    // const handleOpen = () => setOpen(true);
+    // const handleClose = () => setOpen(false);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const { open, setOpen, handleClose } = React.useContext(AlanContext);
 
     const startCamera = () => {
         navigator.mediaDevices.getUserMedia({ video: true })
@@ -56,7 +58,7 @@ const TestPhoto = () => {
 
     return (
         <div>
-            <Button onClick={handleOpen}>Open modal</Button>
+            {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
                 open={open}
                 onClose={handleClose}

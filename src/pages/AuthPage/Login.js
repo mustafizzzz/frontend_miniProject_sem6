@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 // import GoogleIcon from '@mui/icons-material/Google';
 import { Button } from '@mui/material';
 import './AuthPage.css';
@@ -11,6 +11,7 @@ import GoogleButton from 'react-google-button'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
 import { AlanContext } from '../../ContextApi/AlanContext';
+import TestPhoto from '../TestPhoto';
 
 
 
@@ -24,6 +25,8 @@ const Login = () => {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const { loginUserName, setLoginUserName } = useContext(AlanContext);
+
+
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -163,12 +166,12 @@ const Login = () => {
                           <div className="icon-div d-flex">
                             <i className="bi bi-x fs-2"></i>
                             <i className="bi bi-patch-check fs-3"></i>
-
                           </div>
-
-
                         </div>
                       </div>
+
+
+                      <TestPhoto />
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>

@@ -10,7 +10,8 @@ const AlanAiContainer = () => {
     const [isAlanActive, setIsAlanActive] = useState(false);
 
     //context import
-    const { loginUserName, setLoginUserName } = useContext(AlanContext);
+    const { loginUserName, setLoginUserName, handleOpen,
+        handleClose } = useContext(AlanContext);
     console.log('context.....', loginUserName);
 
     useEffect(() => {
@@ -36,6 +37,9 @@ const AlanAiContainer = () => {
                 if (commandData.command === 'getUsername') {
 
                     setLoginUserName(commandData.data.value);
+                }
+                if (commandData.command === 'captureLogin') {
+                    handleOpen();
                 }
                 console.log(commandData);
             }
