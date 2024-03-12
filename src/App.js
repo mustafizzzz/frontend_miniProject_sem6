@@ -16,6 +16,8 @@ import SettingPage from './pages/SettingPage/SettingPage';
 import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 import TestPhoto from './pages/TestPhoto';
 import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
+import CreatMeetPage from './pages/CreateMeetPage/CreatMeetPage';
+import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
 
 function App() {
   return (
@@ -27,6 +29,7 @@ function App() {
         <Route path='/testPhoto' element={<TestPhoto />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
 
+
         {/* Nested layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route path='home' element={<Home />} />
@@ -35,6 +38,8 @@ function App() {
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="setting" element={<SettingPage />} />
           <Route path="about-us" element={<AboutUs />} />
+          <Route path="create-meet" element={<CreatMeetPage />} />
+          <Route path="join-meet" element={<JoinMeetPage />} />
         </Route>
 
 

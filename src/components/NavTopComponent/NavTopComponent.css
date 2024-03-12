@@ -1,0 +1,24 @@
+/* Nav Bar Css */
+.navbar-top-main-box {
+  font-family: 'Lexend', sans-serif;
+}
+
+.create-meet,
+.join-meet {
+  border-radius: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+}
+
+.join-meet {
+  color: black;
+  font-weight: 600;
+}
+
+.join-meet-notification {
+  color: black;
+  font-size: 1.2rem;
+  border: none;
+  background-color: lightgray;
+  border-radius: 1rem;
+}
