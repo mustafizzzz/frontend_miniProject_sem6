@@ -1,8 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import { Pie, Bar } from "react-chartjs-2";
-import "chart.js/auto";
-import "./Analytics.css"; // Assuming you have a CSS file
+import { Chart as ChartJs } from "chart.js/auto";
+import "./Analytics.css";
 import StudentDetailsPage from "./Overall_Data";
 
 const Analytics = () => {
@@ -151,21 +151,17 @@ const Analytics = () => {
   };
 
   const chartOptions = {
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true, // Display legend
+        position: 'top', // Legend position
+      },
     },
-    // maintainAspectRatio: false,
-    // responsive: true,
   };
 
   return (
-    <div className="container in-call-charts">
+    <div className="container-fluid in-call-charts">
       {/* <h1>Analytics of each emotion</h1> */}
       {/* <div className="analytics-container">
 
@@ -214,16 +210,59 @@ const Analytics = () => {
       {/* <div className="overall-data">
         <StudentDetailsPage />
       </div> */}
-      <div className="row border two-pie">
-        <div className="col-6 border border-success">Video</div>
-        <div className="col-6  border border-danger">Audio</div>
+
+      <div className="row over-all-bar justify-content-center mb-5">
+        <div className="col-12 col-md-10">
+          <h3 className="text-center">Over all chart</h3>
+          <Bar data={overallData} options={chartOptions} />
+        </div>
       </div>
-      <div className="row border one-pie">
-        <div className="col-12 border border-success d-flex justify-content-center">In Call message</div>
+
+      <div className="row  two-pie justify-content-evenly mb-5">
+        <div className="col-10 col-md-4" >
+          <h3 className="text-center">Audio Chart</h3>
+          <Pie data={audiochart} options={chartOptions} />
+        </div>
+
+        <div className="col-10 col-md-4">
+          <h3 className="text-center">Video Chart</h3>
+          <Pie data={videochart} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="row one-pie justify-content-center mb-5">
+        <div className="col-10 col-md-4">
+          <h3 className="text-center">In call message chart</h3>
+          <Pie data={audiochart} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="row accordion-each">
+
+        <div className="accordion" id="accordionExample">
+
+          <div className="accordion-item">
+            <h2 className="accordion-header" id="headingOne">
+              <button className="accordion-button border border-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Accordion Item #1
+                <p className="ms-auto text-start m-0 text-muted fw-bold ps-3"> See the emotion for each student</p>
+              </button>
+
+            </h2>
+            <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+              <div className="accordion-body">
+                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
 
-    </div>
+
+
+    </div >
   );
 };
 
