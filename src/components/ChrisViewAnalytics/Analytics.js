@@ -56,16 +56,16 @@ const Analytics = () => {
         label: "Analytics Data",
         data: [10, 20, 20, 25, 25],
         backgroundColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
         borderColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
@@ -81,16 +81,16 @@ const Analytics = () => {
         label: "Analytics Data",
         data: [10, 20, 20, 25, 25],
         backgroundColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
         borderColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
@@ -106,20 +106,20 @@ const Analytics = () => {
         label: "Analytics Data",
         data: [10, 20, 20, 25, 25],
         backgroundColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
         borderColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
-        
+
         borderWidth: 1,
       },
     ],
@@ -132,16 +132,16 @@ const Analytics = () => {
         label: "Analytics Data",
         data: [10, 20, 20, 25, 25],
         backgroundColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
         borderColor: [
-          "rgba(56, 142, 60, 255)",    
-          "rgba(25,118,210,255)",     
-          "rgba(211,47,47,255)",    
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
           "rgba(251,192,45,255)",
           "rgba(3,169,244,255)",
         ],
@@ -165,8 +165,10 @@ const Analytics = () => {
   };
 
   return (
-    <div>
-      <div className="analytics-container">
+    <div className="container in-call-charts">
+      {/* <h1>Analytics of each emotion</h1> */}
+      {/* <div className="analytics-container">
+
         <div className="overall-target ">
           <h3>Overall Chart</h3>
           <Bar
@@ -178,13 +180,13 @@ const Analytics = () => {
 
 
         <div className="video-target">
-            <h3>Video Chart</h3>
-            <Pie
-              data={videochart}
-              options={chartOptions}
-              onClick={handleChartClick}
-            />
-          </div>
+          <h3>Video Chart</h3>
+          <Pie
+            data={videochart}
+            options={chartOptions}
+            onClick={handleChartClick}
+          />
+        </div>
 
 
         <div className="chart-row reduced-size">
@@ -205,13 +207,22 @@ const Analytics = () => {
               onClick={handleChartClick}
             />
           </div>
-         
+
         </div>
+      </div> */}
+
+      {/* <div className="overall-data">
+        <StudentDetailsPage />
+      </div> */}
+      <div className="row border two-pie">
+        <div className="col-6 border border-success">Video</div>
+        <div className="col-6  border border-danger">Audio</div>
+      </div>
+      <div className="row border one-pie">
+        <div className="col-12 border border-success d-flex justify-content-center">In Call message</div>
       </div>
 
-      <div className="overall-data">
-        <StudentDetailsPage />
-      </div>
+
     </div>
   );
 };
