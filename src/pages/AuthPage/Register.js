@@ -20,10 +20,9 @@ const initialValues = {
   pid: '',
   phone: '',
   username: '',
-  name: '',
+  email: '',
+  password: '',
   disability: '',
-  // email: '',
-  // password: ''
 }
 
 const Register = () => {
@@ -50,6 +49,7 @@ const Register = () => {
     try {
       if (!imageFile) return;
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+
       // Upload image to Firebase Storage with the PID as part of the path
       console.log('Values in register hanle', values);
       const imageRef = ref(storage, `images/${values.pid}/${imageFile.name}`);
@@ -67,12 +67,6 @@ const Register = () => {
         disability: values.disability,
         phone: values.phone,
       };
-
-      // const newRef = await push(ref(db, 'users'));
-      // await set(newRef, {
-      //   name: values.username,
-      //   imageURL: imageUrl
-      // });
 
       const imageDataRef = push(dbRef(db, 'StudentImages'));
       set(imageDataRef, {
@@ -137,7 +131,7 @@ const Register = () => {
                       </button>
                       <button
                         type="button"
-                        className={`btn btn-outline-primary ${values.role === 'student' ? 'active' : ''}`}
+                        className={`btn btn-outline-secondary ${values.role === 'student' ? 'active' : ''}`}
                         onClick={() => handleChange('role')('student')}
                       >
                         Student
@@ -155,175 +149,173 @@ const Register = () => {
 
                     <form onSubmit={handleSubmit}>
 
-                      {/* userName input */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type='text'
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="john doe"
-                          name='username'
-                          value={values.username}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">User name</label>
 
-                        {errors.username && touched.username ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.username}
-                            </p>
-
-                          ) : null}
-
-                      </div>
-
-                      {/* name input */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type='text'
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="john doe"
-                          name='name'
-                          value={values.name}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">Enter your name</label>
-
-                        {errors.name && touched.name ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.name}
-                            </p>
-
-                          ) : null}
-
-                      </div>
-
-                      {/* Disablilty ask */}
-                      <div className="from-floating mb-3">
-                        <select
-                          className="form-select mb-2 p-3"
-                          aria-label=".form-select-lg example"
-                          name="disability"
-                          value={values.disability}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        >
-                          <option value="">Select your disability type</option>
-                          <option value="One">One</option>
-                          <option value="Two">Two</option>
-                          <option value="Three">Three</option>
-                        </select>
-                        {errors.disability && touched.disability ?
-                          (
-                            <p className='text-danger ms-1 p-0 m-0'>
-                              {errors.disability}
-                            </p>
-
-                          ) : null}
-                      </div>
+                      <div className="username-name d-flex justify-content-between mb-4">
 
 
-                      {/* Email input */}
-                      {/* <div className="form-floating mb-3">
-                        <input
-                          type="email"
-                          className="form-control"
-                          id="floatingInput"
-                          placeholder="name@example.com"
-                          name='email'
-                          value={values.email}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingInput">Email address</label>
+                        {/* userName input */}
+                        <div className="form-floating w-100 me-3">
+                          <input
+                            type='text'
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="john doe"
+                            name='username'
+                            value={values.username}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">User name</label>
 
-                        {errors.email && touched.email ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.email}
-                            </p>
+                          {errors.username && touched.username ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.username}
+                              </p>
 
-                          ) : null}
+                            ) : null}
 
-                      </div> */}
+                        </div>
 
-                      {/* PID INput */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type="number"
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="211103"
-                          name='pid'
-                          value={values.pid}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">PID</label>
+                        {/* Email input */}
+                        <div className="form-floating w-100">
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="floatingInput"
+                            placeholder="name@example.com"
+                            name='email'
+                            value={values.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingInput">Email address</label>
 
-                        {errors.pid && touched.pid ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.pid}
-                            </p>
+                          {errors.email && touched.email ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.email}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+
+                        </div>
 
                       </div>
 
-                      {/* Phone INput */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type="number"
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="211103"
-                          name='phone'
-                          value={values.phone}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">Phone number</label>
+                      <div className="disablity-image d-flex justify-content-between mb-4 align-items-center">
 
-                        {errors.phone && touched.phone ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.phone}
-                            </p>
+                        {/* Disablilty ask */}
+                        <div className="from-floating w-100">
+                          <select
+                            className="form-select p-2"
+                            aria-label=".form-select-lg example"
+                            name="disability"
+                            value={values.disability}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          >
+                            <option value="">Select your disability type</option>
+                            <option value="Deaf">Deaf</option>
+                            <option value="Blind">Blind</option>
+                            <option value="Wheelchair User">Wheelchair User</option>
+                            <option value="Intellectual Disability">Intellectual Disability</option>
+                            <option value="Physical Disability">Physical Disability</option>
+                            <option value="Autism">Autism</option>
+                            <option value="Developmental Disability">Developmental Disability</option>
+                            <option value="Cerebral Palsy">Cerebral Palsy</option>
+                            <option value="Multiple Sclerosis">Multiple Sclerosis</option>
+                          </select>
+                          {errors.disability && touched.disability ?
+                            (
+                              <p className='text-danger ms-1 p-0 m-0'>
+                                {errors.disability}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+                        </div>
+
+                        {/* ImageData */}
+                        <div className="image-field w-100 ms-3">
+                          {/* <label htmlFor="floatingName">Choose a image</label> */}
+                          <input
+                            className="form-control form-control-md"
+                            type="file"
+                            id="formFile"
+                            placeholder="Choose a Image"
+                            name='imageData'
+                            accept='image/*'
+                            // value={values.ImageData}
+                            onChange={(event) => {
+                              setImageFile(event.target.files[0]);
+                            }}
+                            onBlur={handleBlur} />
+
+
+                          {!imageFile ?
+                            (
+                              <p className='text-danger ms-1 m-0'>
+                                {errors.ImageData}
+                              </p>
+
+                            ) : null}
+
+                        </div>
 
                       </div>
 
-                      {/* ImageData */}
-                      <div className="image-field mb-4">
-                        {/* <label htmlFor="floatingName">Choose a image</label> */}
-                        <input
-                          className="form-control form-control-lg"
-                          type="file"
-                          id="formFile"
-                          placeholder="Choose a Image"
-                          name='imageData'
-                          // value={values.ImageData}
-                          onChange={(event) => {
-                            setImageFile(event.target.files[0]);
-                            // setFieldValue('imageData', event.target.files[0]);
-                          }}
-                          onBlur={handleBlur} />
 
+                      <div className="pid-phone  d-flex justify-content-betweens  mb-4">
+                        {/* PID INput */}
+                        <div className="form-floating w-100 me-3">
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="211103"
+                            name='pid'
+                            value={values.pid}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">PID</label>
 
-                        {!imageFile ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.ImageData}
-                            </p>
+                          {errors.pid && touched.pid ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.pid}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+
+                        </div>
+
+                        {/* Phone INput */}
+                        <div className="form-floating w-100">
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="211103"
+                            name='phone'
+                            value={values.phone}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">Phone number</label>
+
+                          {errors.phone && touched.phone ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.phone}
+                              </p>
+
+                            ) : null}
+
+                        </div>
 
                       </div>
+
+
 
                       {/* Password input */}
-                      {/* <div className="form-floating mb-4">
+                      <div className="form-floating mb-4">
 
                         <input
                           type="password"
@@ -345,23 +337,24 @@ const Register = () => {
                             )
                             : null
                         }
-                      </div> */}
+                      </div>
 
 
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained"
 
-                        className='w-100 mb-4 fw-bold'>SignUp</Button>
+                        className='w-100 mb-2 fw-bold'>SignUp</Button>
                       <div className="text-center">
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
                       </div>
+
                       {/* Register buttons */}
-                      {/* <div className="text-center">
-                        <p>or sign up with:</p>
+                      <div className="text-center ">
+                        {/* <p>or sign up with:</p> */}
                         <GoogleButton className='m-auto' onClick={() => { console.log('Google Clicked'); }} label='Sign up with Google' />
 
-                      </div> */}
+                      </div>
 
                     </form>
 
@@ -372,9 +365,9 @@ const Register = () => {
 
             </div>
           </div>
-        </div>
+        </div >
         {/* Jumbotron */}
-      </section>
+      </section >
 
     </>
   )

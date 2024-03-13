@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 // import GoogleIcon from '@mui/icons-material/Google';
-import { Button } from '@mui/material';
+import { Button, Switch } from '@mui/material';
 import './AuthPage.css';
-import { useFormik } from 'formik';
-import { loginSchema } from '../YupSchema';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../../ContextApi/userContex';
@@ -12,6 +10,8 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
 import { AlanContext } from '../../ContextApi/AlanContext';
 import TestPhoto from '../TestPhoto';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 
 
@@ -23,34 +23,76 @@ const Login = () => {
   const { loginUserName, setLoginUserName } = useContext(AlanContext);
   const [loginImage, setLoginImage] = useState('');
   const [loginName, setLoginName] = useState('');
-
-  const initialValues = {
-    username: loginUserName || '',
-    // password: ''
-  }
+  const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
+  const [isImageCaptured, setIsImageCaptured] = useState(false);
 
 
+  //field input state
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
 
-  const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = useFormik({
-    initialValues: initialValues,
-    validationSchema: loginSchema,
-    onSubmit: async (values, action) => {
-      console.log('Formik values', values);
-      await loginUser(values);
-      action.resetForm();
+  const [errors, setErrors] = useState({
+    username: '',
+    password: '',
+  });
+
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+    // Reset the error message when the user starts typing again
+    setErrors({
+      ...errors,
+      [name]: '',
+    });
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    // Perform validation onBlur
+    if (!value) {
+      setErrors({
+        ...errors,
+        [name]: `${name.charAt(0).toUpperCase() + name.slice(1)} is required`,
+      });
     }
-  })
-  console.log("in form", errors);
+  };
 
   useEffect(() => {
     setLoginName(loginUserName);
     console.log('changeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
   }, [loginUserName])
 
+  //handle toggle button
+  const handleRadioChange = (e) => {
+    const { value } = e.target;
+    setLoginMethod(value);
+  };;
 
-  const loginUser = async () => {
+  const loginUser = async (e) => {
+
+    e.preventDefault();
     console.log('in LoginUSre', loginName);
     console.log('in LoginUSre', loginImage);
+
+    let newErrors = {};
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
+    }
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length !== 0) return;
+
     try {
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
 
@@ -75,7 +117,7 @@ const Login = () => {
     }
 
   }
-  console.log(values);
+
 
   //google login
   const googleLoginHandle = async () => {
@@ -126,86 +168,130 @@ const Login = () => {
 
                   <div className="card-body py-4 px-md-5">
                     <h1 className="card-title mb-4">Login</h1>
-                    <form onSubmit={handleSubmit}>
+
+                    <form onSubmit={loginUser}>
+
                       {/* Email input */}
                       <div className="form-floating mb-3">
                         <input
                           type="text"
+                          name="username"
                           className="form-control"
                           id="floatingInput"
                           placeholder="name@example.com"
-                          name='uesrname'
-                          value={loginUserName}
-
-                          onBlur={handleBlur} />
+                          onChange={handleChange}
+                          onBlur={handleBlur} // Validate onBlur
+                          value={loginUserName || formData.username}
+                        />
                         <label htmlFor="floatingInput">User name</label>
 
-                        {errors.username && touched.username ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.username}
-                            </p>
+                        {errors.username &&
 
-                          ) : null}
+                          <p className='text-danger ms-1 my-1'>
+                            {errors.username}
+                          </p>
+
+                        }
 
                       </div>
 
 
+                      {/* Radio buttons for login method */}
+                      <div className="option-radio-btn d-flex justify-content-start mb-3 align-items-center">
+
+                        <div className="form-check form-check-inline">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="loginMethod"
+                            id="passwordRadio"
+                            value="password"
+                            checked={loginMethod === 'password'}
+                            onChange={handleRadioChange}
+                          />
+                          <label className="form-check-label" htmlFor="passwordRadio">Login with password</label>
+                        </div>
+
+                        <div className="form-check form-check-inline ms-5">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="loginMethod"
+                            id="imageRadio"
+                            value="image"
+                            checked={loginMethod === 'image'}
+                            onChange={handleRadioChange}
+                          />
+                          <label className="form-check-label" htmlFor="imageRadio">Login with image </label>
+                        </div>
+
+                      </div>
 
                       {/* Password input */}
-                      {/* <div className="form-floating mb-4">
+                      {loginMethod === 'password' &&
+                        <div className="form-floating mb-4">
 
-                        <input
-                          type="password"
-                          className="form-control"
-                          id="floatingPassword"
-                          placeholder="Password"
-                          name='password'
-                          value={values.password}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingPassword">Password</label>
-                        {
-                          errors.password && touched.password ?
-                            (
-                              <p className='text-danger ms-1 my-1'>
-                                {errors.password}.
-                              </p>
+                          <input
+                            type="password"
+                            className="form-control"
+                            id="floatingPassword"
+                            placeholder="Password"
+                            name='password'
+                            value={formData.password}
+                            onChange={handleChange}
+                            onBlur={handleBlur} // Validate onBlur
 
-                            )
-                            : null
-                        }
-                      </div> */}
+
+                          />
+                          <label htmlFor="floatingPassword">Password</label>
+                          {
+                            errors.password &&
+
+                            <p className='text-danger ms-1 my-1'>
+                              {errors.password}.
+                            </p>
+
+
+                          }
+                        </div>
+                      }
 
                       {/* Image verify */}
-                      <div className="labels-main">
-                        <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between">
-                          <div className="text-div d-flex align-items-center">
-                            <i className="bi bi-card-image fs-4 me-3"></i>
-                            <p className='p-0  mb-0'>Image verification</p>
-                          </div>
-                          <div className="icon-div d-flex">
-                            <i className="bi bi-x fs-2"></i>
-                            <i className="bi bi-patch-check fs-3"></i>
+
+                      {loginMethod === 'image' &&
+                        <div className="labels-main">
+                          <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between">
+                            <div className="text-div d-flex align-items-center">
+                              <i className="bi bi-card-image fs-4 me-3"></i>
+                              <p className='p-0  mb-0'>Image verification</p>
+                            </div>
+                            <div className="icon-div d-flex">
+                              {isImageCaptured ? (
+                                <i className="bi bi-patch-check fs-3"></i>
+                              ) : (
+                                <i className="bi bi-x fs-2"></i>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-
+                      }
 
                       <TestPhoto setLoginImage={setLoginImage} />
 
                       {/* Submit button */}
-                      <Button type='submit' variant="contained" className='w-100 mb-4 fw-bold'>Login</Button>
+                      <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold'>Login</Button>
+
                       <div className="text-center">
                         <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
                       </div>
+
                       {/* Register buttons */}
-                      {/* <div className="text-center">
-                        <p>or sign up with:</p>
+                      <div className="text-center">
                         <GoogleButton className='m-auto' onClick={googleLoginHandle} label='Sign up with Google' />
-                      </div> */}
+                      </div>
 
                     </form>
+
                   </div>
                 </div>
               </div>
