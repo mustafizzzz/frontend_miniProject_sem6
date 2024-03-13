@@ -4,6 +4,12 @@ import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJs } from "chart.js/auto";
 import "./Analytics.css";
 import StudentDetailsPage from "./Overall_Data";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const Analytics = () => {
   // const navigate = useNavigate();
@@ -130,7 +136,7 @@ const Analytics = () => {
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 25],
+        data: [10, 20, 20, 25, 45],
         backgroundColor: [
           "rgba(56, 142, 60, 255)",
           "rgba(25,118,210,255)",
@@ -162,8 +168,230 @@ const Analytics = () => {
 
   return (
     <div className="container-fluid in-call-charts">
-      {/* <h1>Analytics of each emotion</h1> */}
-      {/* <div className="analytics-container">
+
+
+      <div className="row over-all-bar justify-content-center mb-5">
+        <div className="col-12 col-md-10">
+          <h3 className="text-center">Over all chart</h3>
+          <Bar data={overallData} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="row  two-pie justify-content-evenly mb-5">
+        <div className="col-10 col-md-4" >
+          <h3 className="text-center">Audio Chart</h3>
+          <Pie data={audiochart} options={chartOptions} />
+        </div>
+
+        <div className="col-10 col-md-4">
+          <h3 className="text-center">Video Chart</h3>
+          <Pie data={videochart} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="row one-pie justify-content-center mb-5">
+        <div className="col-10 col-md-4">
+          <h3 className="text-center">In call message chart</h3>
+          <Pie data={audiochart} options={chartOptions} />
+        </div>
+      </div>
+
+      <div className="row accordion-each">
+        <div className="accordion-heading">
+          <h3 className="ms-2 text-start mb-3">Emotions of each student</h3>
+        </div>
+
+        {/* <div className="accordion" id="accordionExample">
+
+          <div className="accordion-item my-3">
+            <h2 className="accordion-header" id="headingOne">
+              <button className="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Chris Dias
+                <p className="ms-auto text-start m-0 text-muted fw-bold ps-3"> See the emotion for each student</p>
+              </button>
+
+            </h2>
+            <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+              <div className="accordion-body">
+                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+              </div>
+            </div>
+          </div>
+
+
+          <div className="accordion-item my-3">
+            <h2 className="accordion-header" id="headingTwo">
+              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Accordion Item #2
+              </button>
+            </h2>
+            <div id="collapseTwo" className="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+              <div className="accordion-body">
+                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+              </div>
+            </div>
+          </div>
+
+
+
+
+        </div> */}
+
+        <div className="accordio-box">
+
+          <Accordion className="my-3" >
+            <AccordionSummary
+              expandIcon={<ArrowDownwardIcon />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+
+
+              <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: "bold" }}>
+                Chris Dias
+              </Typography>
+              <Typography sx={{ color: 'text.secondary', fontWeight: 'bold' }}>Happy</Typography>
+
+            </AccordionSummary>
+
+            <AccordionDetails>
+              <div className="emotion-details d-flex flex-column">
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Text:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-warning" role="progressbar" style={{ width: '50%' }} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Audio:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-info" role="progressbar" style={{ width: '30%' }} aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">30%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Video:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-success" role="progressbar" style={{ width: '70%' }} aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">70%</div>
+                  </div>
+                </div>
+
+              </div>
+
+            </AccordionDetails>
+
+          </Accordion>
+
+          <Accordion className="my-3" >
+            <AccordionSummary
+              expandIcon={<ArrowDownwardIcon />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+
+
+              <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: "bold" }}>
+                Chris Dias
+              </Typography>
+              <Typography sx={{ color: 'text.secondary', fontWeight: 'bold' }}>Happy</Typography>
+
+            </AccordionSummary>
+
+            <AccordionDetails>
+              <div className="emotion-details d-flex flex-column">
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Text:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-warning" role="progressbar" style={{ width: '50%' }} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Audio:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-info" role="progressbar" style={{ width: '30%' }} aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">30%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Video:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-success" role="progressbar" style={{ width: '70%' }} aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">70%</div>
+                  </div>
+                </div>
+
+              </div>
+
+            </AccordionDetails>
+
+          </Accordion>
+
+          <Accordion className="my-3" >
+            <AccordionSummary
+              expandIcon={<ArrowDownwardIcon />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+
+
+              <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: "bold" }}>
+                Chris Dias
+              </Typography>
+              <Typography sx={{ color: 'text.secondary', fontWeight: 'bold' }}>Happy</Typography>
+
+            </AccordionSummary>
+
+            <AccordionDetails>
+              <div className="emotion-details d-flex flex-column">
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Text:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-warning" role="progressbar" style={{ width: '50%' }} aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Audio:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-info" role="progressbar" style={{ width: '30%' }} aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">30%</div>
+                  </div>
+                </div>
+
+                <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                  <Typography variant="body1" className="fw-bold">Video:</Typography>
+                  <div className="progress w-75">
+                    <div className="progress-bar bg-success" role="progressbar" style={{ width: '70%' }} aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">70%</div>
+                  </div>
+                </div>
+
+              </div>
+
+            </AccordionDetails>
+
+          </Accordion>
+
+        </div>
+
+
+      </div>
+
+
+
+
+    </div >
+  );
+};
+
+export default Analytics;
+
+
+//commeted code
+{/* <h1>Analytics of each emotion</h1> */ }
+{/* <div className="analytics-container">
 
         <div className="overall-target ">
           <h3>Overall Chart</h3>
@@ -207,63 +435,6 @@ const Analytics = () => {
         </div>
       </div> */}
 
-      {/* <div className="overall-data">
+{/* <div className="overall-data">
         <StudentDetailsPage />
       </div> */}
-
-      <div className="row over-all-bar justify-content-center mb-5">
-        <div className="col-12 col-md-10">
-          <h3 className="text-center">Over all chart</h3>
-          <Bar data={overallData} options={chartOptions} />
-        </div>
-      </div>
-
-      <div className="row  two-pie justify-content-evenly mb-5">
-        <div className="col-10 col-md-4" >
-          <h3 className="text-center">Audio Chart</h3>
-          <Pie data={audiochart} options={chartOptions} />
-        </div>
-
-        <div className="col-10 col-md-4">
-          <h3 className="text-center">Video Chart</h3>
-          <Pie data={videochart} options={chartOptions} />
-        </div>
-      </div>
-
-      <div className="row one-pie justify-content-center mb-5">
-        <div className="col-10 col-md-4">
-          <h3 className="text-center">In call message chart</h3>
-          <Pie data={audiochart} options={chartOptions} />
-        </div>
-      </div>
-
-      <div className="row accordion-each">
-
-        <div className="accordion" id="accordionExample">
-
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="headingOne">
-              <button className="accordion-button border border-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                Accordion Item #1
-                <p className="ms-auto text-start m-0 text-muted fw-bold ps-3"> See the emotion for each student</p>
-              </button>
-
-            </h2>
-            <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-              <div className="accordion-body">
-                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-
-
-
-    </div >
-  );
-};
-
-export default Analytics;

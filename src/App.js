@@ -18,6 +18,7 @@ import TestPhoto from './pages/TestPhoto';
 import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
 import CreatMeetPage from './pages/CreateMeetPage/CreatMeetPage';
 import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
+import ErrorPage from './pages/404ErrorPage/ErrorPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path='/testSpeech' element={<TestPage />} />
         <Route path='/testPhoto' element={<TestPhoto />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
+        <Route path='/*' element={<ErrorPage />} />
 
 
         {/* Nested layout */}
