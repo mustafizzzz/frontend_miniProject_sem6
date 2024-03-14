@@ -29,6 +29,12 @@
   transition: all 0.4s ease;
 }
 
+.select-login-type {
+  padding: 3rem;
+}
+
+
+
 
 /* Regiter Css */
 .register-mainbox {

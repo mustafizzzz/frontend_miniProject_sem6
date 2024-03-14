@@ -13,7 +13,7 @@ const TypewriterAnimation = () => {
     bounce: true,
   });
   return (
-    <div className='type-animation d-flex align-items-end border'>
+    <div className='type-animation d-flex align-items-end'>
       <span>{typeEffect}</span>
       <span><Cursor
         cursorStyle='●'

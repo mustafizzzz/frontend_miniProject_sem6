@@ -13,6 +13,7 @@ import db, { storage } from '../../firbaseConfig';
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ref as dbRef, push, set } from 'firebase/database';
+import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
 
 
 const initialValues = {
@@ -22,7 +23,7 @@ const initialValues = {
   username: '',
   email: '',
   password: '',
-  disability: '',
+  disability: 'none',
 }
 
 const Register = () => {
@@ -36,7 +37,12 @@ const Register = () => {
     validationSchema: registerSchema,
     onSubmit: async (values, action) => {
       console.log('Formik values', values);
-      await registerUser(values);
+
+      if (values.role === 'teacher') {
+        await registerTeacherUser(values);
+      } else {
+        await registerStudentUser(values);
+      }
       action.resetForm();
     }
 
@@ -44,29 +50,20 @@ const Register = () => {
 
   console.log("in form", errors);
 
-
-  const registerUser = async (values) => {
+  //registerStudentUser handle
+  const registerStudentUser = async (values) => {
     try {
       if (!imageFile) return;
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
 
       // Upload image to Firebase Storage with the PID as part of the path
-      console.log('Values in register hanle', values);
+      console.log('Values in student register hanle', values);
       const imageRef = ref(storage, `images/${values.pid}/${imageFile.name}`);
       await uploadBytes(imageRef, imageFile);
 
       // Get the download URL of the uploaded image
       const imageUrl = await getDownloadURL(imageRef);
       console.log(imageUrl);
-
-      // Prepare data to be stored in the database
-      const registrationData = {
-        pid: values.pid,
-        userName: values.username,
-        face_id: imageUrl, // URL of the uploaded image
-        disability: values.disability,
-        phone: values.phone,
-      };
 
       const imageDataRef = push(dbRef(db, 'StudentImages'));
       set(imageDataRef, {
@@ -78,13 +75,63 @@ const Register = () => {
         console.error("Error saving image URL: ", error);
       });
 
-      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/face_id_signup`, registrationData);
+      // Prepare data to be stored in the database
+      const registrationData = {
+        // role: values.role,
+        pid: parseInt(values.pid),
+        userName: values.username,
+        name: values.username,
+        face_id: imageUrl, // URL of the uploaded image
+        disability: values.disability,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+      };
+
+      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/signup`, registrationData);
       console.log('response in register', response.data.user);
 
-      navigate('/login');
+      if (response.status === 200) {
+        navigate('/login');
+      } else {
+        alert('failed  Registering Student');
+      }
 
     } catch (error) {
-      console.log('Error in registerUSer', error);
+      console.log('Error in registerStudentUser', error);
+
+    }
+
+  }
+
+  //registerTeacherUser handle
+  const registerTeacherUser = async (values) => {
+    try {
+      console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+
+      // Prepare data to be stored in the database
+      const registrationData = {
+        // role: values.role,
+        hostId: parseInt(values.pid),
+        email: values.email,
+        userName: values.username,
+        phone: values.phone,
+        password: values.password,
+      };
+
+      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/teacher/signup`, registrationData);
+
+      console.log('response in Teacher register', response);
+      if (response.status === 200) {
+        navigate('/login');
+      } else {
+        alert('failed  Registering Teacher');
+      }
+
+
+
+    } catch (error) {
+      console.log('Error in registerStudentUser', error);
 
     }
 
@@ -96,7 +143,9 @@ const Register = () => {
 
   return (
     <>
+
       <section className='register-mainbox'>
+
         {/* Jumbotron */}
         <div className="px-4 py-5 px-md-5 text-center text-lg-start shadow register-content-box" style={{ backgroundColor: 'hsl(0, 0%, 96%)' }}>
           <div className="container">
@@ -104,8 +153,8 @@ const Register = () => {
 
               <div className="d-none d-md-block col-lg-6 mb-5 mb-lg-0">
                 <h1 className="my-5 display-3 fw-bold ls-tight">
-                  Video Calls<br />
-                  <span className="text-primary">MoodLens Login</span>
+                  <TypewriterAnimation />
+                  <span className="text-primary">MoodLens Signup</span>
                 </h1>
                 <p style={{ color: 'hsl(217, 10%, 50.8%)' }}>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -201,7 +250,7 @@ const Register = () => {
 
                       </div>
 
-                      <div className="disablity-image d-flex justify-content-between mb-4 align-items-basline">
+                      <div className={`disablity-image d-flex justify-content-between mb-4 align-items-basline ${values.role === 'teacher' ? 'd-none' : ''}`}>
 
                         {/* Disablilty ask */}
                         <div className="from-floating w-100">
@@ -214,6 +263,7 @@ const Register = () => {
                             onBlur={handleBlur}
                           >
                             <option value="">Select your disability type</option>
+                            <option value="None">None</option>
                             <option value="Deaf">Deaf</option>
                             <option value="Blind">Blind</option>
                             <option value="Wheelchair User">Wheelchair User</option>
@@ -343,13 +393,13 @@ const Register = () => {
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained"
-
                         className='w-100 mb-2 fw-bold'>SignUp</Button>
+
                       <div className="text-center">
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
                       </div>
 
-                      {/* Register buttons */}
+                      {/* Google Register buttons */}
                       <div className="text-center ">
                         {/* <p>or sign up with:</p> */}
                         <GoogleButton className='m-auto' onClick={() => { console.log('Google Clicked'); }} label='Sign up with Google' />
