@@ -12,6 +12,7 @@ import { AlanContext } from '../../ContextApi/AlanContext';
 import TestPhoto from '../TestPhoto';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
 
 
 
@@ -152,14 +153,11 @@ const Login = () => {
 
               <div className="col-lg-6 mb-5 mb-lg-0">
                 <h1 className="my-5 display-3 fw-bold ls-tight">
-                  Video Calls<br />
-                  <span className="text-primary">MoodLens Login</span>
+                  <TypewriterAnimation />
+                  <span className="text-primary fw-bold">MoodLens Login</span>
                 </h1>
                 <p style={{ color: 'hsl(217, 10%, 50.8%)' }}>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Eveniet, itaque accusantium odio, soluta, corrupti aliquam
-                  quibusdam tempora at cupiditate quis eum maiores libero
-                  veritatis? Dicta facilis sint aliquid ipsum atque?
+                  Revolutionize online learning with MoodLens! Seamlessly connect students and teachers through interactive video calls. Enjoy features like real-time emotion analysis, message monitoring, intuitive voice commands, and detailed meeting history tracking. Redefine education for all, making it accessible and engaging.
                 </p>
               </div>
 
@@ -222,7 +220,7 @@ const Login = () => {
                             checked={loginMethod === 'image'}
                             onChange={handleRadioChange}
                           />
-                          <label className="form-check-label" htmlFor="imageRadio">Login with image </label>
+                          <label className="form-check-label" htmlFor="imageRadio">Login with face ID </label>
                         </div>
 
                       </div>

@@ -201,7 +201,7 @@ const Register = () => {
 
                       </div>
 
-                      <div className="disablity-image d-flex justify-content-between mb-4 align-items-center">
+                      <div className="disablity-image d-flex justify-content-between mb-4 align-items-basline">
 
                         {/* Disablilty ask */}
                         <div className="from-floating w-100">
