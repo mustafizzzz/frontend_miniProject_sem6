@@ -12,11 +12,14 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import './NavTopComponent.css';
+import { useNavigate } from 'react-router-dom';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const NavTopComponent = () => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -28,7 +31,7 @@ const NavTopComponent = () => {
 
   return (
     <div className="navbar-top-main-box">
-      <AppBar position="static" sx={{ backgroundColor: '#F1F8F8', boxShadow: 2 }} >
+      <AppBar position="static" sx={{ backgroundColor: '#F1F8F8', boxShadow: 2 }}  >
         <Container maxWidth="xxl">
 
           <Toolbar disableGutters>
@@ -43,7 +46,7 @@ const NavTopComponent = () => {
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
-                fontFamily: 'monospace',
+                fontFamily: 'Lexend',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
                 color: 'black',
@@ -65,7 +68,7 @@ const NavTopComponent = () => {
                 mr: 2,
                 display: { xs: 'flex', md: 'none' },
                 flexGrow: 1,
-                fontFamily: 'monospace',
+                fontFamily: 'Lexend',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
                 color: 'black',
@@ -74,6 +77,33 @@ const NavTopComponent = () => {
             >
               LOGO
             </Typography>
+
+            <div className="meeting-creat-join-btn me-5 p-2">
+
+              <button
+                type="button"
+                className="btn btn-primary me-3 create-meet"
+                onClick={() => navigate('/dashboard/create-meet')}>
+                Create meet
+              </button>
+
+              <button
+                type="button"
+                className="btn btn btn-outline-secondary join-meet"
+                onClick={() => navigate('/dashboard/join-meet')}
+              >
+                Join meet
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-secondary join-meet-notification ms-3"
+              >
+                <i className="bi bi-bell"></i>
+              </button>
+
+
+            </div>
 
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">

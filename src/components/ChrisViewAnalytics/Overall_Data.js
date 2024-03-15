@@ -26,6 +26,8 @@ const StudentDetailsPage = () => {
 
   return (
     <div>
+      {/* 
+      OverAll data
       <h3>Overall Analysis for Each Student</h3>
       {studentData.map((student, index) => (
         <div
@@ -51,7 +53,7 @@ const StudentDetailsPage = () => {
             </div>
           )}
         </div>
-      ))}
+      ))} */}
     </div>
   );
 };

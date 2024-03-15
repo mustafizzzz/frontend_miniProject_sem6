@@ -7,7 +7,7 @@ const SidebarComponent = () => {
   return (
 
     <div className="sidebar-in-box ">
-      <div className={`sidebar`}>
+      <div className="sidebar">
 
         <ul className="sidebar-nav px-md-4 px-1">
           <li>
@@ -18,13 +18,13 @@ const SidebarComponent = () => {
           </li>
           <li>
             <NavLink to="/dashboard/meetings" activeclassname="active">
-              <i className="bi bi-camera-reels"></i>
+              <i className="bi bi-mic"></i>
               Meetings
             </NavLink>
           </li>
           <li>
             <NavLink to="/dashboard/reports" activeclassname="active">
-              <i className="bi bi-graph-up"></i>
+              <i className="bi bi-bar-chart"></i>
               Reports
             </NavLink>
           </li>

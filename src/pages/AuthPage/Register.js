@@ -13,6 +13,7 @@ import db, { storage } from '../../firbaseConfig';
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ref as dbRef, push, set } from 'firebase/database';
+import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
 
 
 const initialValues = {
@@ -20,10 +21,9 @@ const initialValues = {
   pid: '',
   phone: '',
   username: '',
-  name: '',
-  disability: '',
-  // email: '',
-  // password: ''
+  email: '',
+  password: '',
+  disability: 'none',
 }
 
 const Register = () => {
@@ -37,7 +37,12 @@ const Register = () => {
     validationSchema: registerSchema,
     onSubmit: async (values, action) => {
       console.log('Formik values', values);
-      await registerUser(values);
+
+      if (values.role === 'teacher') {
+        await registerTeacherUser(values);
+      } else {
+        await registerStudentUser(values);
+      }
       action.resetForm();
     }
 
@@ -45,34 +50,20 @@ const Register = () => {
 
   console.log("in form", errors);
 
-  
-  const registerUser = async (values) => {
+  //registerStudentUser handle
+  const registerStudentUser = async (values) => {
     try {
       if (!imageFile) return;
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+
       // Upload image to Firebase Storage with the PID as part of the path
-      console.log('Values in register hanle', values);
+      console.log('Values in student register hanle', values);
       const imageRef = ref(storage, `images/${values.pid}/${imageFile.name}`);
       await uploadBytes(imageRef, imageFile);
 
       // Get the download URL of the uploaded image
       const imageUrl = await getDownloadURL(imageRef);
       console.log(imageUrl);
-
-      // Prepare data to be stored in the database
-      const registrationData = {
-        pid: values.pid,
-        userName: values.username,
-        face_id: imageUrl, // URL of the uploaded image
-        disability: values.disability,
-        phone: values.phone,
-      };
-
-      // const newRef = await push(ref(db, 'users'));
-      // await set(newRef, {
-      //   name: values.username,
-      //   imageURL: imageUrl
-      // });
 
       const imageDataRef = push(dbRef(db, 'StudentImages'));
       set(imageDataRef, {
@@ -84,13 +75,63 @@ const Register = () => {
         console.error("Error saving image URL: ", error);
       });
 
-      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/face_id_signup`, registrationData);
+      // Prepare data to be stored in the database
+      const registrationData = {
+        // role: values.role,
+        pid: parseInt(values.pid),
+        userName: values.username,
+        name: values.username,
+        face_id: imageUrl, // URL of the uploaded image
+        disability: values.disability,
+        phone: values.phone,
+        email: values.email,
+        password: values.password,
+      };
+
+      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/signup`, registrationData);
       console.log('response in register', response.data.user);
 
-      navigate('/login');
+      if (response.status === 200) {
+        navigate('/login');
+      } else {
+        alert('failed  Registering Student');
+      }
 
     } catch (error) {
-      console.log('Error in registerUSer', error);
+      console.log('Error in registerStudentUser', error);
+
+    }
+
+  }
+
+  //registerTeacherUser handle
+  const registerTeacherUser = async (values) => {
+    try {
+      console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+
+      // Prepare data to be stored in the database
+      const registrationData = {
+        // role: values.role,
+        hostId: parseInt(values.pid),
+        email: values.email,
+        userName: values.username,
+        phone: values.phone,
+        password: values.password,
+      };
+
+      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/teacher/signup`, registrationData);
+
+      console.log('response in Teacher register', response);
+      if (response.status === 200) {
+        navigate('/login');
+      } else {
+        alert('failed  Registering Teacher');
+      }
+
+
+
+    } catch (error) {
+      console.log('Error in registerStudentUser', error);
 
     }
 
@@ -102,7 +143,9 @@ const Register = () => {
 
   return (
     <>
+
       <section className='register-mainbox'>
+
         {/* Jumbotron */}
         <div className="px-4 py-5 px-md-5 text-center text-lg-start shadow register-content-box" style={{ backgroundColor: 'hsl(0, 0%, 96%)' }}>
           <div className="container">
@@ -110,8 +153,8 @@ const Register = () => {
 
               <div className="d-none d-md-block col-lg-6 mb-5 mb-lg-0">
                 <h1 className="my-5 display-3 fw-bold ls-tight">
-                  Video Calls<br />
-                  <span className="text-primary">MoodLens Login</span>
+                  <TypewriterAnimation />
+                  <span className="text-primary">MoodLens Signup</span>
                 </h1>
                 <p style={{ color: 'hsl(217, 10%, 50.8%)' }}>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -137,7 +180,7 @@ const Register = () => {
                       </button>
                       <button
                         type="button"
-                        className={`btn btn-outline-primary ${values.role === 'student' ? 'active' : ''}`}
+                        className={`btn btn-outline-secondary ${values.role === 'student' ? 'active' : ''}`}
                         onClick={() => handleChange('role')('student')}
                       >
                         Student
@@ -155,175 +198,174 @@ const Register = () => {
 
                     <form onSubmit={handleSubmit}>
 
-                      {/* userName input */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type='text'
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="john doe"
-                          name='username'
-                          value={values.username}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">User name</label>
 
-                        {errors.username && touched.username ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.username}
-                            </p>
-
-                          ) : null}
-
-                      </div>
-
-                      {/* name input */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type='text'
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="john doe"
-                          name='name'
-                          value={values.name}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">Enter your name</label>
-
-                        {errors.name && touched.name ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.name}
-                            </p>
-
-                          ) : null}
-
-                      </div>
-
-                      {/* Disablilty ask */}
-                      <div className="from-floating mb-3">
-                        <select
-                          className="form-select mb-2 p-3"
-                          aria-label=".form-select-lg example"
-                          name="disability"
-                          value={values.disability}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        >
-                          <option value="">Select your disability type</option>
-                          <option value="One">One</option>
-                          <option value="Two">Two</option>
-                          <option value="Three">Three</option>
-                        </select>
-                        {errors.disability && touched.disability ?
-                          (
-                            <p className='text-danger ms-1 p-0 m-0'>
-                              {errors.disability}
-                            </p>
-
-                          ) : null}
-                      </div>
+                      <div className="username-name d-flex justify-content-between mb-4">
 
 
-                      {/* Email input */}
-                      {/* <div className="form-floating mb-3">
-                        <input
-                          type="email"
-                          className="form-control"
-                          id="floatingInput"
-                          placeholder="name@example.com"
-                          name='email'
-                          value={values.email}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingInput">Email address</label>
+                        {/* userName input */}
+                        <div className="form-floating w-100 me-3">
+                          <input
+                            type='text'
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="john doe"
+                            name='username'
+                            value={values.username}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">User name</label>
 
-                        {errors.email && touched.email ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.email}
-                            </p>
+                          {errors.username && touched.username ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.username}
+                              </p>
 
-                          ) : null}
+                            ) : null}
 
-                      </div> */}
+                        </div>
 
-                      {/* PID INput */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type="number"
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="211103"
-                          name='pid'
-                          value={values.pid}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">PID</label>
+                        {/* Email input */}
+                        <div className="form-floating w-100">
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="floatingInput"
+                            placeholder="name@example.com"
+                            name='email'
+                            value={values.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingInput">Email address</label>
 
-                        {errors.pid && touched.pid ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.pid}
-                            </p>
+                          {errors.email && touched.email ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.email}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+
+                        </div>
 
                       </div>
 
-                      {/* Phone INput */}
-                      <div className="form-floating mb-3">
-                        <input
-                          type="number"
-                          className="form-control"
-                          id="floatingName"
-                          placeholder="211103"
-                          name='phone'
-                          value={values.phone}
-                          onChange={handleChange}
-                          onBlur={handleBlur} />
-                        <label htmlFor="floatingName">Phone number</label>
+                      <div className={`disablity-image d-flex justify-content-between mb-4 align-items-basline ${values.role === 'teacher' ? 'd-none' : ''}`}>
 
-                        {errors.phone && touched.phone ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.phone}
-                            </p>
+                        {/* Disablilty ask */}
+                        <div className="from-floating w-100">
+                          <select
+                            className="form-select p-2"
+                            aria-label=".form-select-lg example"
+                            name="disability"
+                            value={values.disability}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          >
+                            <option value="">Select your disability type</option>
+                            <option value="None">None</option>
+                            <option value="Deaf">Deaf</option>
+                            <option value="Blind">Blind</option>
+                            <option value="Wheelchair User">Wheelchair User</option>
+                            <option value="Intellectual Disability">Intellectual Disability</option>
+                            <option value="Physical Disability">Physical Disability</option>
+                            <option value="Autism">Autism</option>
+                            <option value="Developmental Disability">Developmental Disability</option>
+                            <option value="Cerebral Palsy">Cerebral Palsy</option>
+                            <option value="Multiple Sclerosis">Multiple Sclerosis</option>
+                          </select>
+                          {errors.disability && touched.disability ?
+                            (
+                              <p className='text-danger ms-1 p-0 m-0'>
+                                {errors.disability}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+                        </div>
+
+                        {/* ImageData */}
+                        <div className="image-field w-100 ms-3">
+                          {/* <label htmlFor="floatingName">Choose a image</label> */}
+                          <input
+                            className="form-control form-control-md"
+                            type="file"
+                            id="formFile"
+                            placeholder="Choose a Image"
+                            name='imageData'
+                            accept='image/*'
+                            // value={values.ImageData}
+                            onChange={(event) => {
+                              setImageFile(event.target.files[0]);
+                            }}
+                            onBlur={handleBlur} />
+
+
+                          {!imageFile ?
+                            (
+                              <p className='text-danger ms-1 m-0'>
+                                {errors.ImageData}
+                              </p>
+
+                            ) : null}
+
+                        </div>
 
                       </div>
 
-                      {/* ImageData */}
-                      <div className="image-field mb-4">
-                        {/* <label htmlFor="floatingName">Choose a image</label> */}
-                        <input
-                          className="form-control form-control-lg"
-                          type="file"
-                          id="formFile"
-                          placeholder="Choose a Image"
-                          name='imageData'
-                          // value={values.ImageData}
-                          onChange={(event) => {
-                            setImageFile(event.target.files[0]);
-                            // setFieldValue('imageData', event.target.files[0]);
-                          }}
-                          onBlur={handleBlur} />
 
+                      <div className="pid-phone  d-flex justify-content-betweens  mb-4">
+                        {/* PID INput */}
+                        <div className="form-floating w-100 me-3">
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="211103"
+                            name='pid'
+                            value={values.pid}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">PID</label>
 
-                        {!imageFile ?
-                          (
-                            <p className='text-danger ms-1 my-1'>
-                              {errors.ImageData}
-                            </p>
+                          {errors.pid && touched.pid ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.pid}
+                              </p>
 
-                          ) : null}
+                            ) : null}
+
+                        </div>
+
+                        {/* Phone INput */}
+                        <div className="form-floating w-100">
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="floatingName"
+                            placeholder="211103"
+                            name='phone'
+                            value={values.phone}
+                            onChange={handleChange}
+                            onBlur={handleBlur} />
+                          <label htmlFor="floatingName">Phone number</label>
+
+                          {errors.phone && touched.phone ?
+                            (
+                              <p className='text-danger ms-1 my-1'>
+                                {errors.phone}
+                              </p>
+
+                            ) : null}
+
+                        </div>
 
                       </div>
+
+
 
                       {/* Password input */}
-                      {/* <div className="form-floating mb-4">
+                      <div className="form-floating mb-4">
 
                         <input
                           type="password"
@@ -345,34 +387,37 @@ const Register = () => {
                             )
                             : null
                         }
-                      </div> */}
+                      </div>
 
 
 
                       {/* Submit button */}
                       <Button type='submit' variant="contained"
+                        className='w-100 mb-2 fw-bold'>SignUp</Button>
 
-                        className='w-100 mb-4 fw-bold'>SignUp</Button>
                       <div className="text-center">
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
                       </div>
-                      {/* Register buttons */}
-                      {/* <div className="text-center">
-                        <p>or sign up with:</p>
+
+                      {/* Google Register buttons */}
+                      <div className="text-center ">
+                        {/* <p>or sign up with:</p> */}
                         <GoogleButton className='m-auto' onClick={() => { console.log('Google Clicked'); }} label='Sign up with Google' />
 
-                      </div> */}
+                      </div>
 
                     </form>
+
+
                   </div>
                 </div>
               </div>
 
             </div>
           </div>
-        </div>
+        </div >
         {/* Jumbotron */}
-      </section>
+      </section >
 
     </>
   )

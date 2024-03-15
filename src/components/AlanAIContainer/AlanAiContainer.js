@@ -19,11 +19,11 @@ const AlanAiContainer = () => {
             key: '604046f361fd8463cd587654400759792e956eca572e1d8b807a3e2338fdd0dc/stage',
             onButtonState: async (status) => {
 
-                if (status === "ONLINE" && !window.welcomeMsgPlayed) {
-                    window.alanBtnInstance.activate();
-                    window.alanBtnInstance.playText('You are online now. You can give me commands for your login just say start login.');
-                    window.welcomeMsgPlayed = true;
-                }
+                // if (status === "ONLINE" && !window.welcomeMsgPlayed) {
+                //     window.alanBtnInstance.activate();
+                //     window.alanBtnInstance.playText('You are online now. You can give me commands for your login just say start login.');
+                //     window.welcomeMsgPlayed = true;
+                // }
             },
             onCommand: (commandData) => {
                 if (commandData.command === 'start login') {

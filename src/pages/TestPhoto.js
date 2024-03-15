@@ -17,9 +17,10 @@ const style = {
     transform: 'translate(-50%, -50%)',
     width: 400,
     bgcolor: 'background.paper',
-    border: '2px solid #000',
+    border: '1px solid #000',
+    borderRadius: 4,
     boxShadow: 15,
-    p: 4,
+    p: 2,
 };
 
 const TestPhoto = ({ setLoginImage }) => {
@@ -95,14 +96,15 @@ const TestPhoto = ({ setLoginImage }) => {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <div>
+                    <div className='image-capture-frame'>
                         {/* <button onClick={startCamera}>Start Camera</button>
                         <button onClick={captureImage}>Capture Image</button> */}
+                        <p className='fw-bold fs-4'>Image Capture Screen</p>
                         <div>
-                            <video ref={videoRef} width="400" height="300" autoPlay muted></video>
+                            <video ref={videoRef} width="200" height="400" autoPlay muted></video>
                         </div>
                         <div>
-                            <canvas ref={canvasRef} width="400" height="300" style={{ display: 'none' }}></canvas>
+                            <canvas ref={canvasRef} width="400" height="400" style={{ display: 'none' }}></canvas>
                         </div>
                     </div>
 
