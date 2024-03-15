@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import GoogleIcon from '@mui/icons-material/Google';
 import { Button } from '@mui/material';
 import './AuthPage.css';
@@ -14,6 +14,7 @@ import db, { storage } from '../../firbaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ref as dbRef, push, set } from 'firebase/database';
 import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
+import { UserContext } from '../../ContextApi/userContex';
 
 
 const initialValues = {
@@ -29,8 +30,6 @@ const initialValues = {
 const Register = () => {
   const navigate = useNavigate();
   const [imageFile, setImageFile] = useState(null);
-
-  console.log(imageFile);
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
@@ -89,12 +88,15 @@ const Register = () => {
       };
 
       const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/signup`, registrationData);
-      console.log('response in register', response.data.user);
+      console.log('response in Student register', response);
 
-      if (response.status === 200) {
+      if (response.data.message === 'User created successfully') {
+        alert('User created successfully');
+
         navigate('/login');
       } else {
-        alert('failed  Registering Student');
+        alert('failed Registering Student');
+
       }
 
     } catch (error) {
@@ -122,10 +124,13 @@ const Register = () => {
       const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/teacher/signup`, registrationData);
 
       console.log('response in Teacher register', response);
-      if (response.status === 200) {
+      if (response.data.message === 'Account created successfully') {
+        alert('Account created successfully')
+
         navigate('/login');
       } else {
-        alert('failed  Registering Teacher');
+        alert('failed Registering Student');
+
       }
 
 
@@ -136,10 +141,7 @@ const Register = () => {
     }
 
   }
-
   // console.log(values);
-
-
 
   return (
     <>

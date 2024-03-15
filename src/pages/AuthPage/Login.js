@@ -79,16 +79,22 @@ const Login = () => {
 
     e.preventDefault();
     let newErrors = {};
+
     if (!formData.username) {
       newErrors.username = 'Username is required';
     }
-    if (!formData.password) {
+
+    if (!formData.password && loginMethod === 'password') {
       newErrors.password = 'Password is required';
     }
 
     setErrors(newErrors);
 
-    // if (Object.keys(newErrors).length !== 0) return;
+    // If any field is empty, show alert and return
+    if (Object.keys(newErrors).length > 0) {
+      alert('Please fill all required fields');
+      return;
+    }
 
     try {
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
@@ -116,13 +122,14 @@ const Login = () => {
 
       }
 
-
-
-
-      if (response.data.message === 'Face ID do not match') {
-        alert('login fail');
+      console.log(response.data.message, 'response message');
+      // Check response for login success or failure
+      if (response.data.message === 'Face ID does not match' ||
+        response.data.message === 'Incorrect password' ||
+        response.data.message === 'Incorrect username') {
+        alert('Login failed. Please check your credentials.');
       } else {
-        alert('login success');
+        alert('Login successful');
         navigate('/');
       }
 
@@ -132,7 +139,6 @@ const Login = () => {
     }
 
   }
-
 
   const teacherloginUser = async (e) => {
     console.log('tecacher login');
