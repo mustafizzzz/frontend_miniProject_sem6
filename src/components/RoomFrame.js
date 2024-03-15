@@ -3,11 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import './Room.css'
 
 //firebase Imports
 import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { push, set } from 'firebase/database';
+import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
 
 
 const RoomFrame = () => {
@@ -269,9 +271,16 @@ const RoomFrame = () => {
 
     return (
         <>
-            <div className="mainFrame" ref={meetingUI} style={{ width: '100%', height: '100vh' }} >
+            <div className="analytic-btn-modal" >
+
+                <ChrisViewAnalytics />
             </div>
-            {<p>Transcribed text: {recognizedText}</p>}
+
+            <div className="mainFrame" ref={meetingUI} style={{ width: '100%', height: '100vh' }} >
+
+            </div>
+
+            {/* {<p>Transcribed text: {recognizedText}</p>} */}
 
             {/* <div className='image-display p-5 border'>
                 <h2>Captured Images:</h2>

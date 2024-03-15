@@ -16,6 +16,7 @@ import SettingPage from './pages/SettingPage/SettingPage';
 import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 import TestPhoto from './pages/TestPhoto';
 import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
+import TeacherAnalytics from './pages/TeacherAnalytics';
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
         <Route path='/testSpeech' element={<TestPage />} />
         <Route path='/testPhoto' element={<TestPhoto />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
+
+        <Route path='/teacheranalytics' element={<TeacherAnalytics/>} />
 
         {/* Nested layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>

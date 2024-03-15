@@ -5,7 +5,7 @@ export const AlanContext = createContext();
 
 const AlanProvider = ({ children }) => {
   const [loginUserName, setLoginUserName] = useState('');
-  const [imageVerify, setImageVerify] = useState(false);
+  const [loginStatus, setLoginStatus] = useState(false);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -14,7 +14,7 @@ const AlanProvider = ({ children }) => {
 
 
   return (
-    <AlanContext.Provider value={{ loginUserName, setLoginUserName, imageVerify, setImageVerify, open, setOpen, handleOpen, handleClose }}>
+    <AlanContext.Provider value={{ loginUserName, setLoginUserName, open, setOpen, handleOpen, handleClose, loginStatus, setLoginStatus }}>
       {children}
     </AlanContext.Provider>
   )

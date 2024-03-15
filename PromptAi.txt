@@ -26,6 +26,9 @@ intent("start login", async p => {
     }
     p.play("wait few moment for image verification.");
      p.play({command:'captureLogin'})
+    setTimeout(() => {
+    p.play({ command: 'loginStatus' });
+}, 10000);
     
     
 //     while (!passwordConfirmed) {
@@ -54,3 +57,17 @@ const getEmail = context(() => {
 const confirm = context(() => {
     intent("$(ANSWER* .+)", p => p.resolve(p.ANSWER));
 });
+
+
+// Define a method to handle the API call
+const setLoginStatus = (p, { loginStatus }) => {
+    // Use the loginStatus parameter to update the login status in your logic
+    if (loginStatus) {
+        p.play("You are logged in successfully.");
+    } else {
+        p.play("Login failed. Please try again later.");
+    }
+};
+
+// Add the method to the project API
+projectAPI.setLoginStatus = setLoginStatus;

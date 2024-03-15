@@ -11,7 +11,7 @@ const AlanAiContainer = () => {
 
     //context import
     const { loginUserName, setLoginUserName, handleOpen,
-        handleClose } = useContext(AlanContext);
+        handleClose, loginStatus } = useContext(AlanContext);
     console.log('context.....', loginUserName);
 
     useEffect(() => {
@@ -40,6 +40,11 @@ const AlanAiContainer = () => {
                 }
                 if (commandData.command === 'captureLogin') {
                     handleOpen();
+                }
+
+                if (commandData.command === 'loginStatus') {
+
+                    window.alanBtnInstance.callProjectApi("setLoginStatus", { loginStatus: loginStatus }, function (error, result) { });
                 }
                 console.log(commandData);
             }

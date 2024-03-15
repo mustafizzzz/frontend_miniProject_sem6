@@ -54,7 +54,7 @@ const Analytics = () => {
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 25],
+        data: [1, 1, 0, 0, 0],
         backgroundColor: [
           "rgba(56, 142, 60, 255)",    
           "rgba(25,118,210,255)",     
@@ -79,7 +79,7 @@ const Analytics = () => {
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 25],
+        data: [2, 0, 1, 0, 0],
         backgroundColor: [
           "rgba(56, 142, 60, 255)",    
           "rgba(25,118,210,255)",     
@@ -104,7 +104,7 @@ const Analytics = () => {
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 25],
+        data: [12, 1, 0, 2, 5],
         backgroundColor: [
           "rgba(56, 142, 60, 255)",    
           "rgba(25,118,210,255)",     
@@ -130,7 +130,7 @@ const Analytics = () => {
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 25],
+        data: [50, 10, 15, 25, 5],
         backgroundColor: [
           "rgba(56, 142, 60, 255)",    
           "rgba(25,118,210,255)",     

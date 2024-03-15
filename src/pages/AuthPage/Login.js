@@ -20,7 +20,7 @@ const Login = () => {
   const { setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
-  const { loginUserName, setLoginUserName } = useContext(AlanContext);
+  const { loginUserName, setLoginUserName, setLoginStatus } = useContext(AlanContext);
   const [loginImage, setLoginImage] = useState('');
   const [loginName, setLoginName] = useState('');
 
@@ -28,7 +28,6 @@ const Login = () => {
     username: loginUserName || '',
     // password: ''
   }
-
 
 
   const { values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue } = useFormik({
@@ -41,6 +40,8 @@ const Login = () => {
     }
   })
   console.log("in form", errors);
+
+
 
   useEffect(() => {
     setLoginName(loginUserName);
@@ -62,10 +63,11 @@ const Login = () => {
       // setCurrentUser(data.data);
       console.log('response of login ', response);
       if (response.data.message === 'Face ID do not match') {
-
-        alert('Face did not match');
+        setLoginStatus(false);
+        alert('login fail');
       } else {
-
+        setLoginStatus(true);
+        alert('login success');
         navigate('/');
       }
 
