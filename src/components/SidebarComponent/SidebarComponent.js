@@ -11,32 +11,32 @@ const SidebarComponent = () => {
 
         <ul className="sidebar-nav px-md-4 px-1">
           <li>
-            <NavLink to="/dashboard/home" activeClassname="active"  >
+            <NavLink to="/dashboard/home" activeclassname="active"  >
               <i className="bi bi-house"></i>
               Home
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/meetings" activeClassname="active">
+            <NavLink to="/dashboard/meetings" activeclassname="active">
               <i className="bi bi-mic"></i>
               Meetings
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/reports" activeClassname="active">
+            <NavLink to="/dashboard/reports" activeclassname="active">
               <i className="bi bi-bar-chart"></i>
               Reports
             </NavLink>
           </li>
 
           {/* <li>
-            <NavLink to="/dashboard/feedback" activeClassname="active">
+            <NavLink to="/dashboard/feedback" activeclassname="active">
               Feedback
             </NavLink>
           </li> */}
 
           <li>
-            <NavLink to="/dashboard/setting" activeClassname="active">
+            <NavLink to="/dashboard/setting" activeclassname="active">
               <i className="bi bi-gear"></i>
               Settings
             </NavLink>

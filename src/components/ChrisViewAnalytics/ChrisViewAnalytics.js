@@ -29,7 +29,7 @@ const ChrisViewAnalytics = () => {
         <>
             <div className='live-inCall-view'>
                 {/* Button trigger modal */}
-                <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <button type="button" className="btn btn-gradient-duotone bg-teal text-lime" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     View live insights
                 </button>
                 {/* Modal */}

@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import './CreatMeetPage.css'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { UserContext } from '../../ContextApi/userContex';
 
 const CreatMeetPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useContext(UserContext)
 
   const [formData, setFormData] = useState({
     meetingName: '',
@@ -37,8 +40,19 @@ const CreatMeetPage = () => {
     }
   };
 
+  //helpetr function
+  const getCurrentTime = () => {
+    const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
 
-  const handleSubmit = (e) => {
+    const now = new Date(); // Get current date and time
+    const hours = padZero(now.getHours()); // Get current hours and pad if necessary
+    const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
+
+    return `${hours}:${minutes}`; // Concatenate hours and minutes
+  };
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Perform validation
     let newErrors = {};
@@ -54,12 +68,39 @@ const CreatMeetPage = () => {
     setErrors(newErrors);
 
 
-    // if (Object.keys(newErrors).length !== 0) return;
-    console.log(formData?.meetingId);
-    if (formData.meetingId) {
+    // If any field is empty, show alert and return
+    if (Object.keys(newErrors).length > 0) {
+      alert('Please fill all required fields');
+      return;
+    }
 
-      navigate(`/room/${formData.meetingId}`);
-    } else {
+    console.log(formData?.meetingId);
+
+    if (formData.meetingId || formData.meetLink && currentUser.role === 'teacher') {
+
+      try {
+        const createMeetingData = {
+          meet_id: formData.meetingId,
+          host_id: currentUser.hostId,
+          title: formData.meetingName,
+          description: formData.meetingDescription,
+          startTime: getCurrentTime(),
+          host_name: currentUser.userName,
+        }
+
+        const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/meeting/create_meeting`, createMeetingData);
+
+        console.log('response in Teacher register', response);
+
+        navigate(`/room/${formData.meetingId}`);
+      } catch (error) {
+        console.error('Error creating meeting:', error);
+
+      }
+
+    }
+
+    else {
       alert('Enter the meet id')
     }
     console.log('Create meet data ', formData);

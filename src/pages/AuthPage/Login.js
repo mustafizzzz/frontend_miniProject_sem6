@@ -129,8 +129,13 @@ const Login = () => {
         response.data.message === 'Incorrect username') {
         alert('Login failed. Please check your credentials.');
       } else {
+        setCurrentUser({
+          ...response.data.user,
+          role: 'student'
+        });
         alert('Login successful');
-        navigate('/');
+
+        navigate('/dashboard');
       }
 
     } catch (error) {
@@ -153,7 +158,11 @@ const Login = () => {
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length !== 0) return;
+    // If any field is empty, show alert and return
+    if (Object.keys(newErrors).length > 0) {
+      alert('Please fill all required fields');
+      return;
+    }
 
     try {
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
@@ -170,6 +179,10 @@ const Login = () => {
         alert('Invalid username or password');
 
       } else {
+        setCurrentUser({
+          ...response.data.teacher,
+          role: 'teacher'
+        });
         navigate('/dashboard');
 
       }
@@ -181,7 +194,6 @@ const Login = () => {
     }
 
   }
-
 
   //google login
   const googleLoginHandle = async () => {

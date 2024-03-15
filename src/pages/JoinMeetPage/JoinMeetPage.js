@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import './JoinMeetPage.css'
+import { useNavigate } from 'react-router-dom';
 
 const JoinMeetPage = () => {
+
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     joinCode: '',
@@ -33,7 +36,7 @@ const JoinMeetPage = () => {
     console.log('clicked');
 
 
-    if (formData.message == '') {
+    if (formData.message === '') {
       newErrors.joinCode = 'any one Field is required';
       formIsValid = false;
     }
@@ -42,7 +45,8 @@ const JoinMeetPage = () => {
 
     if (formIsValid) {
       // Handle form submission
-      console.log('Form submitted successfully:', formData);
+      console.log('Join meet form submitted successfully:', formData);
+      navigate(`/room/${formData.joinCode || formData.meetLink}`)
     }
   }
 

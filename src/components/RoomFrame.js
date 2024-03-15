@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +10,7 @@ import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { push, set } from 'firebase/database';
 import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
+import { UserContext } from '../ContextApi/userContex';
 
 
 const RoomFrame = () => {
@@ -17,10 +18,24 @@ const RoomFrame = () => {
     const [imageData, setImageData] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
-    const [userIsTeacher, setUserIsTeacher] = useState(false)
+    const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
 
+    //helper function
+    const getCurrentTime = () => {
+        const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
+
+        const now = new Date(); // Get current date and time
+        const hours = padZero(now.getHours()); // Get current hours and pad if necessary
+        const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
+        const seconds = padZero(now.getSeconds()); // Get current seconds and pad if necessary
+
+        return `${hours}:${minutes}:${seconds}`; // Concatenate hours, minutes, and seconds
+    };
+
+    //Only for student
     const captureImage = async () => {
+
         if (!isCapturing) return;
         const mainFrame = document.querySelector('.mainFrame');
         if (mainFrame) {
@@ -37,18 +52,26 @@ const RoomFrame = () => {
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
                 // Convert canvas to base64 data URL
-                const imageDataURL = canvas.toDataURL('image/jpeg');
+                const imageDataURL = await new Promise((resolve) => {
+                    canvas.toBlob((blob) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            resolve(reader.result);
+                        };
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg');
+                });
+
+
 
                 try {
-                    //Get the Random ID of Student
-                    const studentId = Math.floor(Math.random() * 10) + 1;
 
                     // Construct the image path with student ID
-                    const studentImagePath = `students/${studentId}`;
+                    const studentImagePath = `students/${currentUser.pid}`;
 
                     // Generate a unique image name using the current timestamp
-                    const timestamp = Date.now(); // Current timestamp in milliseconds
-                    const imageName = `${studentId}_${timestamp}.jpg`;
+                    const timestamp = getCurrentTime(); // Current timestamp in "12":"33"
+                    const imageName = `${currentUser.pid}_${timestamp}.jpg`;
 
                     // Upload image to Firebase Storage with the constructed image path and name
                     const imageRef = ref(storage, `${studentImagePath}/${imageName}`);
@@ -61,7 +84,7 @@ const RoomFrame = () => {
                     // Add image data to state
                     setImageData(prevImageData => [
                         ...prevImageData,
-                        { studentPID: studentId, imageUrl: downloadURL }
+                        { studentPID: currentUser.pid, imageUrl: downloadURL }
                     ]);
 
 
@@ -74,6 +97,7 @@ const RoomFrame = () => {
         }
     };
 
+    // <========================================>
     // useEffect(() => {
     //     const interval = setInterval(() => {
     //         if (isCapturing) {
@@ -94,6 +118,9 @@ const RoomFrame = () => {
     //     return () => clearInterval(interval);
     // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
 
+    // <====================================================>
+
+
     const emotionDetect = async () => {
         // console.log('Detecting .....');
         const sliceData = imageData.slice(-3);
@@ -112,45 +139,65 @@ const RoomFrame = () => {
         }
 
 
-    };
+    };//only for teacher
+
+    // useEffect(() => {
+
+    //     const interval = setInterval(async () => {
+    //         if (isCapturing) {
+    //             console.log('Image capturing start now count  5 sec');
+    //             await captureImage();
+    //         }
+    //     }, 5000); // Capture image every 3 seconds
+
+    //     const runEmotionDetection = async () => {
+
+    //         if (isCapturing && currentUser.role === 'teacher') {
+    //             setIsCapturing(false); // Pause capturing during emotion detection
+    //             try {
+    //                 await emotionDetect();
+    //                 setIsCapturing(true);
+    //             } catch (error) {
+    //                 console.error('Error in emotion detection:', error);
+    //             }
+    //         }
+    //     };
+
+    //     let timeout;
+
+    //     if (currentUser.role === 'teacher') {
+    //         timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
+    //     }
+
+
+    //     // Cleanup interval and timeout
+    //     return () => {
+    //         console.log('interval cleaning');
+    //         clearInterval(interval);
+    //         if (currentUser.role === 'teacher') {
+    //             clearTimeout(timeout);
+    //         }
+    //     };
+    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
+
+    //test useEffect
 
     useEffect(() => {
+        if (!isCapturing) return;
         const interval = setInterval(async () => {
-            if (isCapturing) {
-                console.log('Image capturing');
-                await captureImage();
+            if (currentUser.role === 'teacher') {
+                console.log('emotion detetction start now count  15 sec');
+                await emotionDetect(); // Call emotion detection for teacher
+            } else if (currentUser.role === 'student') {
+                console.log('Image capturing start now count  10 sec');
+                await captureImage(); // Call image capture for student
             }
-        }, 5000); // Capture image every 3 seconds
 
-        const runEmotionDetection = async () => {
-            if (isCapturing && userIsTeacher === true) {
-                setIsCapturing(false); // Pause capturing during emotion detection
-                try {
-                    await emotionDetect();
-                    setIsCapturing(true);
-                } catch (error) {
-                    console.error('Error in emotion detection:', error);
-                }
-            }
-        };
-        let timeout;
-        if (userIsTeacher === false) {
-            timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
-        }
+        }, currentUser.role === 'teacher' ? 25000 : 10000); // Interval based on role
 
+        return () => clearInterval(interval);
 
-
-        // Cleanup interval and timeout
-        return () => {
-            console.log('interval cleaning');
-            clearInterval(interval);
-            if (userIsTeacher === false) {
-                clearTimeout(timeout);
-            }
-        };
-    }, [isCapturing]); // Re-run effect when 'isCapturing' changes
-
-    //text to speech
+    }, [isCapturing, currentUser]);
 
     // Speech-to-text functionality
     const [isListening, setIsListening] = useState(false);
@@ -247,6 +294,7 @@ const RoomFrame = () => {
             },
             onLeaveRoom: () => {
                 setIsCapturing(false);
+
                 stopListen();
                 console.log('room leave....');
 
@@ -258,21 +306,19 @@ const RoomFrame = () => {
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
                 stopListen();
-                navigate('/')
+                navigate('/dashboard/join-meet');
             }
         });
     };
 
     console.log(imageData);
-    console.log('Is capture bool...', isCapturing);
-    // console.log(capturedText);
+
 
 
 
     return (
         <>
             <div className="analytic-btn-modal" >
-
                 <ChrisViewAnalytics />
             </div>
 

@@ -18,7 +18,7 @@
 .join-meet-notification {
   color: black;
   font-size: 1.2rem;
-  border: none;
-  background-color: lightgray;
+  /* border: none; */
+  background-color: whitesmoke;
   border-radius: 1rem;
 }
