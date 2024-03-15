@@ -1,7 +1,53 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './JoinMeetPage.css'
 
 const JoinMeetPage = () => {
+
+  const [formData, setFormData] = useState({
+    joinCode: '',
+    meetLink: ''
+  });
+
+  const [errors, setErrors] = useState({
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (!value) {
+      setErrors({ ...errors, [name]: 'Any one field is required' });
+    } else {
+      setErrors({ ...errors, [name]: '' });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let formIsValid = true;
+    const newErrors = { ...errors };
+    console.log('clicked');
+
+
+    if (formData.message == '') {
+      newErrors.joinCode = 'any one Field is required';
+      formIsValid = false;
+    }
+
+    setErrors(newErrors);
+
+    if (formIsValid) {
+      // Handle form submission
+      console.log('Form submitted successfully:', formData);
+    }
+  }
+
+
+
   return (
     <div className='join-meet-page-main'>
       <div className="container mt-4">
@@ -18,7 +64,14 @@ const JoinMeetPage = () => {
 
             <div className="mb-3">
               <label for="joinCode" className="form-label">Enter a code</label>
-              <input type="text" className="form-control" id="joinCode" aria-describedby="emailHelp" />
+              <input type="text" className="form-control" id="joinCode" aria-describedby="emailHelp"
+                name="joinCode"
+                value={formData.joinCode}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              {errors.joinCode && <p className="text-danger">{errors.joinCode}</p>}
+
             </div>
 
             <div className="or-container py-4">
@@ -30,11 +83,16 @@ const JoinMeetPage = () => {
 
             <div className="mb-5">
               <label for="meetLink" className="form-label">Enter a meet link</label>
-              <input type="text" className="form-control" id="meetLink" />
+              <input type="text" className="form-control" id="meetLink"
+                name="meetLink"
+                value={formData.meetLink}
+                onChange={handleChange}
+                onBlur={handleBlur} />
+              {errors.meetLink && <p className="text-danger">{errors.meetLink}</p>}
             </div>
 
             <div className="btn-meet d-flex  justify-content-center">
-              <button type="submit" className="btn btn-primary">Join Meet</button>
+              <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Join Meet</button>
             </div>
 
           </div>

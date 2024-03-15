@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import './CreatMeetPage.css'
+import { useNavigate } from 'react-router-dom';
 
 const CreatMeetPage = () => {
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     meetingName: '',
@@ -52,7 +54,14 @@ const CreatMeetPage = () => {
     setErrors(newErrors);
 
 
-    if (Object.keys(newErrors).length !== 0) return;
+    // if (Object.keys(newErrors).length !== 0) return;
+    console.log(formData?.meetingId);
+    if (formData.meetingId) {
+
+      navigate(`/room/${formData.meetingId}`);
+    } else {
+      alert('Enter the meet id')
+    }
     console.log('Create meet data ', formData);
   }
 

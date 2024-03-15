@@ -88,18 +88,37 @@ const Login = () => {
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length !== 0) return;
+    // if (Object.keys(newErrors).length !== 0) return;
 
     try {
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
+      let response;
 
-      const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/face_id_login`,
-        {
-          username: formData.username,
-          imageUrl: loginImage
-        });
-      // setCurrentUser(data.data);
-      console.log('response of login ', response);
+      if (loginMethod === 'image') {
+
+        response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/login`,
+          {
+            username: formData.username,
+            imageUrl: loginImage
+          });
+        // setCurrentUser(data.data);
+        console.log('response of login ', response);
+
+      } else {
+
+        response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/login`,
+          {
+            username: formData.username,
+            password: formData.password
+          });
+        console.log('response of login ', response);
+        // setCurrentUser(data.data);
+
+      }
+
+
+
+
       if (response.data.message === 'Face ID do not match') {
         alert('login fail');
       } else {
@@ -337,10 +356,10 @@ const Login = () => {
                             </div>
                             <LoginImageVerify
                               setLoginImage={setLoginImage}
-                              setIsImageCaptured={setIsImageCaptured} />
+                              setIsImageCaptured={setIsImageCaptured}
+                              formData={formData} />
                           </div>
                         }
-
 
 
                         {/* Submit button */}

@@ -21,7 +21,7 @@ const style = {
     p: 2,
 };
 
-const LoginImageVerify = ({ setLoginImage, setIsImageCaptured }) => {
+const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData }) => {
     // const [open, setOpen] = React.useState(false);
     // const handleOpen = () => setOpen(true);
     // const handleClose = () => setOpen(false);
@@ -61,7 +61,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured }) => {
         const imageData = canvas.toDataURL('image/png');
         try {
             // Create a reference to the storage location
-            const storageRef = ref(storage, `loginDump/`);
+            const storageRef = ref(storage, `loginTemp/${formData.username}`);
             // Upload the file
             const snapshot = await uploadString(storageRef, imageData, 'data_url');
             console.log('Uploaded a data URL string!');
