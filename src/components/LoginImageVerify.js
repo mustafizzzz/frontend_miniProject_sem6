@@ -2,8 +2,6 @@
 
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useRef } from 'react';
 import { AlanContext } from '../ContextApi/AlanContext';
@@ -23,7 +21,7 @@ const style = {
     p: 2,
 };
 
-const TestPhoto = ({ setLoginImage }) => {
+const LoginImageVerify = ({ setLoginImage, setIsImageCaptured }) => {
     // const [open, setOpen] = React.useState(false);
     // const handleOpen = () => setOpen(true);
     // const handleClose = () => setOpen(false);
@@ -71,6 +69,7 @@ const TestPhoto = ({ setLoginImage }) => {
             const downloadURL = await getDownloadURL(snapshot.ref);
             console.log('File available at', downloadURL);
             setLoginImage(downloadURL);
+            setIsImageCaptured(true);
 
 
         } catch (error) {
@@ -96,12 +95,12 @@ const TestPhoto = ({ setLoginImage }) => {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <div className='image-capture-frame'>
+                    <div className='image-capture-frame d-flex flex-column justify-content-center align-items-center'>
                         {/* <button onClick={startCamera}>Start Camera</button>
                         <button onClick={captureImage}>Capture Image</button> */}
-                        <p className='fw-bold fs-4'>Image Capture Screen</p>
+                        <p className='fw-bold fs-4'>Look in the camera</p>
                         <div>
-                            <video ref={videoRef} width="200" height="400" autoPlay muted></video>
+                            <video ref={videoRef} width="300" height="400" autoPlay muted></video>
                         </div>
                         <div>
                             <canvas ref={canvasRef} width="400" height="400" style={{ display: 'none' }}></canvas>
@@ -194,4 +193,4 @@ const TestPhoto = ({ setLoginImage }) => {
 
 };
 
-export default TestPhoto;
+export default LoginImageVerify;

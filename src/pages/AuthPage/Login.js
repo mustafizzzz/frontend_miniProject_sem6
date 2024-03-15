@@ -9,8 +9,8 @@ import GoogleButton from 'react-google-button'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
 import { AlanContext } from '../../ContextApi/AlanContext';
-import TestPhoto from '../TestPhoto';
 import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
+import LoginImageVerify from '../../components/LoginImageVerify';
 
 
 
@@ -21,6 +21,7 @@ const Login = () => {
   const [loginImage, setLoginImage] = useState('');
   const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
   const [isImageCaptured, setIsImageCaptured] = useState(false);
+  const { open, setOpen, handleClose } = useContext(AlanContext);
 
   //identify the user
   const [loginType, setLoginType] = useState('');
@@ -100,10 +101,8 @@ const Login = () => {
       // setCurrentUser(data.data);
       console.log('response of login ', response);
       if (response.data.message === 'Face ID do not match') {
-        setLoginStatus(false);
         alert('login fail');
       } else {
-        setLoginStatus(true);
         alert('login success');
         navigate('/');
       }
@@ -322,23 +321,27 @@ const Login = () => {
 
                         {loginMethod === 'image' &&
                           <div className="labels-main">
-                            <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between">
+                            <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between"
+                              onClick={() => setOpen(true)}>
                               <div className="text-div d-flex align-items-center">
                                 <i className="bi bi-card-image fs-4 me-3"></i>
-                                <p className='p-0  mb-0'>Image verification</p>
+                                <p className='p-0 mb-0'>Image verification</p>
                               </div>
                               <div className="icon-div d-flex">
                                 {isImageCaptured ? (
-                                  <i className="bi bi-patch-check fs-3"></i>
+                                  <i className="bi bi-patch-check fs-3 text-primary"></i>
                                 ) : (
-                                  <i className="bi bi-x fs-2"></i>
+                                  <i className="bi bi-x fs-2 text-danger"></i>
                                 )}
                               </div>
                             </div>
+                            <LoginImageVerify
+                              setLoginImage={setLoginImage}
+                              setIsImageCaptured={setIsImageCaptured} />
                           </div>
                         }
 
-                        <TestPhoto setLoginImage={setLoginImage} />
+
 
                         {/* Submit button */}
                         <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold'>Login</Button>

@@ -33,6 +33,16 @@
   padding: 3rem;
 }
 
+.lable-field-box {
+  border-radius: 0.5rem;
+  background-color: rgba(227, 245, 252, 0.5);
+}
+
+.lable-field-box:hover {
+  cursor: pointer;
+  background-color: rgba(184, 235, 255, 0.5);
+}
+
 
 
 
@@ -63,10 +73,7 @@
   margin-bottom: 0px;
 }
 
-.lable-field-box {
-  border-radius: 0.5rem;
-  background-color: rgba(227, 245, 252, 0.5);
-}
+
 
 .from-floating select {
   font-size: 1rem;

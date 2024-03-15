@@ -25,6 +25,7 @@ const AlanAiContainer = () => {
                 //     window.welcomeMsgPlayed = true;
                 // }
             },
+
             onCommand: (commandData) => {
                 if (commandData.command === 'start login') {
                     navigate('/login');
@@ -59,7 +60,7 @@ const AlanAiContainer = () => {
     useEffect(() => {
         const handleKeyPress = (event) => {
             console.log('pressssssssssssssssssss');
-            if (event.code === 'Space') {
+            if (event.ctrlKey && event.code === 'ArrowRight') {
                 if (isAlanActive) {
                     setIsAlanActive(false);
                     window.alanBtnInstance.deactivate();
