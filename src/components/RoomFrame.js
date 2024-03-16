@@ -8,7 +8,7 @@ import './Room.css'
 //firebase Imports
 import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
-import { push, set } from 'firebase/database';
+import { push, set, ref as dbref, get } from 'firebase/database';
 import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
 import { UserContext } from '../ContextApi/userContex';
 
@@ -22,7 +22,7 @@ const RoomFrame = () => {
     const navigate = useNavigate();
 
     //helper function
-    const getCurrentTime = () => {
+    const getCurrentTimeStudent = () => {
         const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
 
         const now = new Date(); // Get current date and time
@@ -31,6 +31,15 @@ const RoomFrame = () => {
         const seconds = padZero(now.getSeconds()); // Get current seconds and pad if necessary
 
         return `${hours}:${minutes}:${seconds}`; // Concatenate hours, minutes, and seconds
+    };
+    const getCurrentTimeTeacher = () => {
+        const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
+
+        const now = new Date(); // Get current date and time
+        const hours = padZero(now.getHours()); // Get current hours and pad if necessary
+        const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
+
+        return `${hours}:${minutes}`; // Concatenate hours and minutes
     };
 
     //Only for student
@@ -67,10 +76,10 @@ const RoomFrame = () => {
                 try {
 
                     // Construct the image path with student ID
-                    const studentImagePath = `students/${currentUser.pid}`;
+                    const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
 
                     // Generate a unique image name using the current timestamp
-                    const timestamp = getCurrentTime(); // Current timestamp in "12":"33"
+                    const timestamp = getCurrentTimeStudent(); // Current timestamp in "12":"33"
                     const imageName = `${currentUser.pid}_${timestamp}.jpg`;
 
                     // Upload image to Firebase Storage with the constructed image path and name
@@ -80,6 +89,14 @@ const RoomFrame = () => {
                     // Get the download URL for the uploaded image
                     const downloadURL = await getDownloadURL(imageRef);
 
+                    // Construct the image path with room ID
+                    const roomDbPath = `Rooms/${roomId}`;
+
+                    // Upload image URL to Firebase Database with the constructed path and student PID
+                    await set(dbref(db, `${roomDbPath}/${currentUser.userName}`), {
+                        studentPID: currentUser.pid,
+                        imageUrl: downloadURL,
+                    });
 
                     // Add image data to state
                     setImageData(prevImageData => [
@@ -122,18 +139,33 @@ const RoomFrame = () => {
 
 
     const emotionDetect = async () => {
-        // console.log('Detecting .....');
-        const sliceData = imageData.slice(-3);
-        // console.log('we have data....', imageData);
-        // console.log('Sliced data....', sliceData);
-
         try {
-            const response = await axios.post('https://mood-lens-server.onrender.com/api/predict_gemini/images_to_emotions', {
-                imgUrls: sliceData
-            });
+            // Fetch image URLs for all students under the room ID
+            const roomImagesRef = dbref(db, `Rooms/${roomId}`);
+            const roomImagesSnapshot = await get(roomImagesRef);
 
+            const imageUrls = [];
+
+            // Iterate over the student PIDs and image URLs in the snapshot
+            roomImagesSnapshot.forEach((childSnapshot) => {
+                const studentPID = childSnapshot.val().studentPID;
+                const imageUrl = childSnapshot.val().imageUrl;
+
+                // Add student PID and image URL to the array
+                imageUrls.push({ studentPID: studentPID, imageUrl: imageUrl });
+            });
+            console.log('Image URLs:', imageUrls);
+
+            // Call the API with the fetched image URLs
+            const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/video/video_to_emotion', {
+                meet_id: parseInt(roomId),
+                host_id: currentUser.hostId,
+                time_stamp: getCurrentTimeTeacher(),
+                imgUrls: imageUrls // Pass the fetched image URLs to the API
+            });
             console.log('Response from API:', response.data);
         } catch (error) {
+
             console.log('error in api calling', error.message);
 
         }
@@ -252,6 +284,7 @@ const RoomFrame = () => {
     const startListen = () => {
         setIsListening(true);
     };
+
     const stopListen = () => {
         setIsListening(false);
     };
