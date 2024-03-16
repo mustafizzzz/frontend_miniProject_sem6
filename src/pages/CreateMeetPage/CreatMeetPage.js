@@ -50,7 +50,7 @@ const CreatMeetPage = () => {
 
     return `${hours}:${minutes}`; // Concatenate hours and minutes
   };
-  
+
 
 
   const handleSubmit = async (e) => {
@@ -77,7 +77,7 @@ const CreatMeetPage = () => {
 
     console.log(formData?.meetingId);
 
-    if (formData.meetingId || formData.meetLink && currentUser.role === 'teacher') {
+    if ((formData.meetingId || formData.meetLink) && currentUser.role === 'teacher') {
 
       try {
         const createMeetingData = {

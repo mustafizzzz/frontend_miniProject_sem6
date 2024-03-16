@@ -4,13 +4,15 @@ import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import './Room.css'
+import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
+import { UserContext } from '../ContextApi/userContex';
+import { emotionsContext } from '../ContextApi/emotionsContext';
 
 //firebase Imports
 import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { push, set, ref as dbref, get } from 'firebase/database';
-import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
-import { UserContext } from '../ContextApi/userContex';
+
 
 
 const RoomFrame = () => {
@@ -20,6 +22,8 @@ const RoomFrame = () => {
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
+    const { setTextEmotions, setVideoEmotions, setAudioEmotions } = useContext(emotionsContext);
+
 
     //helper function
     const getCurrentTimeStudent = () => {
@@ -163,7 +167,11 @@ const RoomFrame = () => {
                 time_stamp: getCurrentTimeTeacher(),
                 imgUrls: imageUrls // Pass the fetched image URLs to the API
             });
-            console.log('Response from API:', response.data);
+            const { text_emotions, video_emotions, audio_emotions } = response?.data.updatedMeetReports;
+            setTextEmotions(text_emotions[0]);
+            setVideoEmotions(video_emotions[0]);
+            setAudioEmotions(audio_emotions[0]);
+            console.log('Response from emotion API:', response.data);
         } catch (error) {
 
             console.log('error in api calling', error.message);
@@ -218,8 +226,9 @@ const RoomFrame = () => {
         if (!isCapturing) return;
         const interval = setInterval(async () => {
             if (currentUser.role === 'teacher') {
-                console.log('emotion detetction start now count  15 sec');
+                console.log('emotion detetction start now count  25 sec');
                 await emotionDetect(); // Call emotion detection for teacher
+                console.log('One call emotion detetction completed');
             } else if (currentUser.role === 'student') {
                 console.log('Image capturing start now count  10 sec');
                 await captureImage(); // Call image capture for student

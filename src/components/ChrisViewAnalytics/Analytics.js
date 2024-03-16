@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJs } from "chart.js/auto";
@@ -10,9 +10,11 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { emotionsContext } from "../../ContextApi/emotionsContext";
 
 const Analytics = () => {
   // const navigate = useNavigate();
+  const { textEmotions, videoEmotions, audioEmotions } = useContext(emotionsContext);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -105,12 +107,23 @@ const Analytics = () => {
     ],
   };
 
+
+  //video carts functions handle
+  const defaultVideoEmotions = {
+    happy: 0,
+    surprised: 0,
+    confused: 0,
+    bored: 0,
+    pnf: 0
+  };
+  const labels = videoEmotions ? Object.keys(videoEmotions) : Object.keys(defaultVideoEmotions);
+  const data = videoEmotions ? Object.values(videoEmotions) : Object.values(defaultVideoEmotions);
   const videochart = {
-    labels: ["Happy", "Surprised", "Confused", "Bored", "Absent"],
+    labels: labels,
     datasets: [
       {
         label: "Analytics Data",
-        data: [12, 1, 0, 2, 5],
+        data: data,
         backgroundColor: [
           "rgba(56, 142, 60, 255)",
           "rgba(25,118,210,255)",
@@ -192,50 +205,16 @@ const Analytics = () => {
       <div className="row one-pie justify-content-center mb-5">
         <div className="col-10 col-md-4">
           <h3 className="text-center">In call message chart</h3>
-          <Pie data={audiochart} options={chartOptions} />
+          <Pie data={textchart} options={chartOptions} />
         </div>
       </div>
 
       <div className="row accordion-each">
+
         <div className="accordion-heading">
           <h3 className="ms-2 text-start mb-3">Emotions of each student</h3>
         </div>
 
-        {/* <div className="accordion" id="accordionExample">
-
-          <div className="accordion-item my-3">
-            <h2 className="accordion-header" id="headingOne">
-              <button className="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                Chris Dias
-                <p className="ms-auto text-start m-0 text-muted fw-bold ps-3"> See the emotion for each student</p>
-              </button>
-
-            </h2>
-            <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-              <div className="accordion-body">
-                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-              </div>
-            </div>
-          </div>
-
-
-          <div className="accordion-item my-3">
-            <h2 className="accordion-header" id="headingTwo">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                Accordion Item #2
-              </button>
-            </h2>
-            <div id="collapseTwo" className="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-              <div className="accordion-body">
-                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-              </div>
-            </div>
-          </div>
-
-
-
-
-        </div> */}
 
         <div className="accordio-box">
 
@@ -376,11 +355,7 @@ const Analytics = () => {
 
         </div>
 
-
       </div>
-
-
-
 
     </div >
   );
