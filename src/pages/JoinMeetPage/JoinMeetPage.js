@@ -31,23 +31,22 @@ const JoinMeetPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let formIsValid = true;
-    const newErrors = { ...errors };
-    console.log('clicked');
-
-
-    if (formData.message === '') {
-      newErrors.joinCode = 'any one Field is required';
-      formIsValid = false;
+    // Perform validation
+    let newErrors = {};
+    if (formData.joinCode.trim() === '' && formData.meetLink.trim() === '') {
+      newErrors = { ...newErrors, meetingName: 'Any one field is required' };
     }
-
     setErrors(newErrors);
 
-    if (formIsValid) {
-      // Handle form submission
-      console.log('Join meet form submitted successfully:', formData);
-      navigate(`/room/${formData.joinCode || formData.meetLink}`)
+
+    // If any field is empty, show alert and return
+    if (Object.keys(newErrors).length > 0) {
+      alert('Please fill any one  fields');
+      return;
     }
+    console.log('Join meet form submitted successfully:', formData);
+    navigate(`/room/${formData.joinCode || formData.meetLink}`)
+
   }
 
 

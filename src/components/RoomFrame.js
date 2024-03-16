@@ -7,11 +7,12 @@ import './Room.css'
 import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
 import { UserContext } from '../ContextApi/userContex';
 import { emotionsContext } from '../ContextApi/emotionsContext';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 //firebase Imports
 import db, { storage } from '../firbaseConfig';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
-import { push, set, ref as dbref, get } from 'firebase/database';
+import { set, ref as dbref, get } from 'firebase/database';
 
 
 
@@ -241,62 +242,51 @@ const RoomFrame = () => {
     }, [isCapturing, currentUser]);
 
     // Speech-to-text functionality
-    const [isListening, setIsListening] = useState(false);
     const [recognizedText, setRecognizedText] = useState('');
+    const [isListening, setIsListening] = useState(true);
+    const { transcript, resetTranscript } = useSpeechRecognition();
 
     useEffect(() => {
-        if (!('webkitSpeechRecognition' in window)) {
-            console.log('Speech recognition is not supported by this browser.');
-            return;
-        }
 
-        const recognition = new window.webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-
-        recognition.onstart = () => {
-            setIsListening(true);
-            console.log('Listening...');
+        const handleClick = (event) => {
+            // Check if the clicked element has the target class name
+            if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7')) {
+                console.log('Clicked on the button');
+                setIsListening(prevIsListening => !prevIsListening);
+                if (!isListening) {
+                    startListening();
+                } else {
+                    stopListening();
+                }
+            }
         };
 
-        recognition.onend = () => {
-            setIsListening(false);
-            console.log('Stopped listening.');
-        };
+        // Add event listener to document for click events
+        document.addEventListener('click', handleClick);
 
-        recognition.onresult = (event) => {
-            const transcript = Array.from(event.results)
-                .map((result) => result[0])
-                .map((result) => result.transcript)
-                .join('');
-
-            setRecognizedText(transcript);
-        };
-
-        if (isListening) {
-            recognition.start();
-        } else {
-            recognition.stop();
-        }
-
+        // Cleanup function to remove event listener when component unmounts
         return () => {
-            recognition.stop();
+            document.removeEventListener('click', handleClick);
         };
     }, [isListening]);
 
     useEffect(() => {
-        if (!isListening) {
-            console.log('Saved text:', recognizedText);
+        if (transcript !== '') {
+            setRecognizedText(transcript);
         }
-    }, [isListening, recognizedText]);
+    }, [transcript]);
 
-    const startListen = () => {
-        setIsListening(true);
+    const startListening = () => {
+        console.log('Start listening');
+        SpeechRecognition.startListening({ continuous: true });
     };
 
-    const stopListen = () => {
-        setIsListening(false);
+    const stopListening = () => {
+        console.log('Stop listening');
+        SpeechRecognition.stopListening();
+        resetTranscript(); // Clear transcript when stopped
     };
+
 
 
     //Meeting UI Code
@@ -331,13 +321,10 @@ const RoomFrame = () => {
 
             onJoinRoom: () => {
                 setIsCapturing(true);
-                startListen();
                 console.log('Joined the roommm');
             },
             onLeaveRoom: () => {
                 setIsCapturing(false);
-
-                stopListen();
                 console.log('room leave....');
 
             },
@@ -347,13 +334,13 @@ const RoomFrame = () => {
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
-                stopListen();
                 navigate('/dashboard/join-meet');
             }
         });
     };
 
-    console.log(imageData);
+    // console.log(imageData);
+    console.log('%cSaved text:', 'color:blue', recognizedText);
 
 
 
@@ -363,8 +350,12 @@ const RoomFrame = () => {
             <div className="analytic-btn-modal" >
                 <ChrisViewAnalytics />
             </div>
+            {/* <div className="btn-box">
+            </div> */}
 
-            <div className="mainFrame" ref={meetingUI} style={{ width: '100%', height: '100vh' }} >
+
+
+            <div className="mainFrame o" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
 
             </div>
 
