@@ -244,21 +244,26 @@ const RoomFrame = () => {
     // Speech-to-text functionality
     const [recognizedText, setRecognizedText] = useState('');
     const [isListening, setIsListening] = useState(true);
-    const { transcript, resetTranscript } = useSpeechRecognition();
+    const { transcript, resetTranscript, listening } = useSpeechRecognition();
 
     useEffect(() => {
 
         const handleClick = (event) => {
-            // Check if the clicked element has the target class name
-            if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7')) {
+
+            if (currentUser.role === 'teacher') return; // Only for students
+
+            if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7' || 'h2M8QwerO1XmsfrZlpv6')) {
                 console.log('Clicked on the button');
                 setIsListening(prevIsListening => !prevIsListening);
-                if (!isListening) {
+                if (isListening === true) {
+
                     startListening();
+
                 } else {
                     stopListening();
                 }
             }
+
         };
 
         // Add event listener to document for click events
@@ -276,16 +281,59 @@ const RoomFrame = () => {
         }
     }, [transcript]);
 
+
+
     const startListening = () => {
         console.log('Start listening');
         SpeechRecognition.startListening({ continuous: true });
     };
 
+
     const stopListening = () => {
         console.log('Stop listening');
         SpeechRecognition.stopListening();
         resetTranscript(); // Clear transcript when stopped
-    };
+
+    }
+    useEffect(() => {
+
+        const sendTranscriptToAPI = async () => {
+            if (!listening && transcript) {
+                console.log('Recognized text:', transcript);
+                try {
+                    await audioEmotion(transcript);
+                    console.log('Audio emotion analysis completed.');
+                    // Here you can optionally reset the recognized text
+                    // resetTranscript();
+                } catch (error) {
+                    console.error('Error in audio emotion analysis:', error);
+                }
+            }
+        };
+
+        sendTranscriptToAPI();
+    }, [listening, transcript]);
+
+
+    //only for student
+    const audioEmotion = async (text) => {
+
+
+        try {
+            const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
+                meet_id: parseInt(roomId),
+                host_id: currentUser.pid,
+                time_stamp: getCurrentTimeTeacher(),
+                studentPID: currentUser.pid,
+                audio_message: text
+            });
+            // const { audio_emotions } = response?.data.updatedMeetReports;
+            // setAudioEmotions(audio_emotions[0]);
+            console.log('Response from audio emotion API:', response);
+        } catch (error) {
+            console.error('Error in audio emotion detection:', error);
+        }
+    }
 
 
 
@@ -318,11 +366,12 @@ const RoomFrame = () => {
             scenario: {
                 mode: ZegoUIKitPrebuilt.VideoConference,
             },
-
+            turnOnMicrophoneWhenJoining: false,
             onJoinRoom: () => {
                 setIsCapturing(true);
                 console.log('Joined the roommm');
             },
+
             onLeaveRoom: () => {
                 setIsCapturing(false);
                 console.log('room leave....');
@@ -340,7 +389,7 @@ const RoomFrame = () => {
     };
 
     // console.log(imageData);
-    console.log('%cSaved text:', 'color:blue', recognizedText);
+    console.log('%cSaved text:', 'color:orange', recognizedText);
 
 
 
@@ -350,25 +399,14 @@ const RoomFrame = () => {
             <div className="analytic-btn-modal" >
                 <ChrisViewAnalytics />
             </div>
+
             {/* <div className="btn-box">
             </div> */}
-
-
 
             <div className="mainFrame o" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
 
             </div>
 
-            {/* {<p>Transcribed text: {recognizedText}</p>} */}
-
-            {/* <div className='image-display p-5 border'>
-                <h2>Captured Images:</h2>
-                <div className='border border-info p-3'>
-                    {images.map((image, index) => (
-                        <img key={index} src={image} alt={`Captured Image ${index}`} className='m-2 p-3 border  border-success' />
-                    ))}
-                </div>
-            </div> */}
         </>
     );
 
