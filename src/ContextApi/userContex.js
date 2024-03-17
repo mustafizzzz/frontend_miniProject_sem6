@@ -6,6 +6,7 @@ const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem('user'))
   );
+
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(currentUser))
   }, [currentUser])

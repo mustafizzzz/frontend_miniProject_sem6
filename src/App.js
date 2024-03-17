@@ -19,6 +19,7 @@ import CreatMeetPage from './pages/CreateMeetPage/CreatMeetPage';
 import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
 import ErrorPage from './pages/404ErrorPage/ErrorPage';
 import LoginImageVerify from './components/LoginImageVerify';
+import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 
 function App() {
   return (
@@ -32,21 +33,25 @@ function App() {
         <Route path='/*' element={<ErrorPage />} />
 
         {/* Nested layout */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route path='home' element={<Home />} />
-          <Route path="meetings" element={<MeetingPage />} />
-          <Route path='reports' element={<ReportsPage />} />
-          <Route path="feedback" element={<FeedbackPage />} />
-          <Route path="setting" element={<SettingPage />} />
-          <Route path="about-us" element={<AboutUs />} />
-          <Route path="create-meet" element={<CreatMeetPage />} />
-          <Route path="join-meet" element={<JoinMeetPage />} />
-        </Route>
-
+        <ProtectedRoute>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route path='home' element={<Home />} />
+            <Route path="meetings" element={<MeetingPage />} />
+            <Route path='reports' element={<ReportsPage />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="setting" element={<SettingPage />} />
+            <Route path="about-us" element={<AboutUs />} />
+            <Route path="create-meet" element={<CreatMeetPage />} />
+            <Route path="join-meet" element={<JoinMeetPage />} />
+          </Route>
+        </ProtectedRoute>
 
         {/* Video Pages */}
-        <Route path='/' element={<VideoFrame />} />
-        <Route path='/room/:roomId' element={<RoomFrame />} />
+        <ProtectedRoute>
+          <Route path='/' element={<VideoFrame />} />
+          <Route path='/room/:roomId' element={<RoomFrame />} />
+        </ProtectedRoute>
+
       </Routes>
       <AlanAiContainer />
     </div>
