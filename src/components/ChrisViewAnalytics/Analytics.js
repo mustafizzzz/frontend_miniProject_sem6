@@ -57,55 +57,9 @@ const Analytics = () => {
     setSelectedStudent(studentData[0]);
   };
 
-  const audiochart = {
-    labels: ["Happy", "Surprised", "Confused", "Bored", "Absent"],
-    datasets: [
-      {
-        label: "Analytics Data",
-        data: [1, 1, 0, 0, 0],
-        backgroundColor: [
-          "rgba(56, 142, 60, 255)",
-          "rgba(25,118,210,255)",
-          "rgba(211,47,47,255)",
-          "rgba(251,192,45,255)",
-          "rgba(3,169,244,255)",
-        ],
-        borderColor: [
-          "rgba(56, 142, 60, 255)",
-          "rgba(25,118,210,255)",
-          "rgba(211,47,47,255)",
-          "rgba(251,192,45,255)",
-          "rgba(3,169,244,255)",
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
 
-  const textchart = {
-    labels: ["Happy", "Surprised", "Confused", "Bored", "Absent"],
-    datasets: [
-      {
-        label: "Analytics Data",
-        data: [2, 0, 1, 0, 0],
-        backgroundColor: [
-          "rgba(56, 142, 60, 255)",
-          "rgba(25,118,210,255)",
-          "rgba(211,47,47,255)",
-          "rgba(251,192,45,255)",
-          "rgba(3,169,244,255)",
-        ],
-        borderColor: [
-          "rgba(56, 142, 60, 255)",
-          "rgba(25,118,210,255)",
-          "rgba(211,47,47,255)",
-          "rgba(251,192,45,255)",
-          "rgba(3,169,244,255)",
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+
+
 
 
   //video carts functions handle
@@ -116,14 +70,15 @@ const Analytics = () => {
     bored: 0,
     pnf: 0
   };
-  const labels = videoEmotions ? Object.keys(videoEmotions) : Object.keys(defaultVideoEmotions);
-  const data = videoEmotions ? Object.values(videoEmotions) : Object.values(defaultVideoEmotions);
+
+  const videoLabels = videoEmotions ? Object.keys(videoEmotions) : Object.keys(defaultVideoEmotions);
+  const videoData = videoEmotions ? Object.values(videoEmotions) : Object.values(defaultVideoEmotions);
   const videochart = {
-    labels: labels,
+    labels: videoLabels,
     datasets: [
       {
         label: "Analytics Data",
-        data: data,
+        data: videoData,
         backgroundColor: [
           "rgba(56, 142, 60, 255)",
           "rgba(25,118,210,255)",
@@ -143,6 +98,78 @@ const Analytics = () => {
       },
     ],
   };
+
+  //audio carts functions handle
+  const defaultAudioEmotions = {
+    happy: 1,
+    surprised: 2,
+    confused: 2,
+    bored: 3,
+    pnf: 2
+  };
+  const audioLabels = audioEmotions ? Object.keys(audioEmotions) : Object.keys(defaultAudioEmotions);
+  const audioData = audioEmotions ? Object.values(audioEmotions) : Object.values(defaultAudioEmotions);
+  const audiochart = {
+    labels: audioLabels,
+    datasets: [
+      {
+        label: "Analytics Data",
+        data: audioData,
+        backgroundColor: [
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
+          "rgba(251,192,45,255)",
+          "rgba(3,169,244,255)",
+        ],
+        borderColor: [
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
+          "rgba(251,192,45,255)",
+          "rgba(3,169,244,255)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  //message carts functions handle
+  const defaultTextEmotions = {
+    happy: 1,
+    surprised: 2,
+    confused: 2,
+    bored: 3,
+    pnf: 2
+  };
+  const textLabels = textEmotions ? Object.keys(textEmotions) : Object.keys(defaultTextEmotions);
+  const textData = textEmotions ? Object.values(textEmotions) : Object.values(defaultTextEmotions);
+  const textchart = {
+    labels: textLabels,
+    datasets: [
+      {
+        label: "Analytics Data",
+        data: textData,
+        backgroundColor: [
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
+          "rgba(251,192,45,255)",
+          "rgba(3,169,244,255)",
+        ],
+        borderColor: [
+          "rgba(56, 142, 60, 255)",
+          "rgba(25,118,210,255)",
+          "rgba(211,47,47,255)",
+          "rgba(251,192,45,255)",
+          "rgba(3,169,244,255)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  //overall carts functions handle
 
   const overallData = {
     labels: ["Happy", "Surprised", "Confused", "Bored", "Absent"],

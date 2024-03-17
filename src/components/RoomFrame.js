@@ -19,7 +19,6 @@ import { set, ref as dbref, get } from 'firebase/database';
 const RoomFrame = () => {
     const { roomId } = useParams();
     const [imageData, setImageData] = useState([]);
-    const [chatMessages, setChatMessages] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
@@ -241,7 +240,8 @@ const RoomFrame = () => {
 
     }, [isCapturing, currentUser]);
 
-    // Speech-to-text functionality
+    //<===================audio emotion start===================>
+
     const [recognizedText, setRecognizedText] = useState('');
     const [isListening, setIsListening] = useState(true);
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
@@ -295,14 +295,17 @@ const RoomFrame = () => {
         resetTranscript(); // Clear transcript when stopped
 
     }
+
+
     useEffect(() => {
 
         const sendTranscriptToAPI = async () => {
-            if (!listening && transcript) {
-                console.log('Recognized text:', transcript);
+            if (!listening) {
+                console.log('%cStart api:', 'color:green', recognizedText);
                 try {
-                    await audioEmotion(transcript);
+                    await audioEmotion(recognizedText);
                     console.log('Audio emotion analysis completed.');
+
                     // Here you can optionally reset the recognized text
                     // resetTranscript();
                 } catch (error) {
@@ -312,7 +315,7 @@ const RoomFrame = () => {
         };
 
         sendTranscriptToAPI();
-    }, [listening, transcript]);
+    }, [listening]);
 
 
     //only for student
@@ -330,11 +333,20 @@ const RoomFrame = () => {
             // const { audio_emotions } = response?.data.updatedMeetReports;
             // setAudioEmotions(audio_emotions[0]);
             console.log('Response from audio emotion API:', response);
+            setRecognizedText('')
         } catch (error) {
             console.error('Error in audio emotion detection:', error);
         }
     }
 
+    //<===================audio emotion end===================>
+
+
+    //<===================text emotion start===================>
+
+
+
+    //<===================text emotion end===================>
 
 
     //Meeting UI Code
@@ -355,6 +367,25 @@ const RoomFrame = () => {
 
         const ui = ZegoUIKitPrebuilt.create(kitToken);
 
+        const textEmotion = async (text) => {
+
+
+            try {
+                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/text_to_emotion', {
+                    meet_id: parseInt(roomId),
+                    host_id: currentUser.pid,
+                    time_stamp: getCurrentTimeTeacher(),
+                    studentPID: currentUser.pid,
+                    message: text
+                });
+
+                console.log('Response from text emotion API:', response);
+
+            } catch (error) {
+                console.error('Error in audio emotion detection:', error);
+            }
+        }
+
         ui.joinRoom({
             container: element,
             sharedLinks: [
@@ -367,10 +398,12 @@ const RoomFrame = () => {
                 mode: ZegoUIKitPrebuilt.VideoConference,
             },
             turnOnMicrophoneWhenJoining: false,
+
             onJoinRoom: () => {
                 setIsCapturing(true);
                 console.log('Joined the roommm');
             },
+
 
             onLeaveRoom: () => {
                 setIsCapturing(false);
@@ -379,7 +412,8 @@ const RoomFrame = () => {
             },
 
             onInRoomMessageReceived: (data) => {
-                setChatMessages(prevMessages => [...prevMessages, data.message]);
+                console.log('In room message:', data.message);
+                textEmotion(data.message);
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
