@@ -59,7 +59,6 @@ const AlanAiContainer = () => {
 
     useEffect(() => {
         const handleKeyPress = (event) => {
-            console.log('pressssssssssssssssssss');
             if (event.ctrlKey && event.code === 'ArrowRight') {
                 if (isAlanActive) {
                     setIsAlanActive(false);

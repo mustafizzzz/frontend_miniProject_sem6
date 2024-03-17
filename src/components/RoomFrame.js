@@ -342,12 +342,6 @@ const RoomFrame = () => {
     //<===================audio emotion end===================>
 
 
-    //<===================text emotion start===================>
-
-
-
-    //<===================text emotion end===================>
-
 
     //Meeting UI Code
     const meetingUI = async (element) => {
@@ -367,16 +361,15 @@ const RoomFrame = () => {
 
         const ui = ZegoUIKitPrebuilt.create(kitToken);
 
-        const textEmotion = async (text) => {
-
+        const textEmotion = async (dataText) => {
 
             try {
-                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/text_to_emotion', {
+                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
                     meet_id: parseInt(roomId),
-                    host_id: currentUser.pid,
+                    host_id: currentUser.hostId,
                     time_stamp: getCurrentTimeTeacher(),
-                    studentPID: currentUser.pid,
-                    message: text
+                    studentPID: parseInt(dataText.fromUser.userID),
+                    message: dataText.message
                 });
 
                 console.log('Response from text emotion API:', response);
@@ -385,6 +378,7 @@ const RoomFrame = () => {
                 console.error('Error in audio emotion detection:', error);
             }
         }
+
 
         ui.joinRoom({
             container: element,
@@ -412,8 +406,10 @@ const RoomFrame = () => {
             },
 
             onInRoomMessageReceived: (data) => {
-                console.log('In room message:', data.message);
-                textEmotion(data.message);
+                console.log('In room message in text:', data);
+                if (currentUser.role !== 'teacher') return;
+                textEmotion(data);
+
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
