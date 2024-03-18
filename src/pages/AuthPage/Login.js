@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 // import GoogleIcon from '@mui/icons-material/Google';
-import { Button, Switch } from '@mui/material';
+import { Button, CircularProgress, Switch } from '@mui/material';
 import './AuthPage.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -22,6 +22,8 @@ const Login = () => {
   const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
   const [isImageCaptured, setIsImageCaptured] = useState(false);
   const { open, setOpen, handleClose } = useContext(AlanContext);
+  //loding state
+  const [loading, setLoading] = useState(false);
 
   //identify the user
   const [loginType, setLoginType] = useState('');
@@ -76,7 +78,7 @@ const Login = () => {
   };;
 
   const studentLoginUser = async (e) => {
-
+    setLoading(true);
     e.preventDefault();
     let newErrors = {};
 
@@ -109,6 +111,7 @@ const Login = () => {
           });
         // setCurrentUser(data.data);
         console.log('response of image student login ', response);
+        setLoading(false);
 
       } else {
 
@@ -119,6 +122,7 @@ const Login = () => {
           });
         console.log('response of login ', response);
         // setCurrentUser(data.data);
+        setLoading(false)
 
       }
 
@@ -128,13 +132,14 @@ const Login = () => {
         response.data.message === 'Incorrect password' ||
         response.data.message === 'Incorrect username') {
         alert(response.data.message);
+        setLoading(false);
       } else {
         setCurrentUser({
           ...response.data.user,
           role: 'student'
         });
         alert('Login successful');
-
+        setLoading(false);
         navigate('/dashboard');
       }
 
@@ -241,18 +246,18 @@ const Login = () => {
 
                   <div className="card-body py-4 px-md-5">
 
-                    <div className="back-icon-btn-login mb-4  d-flex justify-content-between p-2">
+                    <div className="back-icon-btn-login mb-4  d-flex justify-content-between p-2 align-items-center">
 
-                      <h1 className="card-title">Login {loginType ? loginType : ''}</h1>
+                      <h1 className="card-title m-0">Login {loginType ? loginType : ''}</h1>
 
-                      {/* <Button onClick={() => {
+                      <Button onClick={() => {
                         setShowForm(false);
-                        setLoginMethod('');
+                        setLoginType('');
                       }}
                         style={{ borderRadius: '1rem', border: 'none', padding: '0.2rem 0.8rem' }}
                         variant="outlined" className=' fw-bold mx-2 fs-3' size="large">
                         <i className="bi bi-arrow-left-short"></i>
-                      </Button> */}
+                      </Button>
 
                     </div>
 
@@ -394,7 +399,14 @@ const Login = () => {
 
 
                         {/* Submit button */}
-                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold'>Login</Button>
+                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                          {loading ? (
+                            <>
+                              <CircularProgress size={24} color="inherit" className='mx-2' />
+                              Logging in...
+                            </>
+                          ) : 'Login'}
+                        </Button>
 
                         <div className="text-center">
                           <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
