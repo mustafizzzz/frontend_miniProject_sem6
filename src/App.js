@@ -33,24 +33,27 @@ function App() {
         <Route path='/*' element={<ErrorPage />} />
 
         {/* Nested layout */}
-        <ProtectedRoute>
-          <Route path="/dashboard" element={<DashboardLayout />}>
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path='/dashboard' element={<DashboardLayout />}>
             <Route path='home' element={<Home />} />
-            <Route path="meetings" element={<MeetingPage />} />
+            <Route path='meetings' element={<MeetingPage />} />
             <Route path='reports' element={<ReportsPage />} />
-            <Route path="feedback" element={<FeedbackPage />} />
-            <Route path="setting" element={<SettingPage />} />
-            <Route path="about-us" element={<AboutUs />} />
-            <Route path="create-meet" element={<CreatMeetPage />} />
-            <Route path="join-meet" element={<JoinMeetPage />} />
+            <Route path='feedback' element={<FeedbackPage />} />
+            <Route path='setting' element={<SettingPage />} />
+            <Route path='about-us' element={<AboutUs />} />
+            <Route path='create-meet' element={<CreatMeetPage />} />
+            <Route path='join-meet' element={<JoinMeetPage />} />
           </Route>
-        </ProtectedRoute>
+        </Route>
+
 
         {/* Video Pages */}
-        <ProtectedRoute>
+        <Route element={<ProtectedRoute />}>
           <Route path='/' element={<VideoFrame />} />
           <Route path='/room/:roomId' element={<RoomFrame />} />
-        </ProtectedRoute>
+        </Route>
+
 
       </Routes>
       <AlanAiContainer />

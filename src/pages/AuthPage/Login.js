@@ -108,7 +108,7 @@ const Login = () => {
             imageUrl: loginImage
           });
         // setCurrentUser(data.data);
-        console.log('response of login ', response);
+        console.log('response of image student login ', response);
 
       } else {
 
@@ -127,7 +127,7 @@ const Login = () => {
       if (response.data.message === 'Face ID does not match' ||
         response.data.message === 'Incorrect password' ||
         response.data.message === 'Incorrect username') {
-        alert('Login failed. Please check your credentials.');
+        alert(response.data.message);
       } else {
         setCurrentUser({
           ...response.data.user,
@@ -139,7 +139,7 @@ const Login = () => {
       }
 
     } catch (error) {
-      console.log('Error in loginUser', error);
+      console.log('Error in student image loginUser', error);
 
     }
 
@@ -241,7 +241,20 @@ const Login = () => {
 
                   <div className="card-body py-4 px-md-5">
 
-                    <h1 className="card-title mb-4">Login {loginType ? loginType : ''}</h1>
+                    <div className="back-icon-btn-login mb-4  d-flex justify-content-between p-2">
+
+                      <h1 className="card-title">Login {loginType ? loginType : ''}</h1>
+
+                      {/* <Button onClick={() => {
+                        setShowForm(false);
+                        setLoginMethod('');
+                      }}
+                        style={{ borderRadius: '1rem', border: 'none', padding: '0.2rem 0.8rem' }}
+                        variant="outlined" className=' fw-bold mx-2 fs-3' size="large">
+                        <i className="bi bi-arrow-left-short"></i>
+                      </Button> */}
+
+                    </div>
 
                     {!showForm && (
                       <div className="select-login-type-wrapper">
