@@ -87,7 +87,7 @@ const Register = () => {
         password: values.password,
       };
 
-      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/user/signup`, registrationData);
+      const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/signup`, registrationData);
       console.log('response in Student register', response);
 
       if (response.data.message === 'User created successfully') {
@@ -121,7 +121,7 @@ const Register = () => {
         password: values.password,
       };
 
-      const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/teacher/signup`, registrationData);
+      const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/teacher/signup`, registrationData);
 
       console.log('response in Teacher register', response);
       if (response.data.message === 'Account created successfully') {

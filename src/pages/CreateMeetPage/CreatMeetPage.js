@@ -89,7 +89,7 @@ const CreatMeetPage = () => {
           host_name: currentUser.userName,
         }
 
-        const response = await axios.post(`${process.env.REACT_APP_DEPLOY_URL}/api/v1/meeting/create_meeting`, createMeetingData);
+        const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/meeting/create_meeting`, createMeetingData);
 
         console.log('response in Teacher register', response);
 
