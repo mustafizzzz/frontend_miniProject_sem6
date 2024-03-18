@@ -22,7 +22,7 @@ const RoomFrame = () => {
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
-    const { setTextEmotions, setVideoEmotions, setAudioEmotions } = useContext(emotionsContext);
+    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions } = useContext(emotionsContext);
 
 
     //helper function
@@ -168,9 +168,11 @@ const RoomFrame = () => {
                 imgUrls: imageUrls // Pass the fetched image URLs to the API
             });
             const { text_emotions, video_emotions, audio_emotions } = response?.data.updatedMeetReports;
+            const { overallEmotions, studentLiveEmotions } = response?.data;
             setTextEmotions(text_emotions[0]);
             setVideoEmotions(video_emotions[0]);
             setAudioEmotions(audio_emotions[0]);
+            setOverAllEmotions(overallEmotions);
             console.log('Response from emotion API:', response.data);
         } catch (error) {
 
@@ -300,7 +302,7 @@ const RoomFrame = () => {
     useEffect(() => {
 
         const sendTranscriptToAPI = async () => {
-            if (!listening) {
+            if (!listening && !isListening) {
                 console.log('%cStart api:', 'color:green', recognizedText);
                 try {
                     await audioEmotion(recognizedText);
@@ -353,7 +355,7 @@ const RoomFrame = () => {
             serverSecret,
             roomId,
             uuidv4(),
-            'Your Name'
+            `${currentUser.userName || "Your Name"}`
         );
         if (!appID || !serverSecret) {
             throw new Error('Zego app ID or server secret is missing from environment variables.');
@@ -426,14 +428,14 @@ const RoomFrame = () => {
 
     return (
         <>
-            <div className="analytic-btn-modal" >
+            <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' ? 'block' : 'none' }}>
                 <ChrisViewAnalytics />
             </div>
 
             {/* <div className="btn-box">
             </div> */}
 
-            <div className="mainFrame o" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
+            <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
 
             </div>
 

@@ -14,7 +14,7 @@ import { emotionsContext } from "../../ContextApi/emotionsContext";
 
 const Analytics = () => {
   // const navigate = useNavigate();
-  const { textEmotions, videoEmotions, audioEmotions } = useContext(emotionsContext);
+  const { textEmotions, videoEmotions, audioEmotions, overAllEmotions } = useContext(emotionsContext);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -64,13 +64,12 @@ const Analytics = () => {
 
   //video carts functions handle
   const defaultVideoEmotions = {
-    happy: 0,
-    surprised: 0,
-    confused: 0,
-    bored: 0,
-    pnf: 0
+    happy: 1,
+    surprised: 1,
+    confused: 1,
+    bored: 1,
+    pnf: 1
   };
-
   const videoLabels = videoEmotions ? Object.keys(videoEmotions) : Object.keys(defaultVideoEmotions);
   const videoData = videoEmotions ? Object.values(videoEmotions) : Object.values(defaultVideoEmotions);
   const videochart = {
@@ -102,10 +101,10 @@ const Analytics = () => {
   //audio carts functions handle
   const defaultAudioEmotions = {
     happy: 1,
-    surprised: 2,
-    confused: 2,
-    bored: 3,
-    pnf: 2
+    surprised: 1,
+    confused: 1,
+    bored: 1,
+    pnf: 1
   };
   const audioLabels = audioEmotions ? Object.keys(audioEmotions) : Object.keys(defaultAudioEmotions);
   const audioData = audioEmotions ? Object.values(audioEmotions) : Object.values(defaultAudioEmotions);
@@ -137,10 +136,10 @@ const Analytics = () => {
   //message carts functions handle
   const defaultTextEmotions = {
     happy: 1,
-    surprised: 2,
-    confused: 2,
-    bored: 3,
-    pnf: 2
+    surprised: 1,
+    confused: 1,
+    bored: 1,
+    pnf: 1
   };
   const textLabels = textEmotions ? Object.keys(textEmotions) : Object.keys(defaultTextEmotions);
   const textData = textEmotions ? Object.values(textEmotions) : Object.values(defaultTextEmotions);
@@ -170,13 +169,21 @@ const Analytics = () => {
   };
 
   //overall carts functions handle
-
-  const overallData = {
-    labels: ["Happy", "Surprised", "Confused", "Bored", "Absent"],
+  const defaultOverAllEmotions = {
+    happy: 1,
+    surprised: 1,
+    confused: 1,
+    bored: 1,
+    absent: 1
+  };
+  const overAllLabels = overAllEmotions ? Object.keys(overAllEmotions) : Object.keys(defaultOverAllEmotions);
+  const overAllData = overAllEmotions ? Object.values(overAllEmotions) : Object.values(defaultOverAllEmotions);
+  const overAllBarChart = {
+    labels: overAllLabels,
     datasets: [
       {
         label: "Analytics Data",
-        data: [10, 20, 20, 25, 45],
+        data: overAllData,
         backgroundColor: [
           "rgba(56, 142, 60, 255)",
           "rgba(25,118,210,255)",
@@ -196,6 +203,8 @@ const Analytics = () => {
     ],
   };
 
+
+  //chart options for all charts
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -206,6 +215,8 @@ const Analytics = () => {
     },
   };
 
+
+
   return (
     <div className="container-fluid in-call-charts">
 
@@ -213,7 +224,7 @@ const Analytics = () => {
       <div className="row over-all-bar justify-content-center mb-5">
         <div className="col-12 col-md-10">
           <h3 className="text-center">Over all chart</h3>
-          <Bar data={overallData} options={chartOptions} />
+          <Bar data={overAllBarChart} options={chartOptions} />
         </div>
       </div>
 

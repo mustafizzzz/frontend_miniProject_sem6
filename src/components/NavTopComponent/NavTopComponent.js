@@ -21,6 +21,7 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 const NavTopComponent = () => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const { currentUser, setCurrentUser } = React.useContext(UserContext);
+  const userInitial = currentUser.userName ? currentUser.userName.charAt(0).toUpperCase() : '';
   const navigate = useNavigate();
 
   const handleOpenUserMenu = (event) => {
@@ -86,7 +87,7 @@ const NavTopComponent = () => {
               LOGO
             </Typography>
 
-            <div className="meeting-creat-join-btn me-5 p-2">
+            <div className="meeting-creat-join-btn me-3 p-2 d-flex align-items-center">
 
               <button
                 type="button"
@@ -105,10 +106,11 @@ const NavTopComponent = () => {
 
               <button
                 type="button"
-                className="btn btn-secondary join-meet-notification ms-3"
+                className="btn  join-meet-notification ms-3"
               >
                 <i className="bi bi-bell"></i>
               </button>
+              <p className='user-name-navbar m-0 p-0 ms-3'>Hey, {currentUser?.userName || 'username'}</p>
 
 
             </div>
@@ -116,7 +118,7 @@ const NavTopComponent = () => {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar alt={`${userInitial || "Remy Sharp"}`} src="/static/images/avatar/2.jpg" />
                 </IconButton>
               </Tooltip>
               <Menu

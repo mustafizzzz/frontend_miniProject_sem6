@@ -11,13 +11,11 @@ const CreatMeetPage = () => {
   const [formData, setFormData] = useState({
     meetingName: '',
     meetingDescription: '',
-    meetingId: '',
   });
 
   const [errors, setErrors] = useState({
     meetingName: '',
     meetingDescription: '',
-    meetingId: '',
   });
 
   const handleChange = (e) => {
@@ -63,9 +61,6 @@ const CreatMeetPage = () => {
     if (formData.meetingDescription.trim() === '') {
       newErrors = { ...newErrors, meetingDescription: 'Meeting description is required' };
     }
-    if (formData.meetingId.trim() === '') {
-      newErrors = { ...newErrors, meetingId: 'Meeting ID is required' };
-    }
     setErrors(newErrors);
 
 
@@ -75,13 +70,10 @@ const CreatMeetPage = () => {
       return;
     }
 
-    console.log(formData?.meetingId);
-
-    if ((formData.meetingId || formData.meetLink) && currentUser.role === 'teacher') {
+    if (currentUser.role === 'teacher') {
 
       try {
         const createMeetingData = {
-          meet_id: formData.meetingId,
           host_id: currentUser.hostId,
           title: formData.meetingName,
           description: formData.meetingDescription,
@@ -91,9 +83,10 @@ const CreatMeetPage = () => {
 
         const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/meeting/create_meeting`, createMeetingData);
 
-        console.log('response in Teacher register', response);
+        console.log('response in create meet', response);
 
-        navigate(`/room/${formData.meetingId}`);
+        navigate(`/room/${response.data.meet_id}`);
+
       } catch (error) {
         console.error('Error creating meeting:', error);
 
@@ -140,7 +133,7 @@ const CreatMeetPage = () => {
               </div>
 
 
-              <div className="mb-5 meeting-description">
+              <div className="mb-4 meeting-description">
                 <label htmlFor="meetingDescription" className="form-label">Meeting Description</label>
                 <textarea
                   className="form-control"
@@ -157,6 +150,12 @@ const CreatMeetPage = () => {
               </div>
 
               <div className="mb-5">
+                <p className="text-muted fw-bold">The meeting ID is automatically generated and can be shared with students.</p>
+              </div>
+
+
+              {/* Meeting ID  */}
+              {/* <div className="mb-5">
                 <label htmlFor="meetingId" className="form-label">Meeting Id</label>
                 <input
                   type="number"
@@ -169,7 +168,7 @@ const CreatMeetPage = () => {
                   aria-describedby="meetingIdError"
                 />
                 {errors.meetingId && <p className="text-danger" id="meetingIdError">{errors.meetingId}</p>}
-              </div>
+              </div> */}
 
               <div className="btn-meet d-flex  justify-content-end">
                 <button type="submit" className="btn btn-secondary me-3">Cancel</button>

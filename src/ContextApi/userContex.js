@@ -1,8 +1,10 @@
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const UserContext = createContext();
 
 const UserProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem('user'))
   );

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 // import GoogleIcon from '@mui/icons-material/Google';
-import { Button, CircularProgress, Switch } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import './AuthPage.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +12,10 @@ import { AlanContext } from '../../ContextApi/AlanContext';
 import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
 import LoginImageVerify from '../../components/LoginImageVerify';
 
+//alerts material ui
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+
 
 
 const Login = () => {
@@ -22,17 +26,14 @@ const Login = () => {
   const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
   const [isImageCaptured, setIsImageCaptured] = useState(false);
   const { open, setOpen, handleClose } = useContext(AlanContext);
-  //loding state
-  const [loading, setLoading] = useState(false);
 
   //identify the user
   const [loginType, setLoginType] = useState('');
   const [showForm, setShowForm] = useState(false);
 
-  const handleLoginType = (type) => {
-    setLoginType(type);
-    setShowForm(true);
-  };
+  //loding state
+  const [loading, setLoading] = useState(false);
+  const [snackbarInfo, setSnackbarInfo] = useState({ open: false, severity: 'info', message: '' });
 
   //field input state
   const [formData, setFormData] = useState({
@@ -45,6 +46,20 @@ const Login = () => {
     password: '',
   });
 
+
+  //close snackbar
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarInfo({ ...snackbarInfo, open: false });
+  };
+
+  const handleLoginType = (type) => {
+    setLoginType(type);
+    setShowForm(true);
+  };
 
 
   const handleChange = (e) => {
@@ -94,7 +109,8 @@ const Login = () => {
 
     // If any field is empty, show alert and return
     if (Object.keys(newErrors).length > 0) {
-      alert('Please fill all required fields');
+      setLoading(false);
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Fill the form correctly.', open: true });
       return;
     }
 
@@ -127,23 +143,28 @@ const Login = () => {
       }
 
       console.log(response.data.message, 'response message');
+
       // Check response for login success or failure
       if (response.data.message === 'Face ID does not match' ||
         response.data.message === 'Incorrect password' ||
-        response.data.message === 'Incorrect username') {
-        alert(response.data.message);
+        response.data.message === 'Incorrect username' ||
+        response.data === 'User not found') {
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: response.data.message || response.data || 'Error in student login', open: true });
         setLoading(false);
       } else {
         setCurrentUser({
           ...response.data.user,
           role: 'student'
         });
-        alert('Login successful');
         setLoading(false);
+        setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
         navigate('/dashboard');
       }
 
     } catch (error) {
+      setLoading(false);
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error in student login', open: true });
       console.log('Error in student image loginUser', error);
 
     }
@@ -492,6 +513,11 @@ const Login = () => {
                       : null}
 
                   </div>
+                  <Snackbar open={snackbarInfo.open} autoHideDuration={4000} onClose={handleCloseSnackBar}>
+                    <Alert onClose={handleCloseSnackBar} severity={snackbarInfo.severity} variant="filled" sx={{ width: '100%' }}>
+                      {snackbarInfo.message}
+                    </Alert>
+                  </Snackbar>
                 </div>
               </div>
 

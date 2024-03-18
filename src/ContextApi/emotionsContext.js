@@ -7,11 +7,12 @@ const EmotionsProvider = ({ children }) => {
     const [textEmotions, setTextEmotions] = useState(null);
     const [videoEmotions, setVideoEmotions] = useState(null);
     const [audioEmotions, setAudioEmotions] = useState(null);
+    const [overAllEmotions, setOverAllEmotions] = useState(null);
 
 
     return (
 
-        <emotionsContext.Provider value={{ textEmotions, setTextEmotions, videoEmotions, setVideoEmotions, audioEmotions, setAudioEmotions }}>
+        <emotionsContext.Provider value={{ textEmotions, setTextEmotions, videoEmotions, setVideoEmotions, audioEmotions, setAudioEmotions, overAllEmotions, setOverAllEmotions }}>
             {children}
         </emotionsContext.Provider>
     )
