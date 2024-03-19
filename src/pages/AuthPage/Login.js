@@ -15,6 +15,7 @@ import LoginImageVerify from '../../components/LoginImageVerify';
 //alerts material ui
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import { set } from 'firebase/database';
 
 
 
@@ -120,6 +121,12 @@ const Login = () => {
 
       if (loginMethod === 'image') {
 
+        if (!isImageCaptured) {
+          setLoading(false);
+          setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Capture image for face ID', open: true });
+          return;
+        }
+
         response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/login`,
           {
             username: formData.username,
@@ -156,9 +163,10 @@ const Login = () => {
           ...response.data.user,
           role: 'student'
         });
-        setLoading(false);
+
         setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
+        setLoading(false);
         navigate('/dashboard');
       }
 
@@ -173,6 +181,7 @@ const Login = () => {
 
   const teacherloginUser = async (e) => {
     console.log('tecacher login');
+    setLoading(true);
     e.preventDefault();
     let newErrors = {};
     if (!formData.username) {
@@ -186,7 +195,8 @@ const Login = () => {
 
     // If any field is empty, show alert and return
     if (Object.keys(newErrors).length > 0) {
-      alert('Please fill all required fields');
+      setLoading(false);
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Fill the form correctly.', open: true });
       return;
     }
 
@@ -201,21 +211,27 @@ const Login = () => {
       // setCurrentUser(data.data);
       console.log('response of teacher login ', response);
 
-      if (response.data.message === 'Incorrect password' || response.data.message === 'Incorrect username') {
-        alert('Invalid username or password');
+      if (response.data.message === 'Incorrect password' || response.data.message === 'Incorrect username' || response.data === 'User not found') {
+        setLoading(false);
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: response.data.message || response.data || 'Error in teacher login', open: true });
 
       } else {
         setCurrentUser({
           ...response.data.teacher,
           role: 'teacher'
         });
+
+        setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
+        setLoading(false);
         navigate('/dashboard');
 
       }
 
     } catch (error) {
-      console.log('Error in loginUser', error);
-      alert('Invalid username or password');
+      console.log('Error in Teacher loginUser', error);
+      setLoading(false);
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error in teacher login', open: true });
 
     }
 
@@ -263,7 +279,7 @@ const Login = () => {
               </div>
 
               <div className="col-lg-6 mb-5 mb-lg-0">
-                <div className="card">
+                <div className="card shadow shadow-sm">
 
                   <div className="card-body py-4 px-md-5">
 
@@ -497,7 +513,14 @@ const Login = () => {
                         </div>
 
                         {/* Submit button */}
-                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold'>Login</Button>
+                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                          {loading ? (
+                            <>
+                              <CircularProgress size={24} color="inherit" className='mx-2' />
+                              Logging in...
+                            </>
+                          ) : 'Login'}
+                        </Button>
 
                         <div className="text-center">
                           <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
@@ -513,6 +536,8 @@ const Login = () => {
                       : null}
 
                   </div>
+
+                  {/* Common snackbar */}
                   <Snackbar open={snackbarInfo.open} autoHideDuration={4000} onClose={handleCloseSnackBar}>
                     <Alert onClose={handleCloseSnackBar} severity={snackbarInfo.severity} variant="filled" sx={{ width: '100%' }}>
                       {snackbarInfo.message}

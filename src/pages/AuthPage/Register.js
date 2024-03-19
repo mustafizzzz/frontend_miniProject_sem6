@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import GoogleIcon from '@mui/icons-material/Google';
-import { Button } from '@mui/material';
+import { Alert, Button, CircularProgress, Snackbar } from '@mui/material';
 import './AuthPage.css';
 import { useFormik } from 'formik';
 import { registerSchema } from '../YupSchema';
@@ -40,6 +40,11 @@ const Register = () => {
       if (values.role === 'teacher') {
         await registerTeacherUser(values);
       } else {
+        if (imageFile === null) {
+          setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Uploade the image', open: true });
+          setLoading(false);
+          return;
+        }
         await registerStudentUser(values);
       }
       action.resetForm();
@@ -47,12 +52,28 @@ const Register = () => {
 
   });
 
-  console.log("in form", errors);
+  //snackbar states n loading states
+  const [snackbarInfo, setSnackbarInfo] = useState({ open: false, severity: 'info', message: '' });
+  const [loading, setLoading] = useState(false)
+  const [showForm, setShowForm] = useState(false);
+
+  //close snackbar
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarInfo({ ...snackbarInfo, open: false });
+  };
+
+  console.log("in form erros ", errors);
+
 
   //registerStudentUser handle
   const registerStudentUser = async (values) => {
     try {
-      if (!imageFile) return;
+      setLoading(true);
+
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
 
       // Upload image to Firebase Storage with the PID as part of the path
@@ -69,8 +90,10 @@ const Register = () => {
         Name: values.username,
         imageUrl: imageUrl
       }).then(() => {
-        console.log("Image URL saved successfully!");
+        setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Image Uploaded successful!', open: true });
       }).catch((error) => {
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error saving image URL', open: true });
+        setLoading(false);
         console.error("Error saving image URL: ", error);
       });
 
@@ -91,15 +114,18 @@ const Register = () => {
       console.log('response in Student register', response);
 
       if (response.data.message === 'User created successfully') {
-        alert('User created successfully');
-
+        setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Account created successfully', open: true });
+        setLoading(false);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         navigate('/login');
       } else {
-        alert('failed Registering Student');
-
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Failed Registering Student', open: true });
+        setLoading(false);
       }
 
     } catch (error) {
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error Registering Student', open: true });
+      setLoading(false);
       console.log('Error in registerStudentUser', error);
 
     }
@@ -109,6 +135,7 @@ const Register = () => {
   //registerTeacherUser handle
   const registerTeacherUser = async (values) => {
     try {
+      setLoading(true);
       console.log(`${process.env.REACT_APP_DEPLOY_URL} APP URL`);
 
       // Prepare data to be stored in the database
@@ -125,17 +152,21 @@ const Register = () => {
 
       console.log('response in Teacher register', response);
       if (response.data.message === 'Account created successfully') {
-        alert('Account created successfully')
-
+        setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Account created successfully', open: true });
+        setLoading(false);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         navigate('/login');
       } else {
-        alert('failed Registering Student');
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Failed Registering Teacher', open: true });
+        setLoading(false);
 
       }
 
 
 
     } catch (error) {
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error Registering Teacher', open: true });
+      setLoading(false);
       console.log('Error in registerStudentUser', error);
 
     }
@@ -159,15 +190,12 @@ const Register = () => {
                   <span className="text-primary">MoodLens Signup</span>
                 </h1>
                 <p style={{ color: 'hsl(217, 10%, 50.8%)' }}>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Eveniet, itaque accusantium odio, soluta, corrupti aliquam
-                  quibusdam tempora at cupiditate quis eum maiores libero
-                  veritatis? Dicta facilis sint aliquid ipsum atque?
+                  Revolutionize online learning with MoodLens! Seamlessly connect students and teachers through interactive video calls. Enjoy features like real-time emotion analysis, message monitoring, intuitive voice commands, and detailed meeting history tracking. Redefine education for all, making it accessible and engaging.
                 </p>
               </div>
 
               <div className="col-lg-6 mb-5 mb-lg-0">
-                <div className="card">
+                <div className="card shadow shadow-sm">
                   <div className="card-body py-4 px-md-5">
                     <h1 className="card-title mb-4">Create a new account</h1>
 
@@ -201,7 +229,7 @@ const Register = () => {
                     <form onSubmit={handleSubmit}>
 
 
-                      <div className="username-name d-flex justify-content-between mb-4">
+                      <div className="username-email d-flex justify-content-between mb-4">
 
 
                         {/* userName input */}
@@ -394,8 +422,14 @@ const Register = () => {
 
 
                       {/* Submit button */}
-                      <Button type='submit' variant="contained"
-                        className='w-100 mb-2 fw-bold'>SignUp</Button>
+                      <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                        {loading ? (
+                          <>
+                            <CircularProgress size={24} color="inherit" className='mx-2' />
+                            Signing in...
+                          </>
+                        ) : 'Signin'}
+                      </Button>
 
                       <div className="text-center">
                         <p>Already a member? <NavLink to='/login'>Login</NavLink></p>
@@ -412,6 +446,12 @@ const Register = () => {
 
 
                   </div>
+
+                  <Snackbar open={snackbarInfo.open} autoHideDuration={4000} onClose={handleCloseSnackBar}>
+                    <Alert onClose={handleCloseSnackBar} severity={snackbarInfo.severity} variant="filled" sx={{ width: '100%' }}>
+                      {snackbarInfo.message}
+                    </Alert>
+                  </Snackbar>
                 </div>
               </div>
 

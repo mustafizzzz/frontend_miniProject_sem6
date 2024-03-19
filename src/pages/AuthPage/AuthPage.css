@@ -78,3 +78,8 @@
 .from-floating select {
   font-size: 1rem;
 }
+
+.login-mainbox .card,
+.register-mainbox .card {
+  border-radius: 1rem;
+}
