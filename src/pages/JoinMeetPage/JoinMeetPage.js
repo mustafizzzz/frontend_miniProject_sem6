@@ -56,13 +56,13 @@ const JoinMeetPage = () => {
       <div className="container mt-4">
 
         <div className="row">
-          <div className="col-10">
+          <div className="col-11 px-0">
             <h1 className="text-center join-heading">Join a lecture</h1>
           </div>
         </div>
 
         <div className="row mt-2 join-meet-form">
-          <div className="offset-2 col-6 py-4">
+          <div className="offset-3 col-5 py-4 px-0">
 
 
             <div className="mb-3">

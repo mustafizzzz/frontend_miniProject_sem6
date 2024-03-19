@@ -6,8 +6,8 @@ const SidebarComponent = () => {
 
   return (
 
-    <div className="sidebar-in-box ">
-      <div className="sidebar">
+    <div className="sidebar-in-box">
+      <div className="sidebar  d-flex flex-column justify-content-between">
 
         <ul className="sidebar-nav px-md-4 px-1">
           <li>
@@ -42,6 +42,13 @@ const SidebarComponent = () => {
             </NavLink>
           </li>
         </ul>
+
+        <div className="contact-us-btn-sidebar d-flex justify-content-center p-2 align-items-center">
+          <button type='button' className='btn btn-primary'>
+            <i className="bi bi-telephone"></i>
+            Contact us
+          </button>
+        </div>
         {/* <div className="contact-us">
           <Link to="/contact">Contact Us</Link>
         </div> */}

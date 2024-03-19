@@ -91,7 +91,7 @@ const NavTopComponent = () => {
 
               <button
                 type="button"
-                className="btn btn-primary me-3 create-meet"
+                className={`${currentUser.role === 'teacher' ? '' : 'd-none'} btn btn-primary me-3 create-meet`}
                 onClick={() => navigate('/dashboard/create-meet')}>
                 Create meet
               </button>

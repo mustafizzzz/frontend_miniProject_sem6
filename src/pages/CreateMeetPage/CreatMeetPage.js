@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import './CreatMeetPage.css'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,6 +7,15 @@ import { UserContext } from '../../ContextApi/userContex';
 const CreatMeetPage = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(UserContext)
+
+  //only for teacher
+  useEffect(() => {
+
+    if (currentUser.role === 'student') {
+      navigate('/dashboard/join-meet')
+    }
+    // eslint-disable-next-line
+  }, [])
 
   const [formData, setFormData] = useState({
     meetingName: '',
@@ -107,13 +116,13 @@ const CreatMeetPage = () => {
       <div className="container mt-4">
 
         <div className="row">
-          <div className=" offset-2 col-6">
+          <div className="offset-3 col-6 ">
             <h1 className="text-start meet-heading">Create Meeting</h1>
           </div>
         </div>
 
         <div className="row mt-3 create-meet-form">
-          <div className="offset-2 col-6 py-4">
+          <div className="offset-3 col-6 py-4 ">
 
             <form onSubmit={handleSubmit}>
 
