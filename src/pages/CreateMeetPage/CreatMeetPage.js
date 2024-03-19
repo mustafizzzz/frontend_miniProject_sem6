@@ -3,10 +3,13 @@ import './CreatMeetPage.css'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../../ContextApi/userContex';
+import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
 
 const CreatMeetPage = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(UserContext)
+  const [snackbarInfo, setSnackbarInfo] = useState({ open: false, severity: 'info', message: '' });
+  const [backdropOpen, setBackdropOpen] = useState(false)
 
   //only for teacher
   useEffect(() => {
@@ -16,6 +19,15 @@ const CreatMeetPage = () => {
     }
     // eslint-disable-next-line
   }, [])
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarInfo({ ...snackbarInfo, open: false });
+  };
+
 
   const [formData, setFormData] = useState({
     meetingName: '',
@@ -75,12 +87,14 @@ const CreatMeetPage = () => {
 
     // If any field is empty, show alert and return
     if (Object.keys(newErrors).length > 0) {
-      alert('Please fill all required fields');
+      setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Fill the form correctly.', open: true });
       return;
     }
 
     if (currentUser.role === 'teacher') {
+      console.log('called the create meet');
 
+      setBackdropOpen(true);
       try {
         const createMeetingData = {
           host_id: currentUser.hostId,
@@ -93,20 +107,25 @@ const CreatMeetPage = () => {
         const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/meeting/create_meeting`, createMeetingData);
 
         console.log('response in create meet', response);
-
+        setBackdropOpen(false);
         navigate(`/room/${response.data.meet_id}`);
 
       } catch (error) {
+        setBackdropOpen(false);
+        setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error creating meeting', open: true });
         console.error('Error creating meeting:', error);
-
       }
 
     }
+    console.log('Create meet data', formData);
+  }
 
-    else {
-      alert('Enter the meet id')
-    }
-    console.log('Create meet data ', formData);
+  const handleCancel = (e) => {
+    setFormData({
+      meetingName: '',
+      meetingDescription: '',
+
+    })
   }
 
 
@@ -180,14 +199,30 @@ const CreatMeetPage = () => {
               </div> */}
 
               <div className="btn-meet d-flex  justify-content-end">
-                <button type="submit" className="btn btn-secondary me-3">Cancel</button>
-                <button type="submit" className="btn btn-primary">Create Meeting</button>
+                <button type="submit" className="btn btn-secondary me-3" onClick={handleCancel}>Cancel</button>
+                <button type="submit" className="btn btn-primary" >Create Meeting</button>
               </div>
 
             </form>
 
           </div>
         </div>
+
+
+        {/* Backdrops and snackbar */}
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+          open={backdropOpen}
+        >
+          <CircularProgress color="inherit" />
+          <p className='m-0 p-0 fs-4 mx-2'>Creating meet please wait...</p>
+        </Backdrop>
+
+        <Snackbar open={snackbarInfo.open} autoHideDuration={4000} onClose={handleCloseSnackBar}>
+          <Alert onClose={handleCloseSnackBar} severity={snackbarInfo.severity} variant="filled" sx={{ width: '100%' }}>
+            {snackbarInfo.message}
+          </Alert>
+        </Snackbar>
 
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -22,7 +22,10 @@ const RoomFrame = () => {
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions } = useContext(emotionsContext);
+
+
 
 
     //helper function
