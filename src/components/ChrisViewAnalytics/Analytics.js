@@ -9,7 +9,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { emotionsContext } from "../../ContextApi/emotionsContext";
 
 const Analytics = () => {
@@ -214,6 +213,27 @@ const Analytics = () => {
       },
     },
   };
+  //chart options for bar charts 
+  const chartOptionBarChart = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        min: 0, // Set the minimum value of the y-axis scale to 1
+        max: 'auto', // Automatically determine the maximum value based on the data
+        ticks: {
+          stepSize: 1, // Set the step size to 1 to display only integers
+        },
+      },
+
+    },
+  };
 
 
 
@@ -221,33 +241,33 @@ const Analytics = () => {
     <div className="container-fluid in-call-charts">
 
 
-      <div className="row over-all-bar justify-content-center mb-5">
+      <div className="row over-all-bar justify-content-center mb-5 border py-3 mx-md-4">
         <div className="col-12 col-md-10">
-          <h3 className="text-center">Over all chart</h3>
-          <Bar data={overAllBarChart} options={chartOptions} />
+          <h2 className="text-center mb-3">Over all charts</h2>
+          <Bar data={overAllBarChart} options={chartOptionBarChart} />
         </div>
       </div>
 
-      <div className="row  two-pie justify-content-evenly mb-5">
-        <div className="col-10 col-md-4" >
+      <div className="row  two-pie justify-content-evenly mb-5 py-3">
+        <div className="col-10 col-md-5 pie-audio py-3 border" >
           <h3 className="text-center">Audio Chart</h3>
           <Pie data={audiochart} options={chartOptions} />
         </div>
 
-        <div className="col-10 col-md-4">
+        <div className="col-10 col-md-5 py-3 pie-video border">
           <h3 className="text-center">Video Chart</h3>
           <Pie data={videochart} options={chartOptions} />
         </div>
       </div>
 
-      <div className="row one-pie justify-content-center mb-5">
-        <div className="col-10 col-md-4">
+      <div className="row one-pie justify-content-center mb-5 py-3">
+        <div className="col-10 col-md-5 pi-messages py-3 border">
           <h3 className="text-center">In call message chart</h3>
           <Pie data={textchart} options={chartOptions} />
         </div>
       </div>
 
-      <div className="row accordion-each">
+      <div className="row accordion-each border p-3">
 
         <div className="accordion-heading">
           <h3 className="ms-2 text-start mb-3">Emotions of each student</h3>
