@@ -77,7 +77,7 @@ const JoinMeetPage = () => {
         {
           meet_id: parseInt(formData.joinCode)
         });
-      console.log('Join meet form submitted successfully:', response);
+      console.log('Join meet form submitted successfully:', response.message);
       if (response) {
         setSnackbarInfo({ open: true, severity: 'success', message: 'Meeting joined successfully' });
         setBackdropOpen(false);

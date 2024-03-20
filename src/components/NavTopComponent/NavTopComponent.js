@@ -15,6 +15,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import './NavTopComponent.css';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../ContextApi/userContex';
+// import logo from '../../assets/MOODLENS-bgLess.svg'
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -61,8 +62,10 @@ const NavTopComponent = () => {
                 color: 'black',
                 textDecoration: 'none',
                 flexGrow: 1,
+                alignItems: 'center', // Center the logo vertically
               }}
             >
+              {/* <img src={logo} alt="Logo" className='moodlens-logo border' /> */}
               LOGO
             </Typography>
 

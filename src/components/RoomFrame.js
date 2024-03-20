@@ -412,6 +412,8 @@ const RoomFrame = () => {
 
         const ui = ZegoUIKitPrebuilt.create(kitToken);
 
+
+        //text emotion api function
         const textEmotion = async (dataText) => {
 
             try {
@@ -427,6 +429,19 @@ const RoomFrame = () => {
 
             } catch (error) {
                 console.error('Error in audio emotion detection:', error);
+            }
+        }
+        //end the meet api call
+        const endMeetingCall = async () => {
+
+            try {
+                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/meeting/end_meeting', {
+                    meet_id: parseInt(roomId),
+                    endTime: getCurrentTimeTeacher(),
+                });
+                console.log('Response from end meeting API:', response);
+            } catch (error) {
+                console.error('Error in ending meeting:', error);
             }
         }
 
@@ -464,6 +479,9 @@ const RoomFrame = () => {
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
+                if (currentUser.role === 'teacher') {
+                    endMeetingCall();
+                }
                 navigate('/dashboard/join-meet');
             }
         });
