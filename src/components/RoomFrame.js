@@ -52,7 +52,7 @@ const RoomFrame = () => {
     //Only for student
     const captureImage = async () => {
 
-        if (!isCapturing) return;
+        if (!isCapturing && currentUser.role === 'teacher') return;
         const mainFrame = document.querySelector('.mainFrame');
         if (mainFrame) {
             const videoElement = mainFrame.querySelector('video');
@@ -69,19 +69,32 @@ const RoomFrame = () => {
 
                 // Convert canvas to base64 data URL
                 const imageDataURL = await new Promise((resolve) => {
+
                     canvas.toBlob((blob) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            resolve(reader.result);
-                        };
-                        reader.readAsDataURL(blob);
+
+                        if (blob) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            }
+
+                        } else {
+                            resolve(null);
+                        }
+
                     }, 'image/jpeg');
+
                 });
 
 
 
                 try {
 
+                    if (!imageDataURL) {
+                        console.log('No image data URL found');
+                        return;
+                    }
                     // Construct the image path with student ID
                     const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
 
@@ -239,7 +252,7 @@ const RoomFrame = () => {
                 await captureImage(); // Call image capture for student
             }
 
-        }, currentUser.role === 'teacher' ? 25000 : 10000); // Interval based on role
+        }, currentUser.role === 'teacher' ? 15000 : 10000); // Interval based on role
 
         return () => clearInterval(interval);
 
@@ -250,6 +263,8 @@ const RoomFrame = () => {
     const [recognizedText, setRecognizedText] = useState('');
     const [isListening, setIsListening] = useState(true);
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
+
+
 
     useEffect(() => {
 
@@ -301,11 +316,11 @@ const RoomFrame = () => {
 
     }
 
-
+    //toggle api call audio emotion
     useEffect(() => {
 
         const sendTranscriptToAPI = async () => {
-            if (!listening && !isListening) {
+            if (!listening && recognizedText.trim() !== '') {
                 console.log('%cStart api:', 'color:green', recognizedText);
                 try {
                     await audioEmotion(recognizedText);
@@ -361,7 +376,7 @@ const RoomFrame = () => {
             `${currentUser.userName || "Your Name"}`
         );
         if (!appID || !serverSecret) {
-            throw new Error('Zego app ID or server secret is missing from environment variables.');
+            alert('Zego app ID or server secret is missing from environment variables.');
         }
 
         const ui = ZegoUIKitPrebuilt.create(kitToken);

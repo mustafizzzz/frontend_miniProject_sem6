@@ -20,6 +20,7 @@ import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
 import ErrorPage from './pages/404ErrorPage/ErrorPage';
 import LoginImageVerify from './components/LoginImageVerify';
 import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
+import TestCapture from './pages/TestCapture';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/testSpeech' element={<TestPage />} />
+        <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
