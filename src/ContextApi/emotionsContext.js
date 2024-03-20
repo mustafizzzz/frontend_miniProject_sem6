@@ -9,11 +9,16 @@ const EmotionsProvider = ({ children }) => {
     const [audioEmotions, setAudioEmotions] = useState(null);
     const [overAllEmotions, setOverAllEmotions] = useState(null);
     const [studentLiveEmotions, setStudentLiveEmotions] = useState(null);
+    const [lastSync, setLastSync] = useState(0);
 
 
     return (
 
-        <emotionsContext.Provider value={{ textEmotions, setTextEmotions, videoEmotions, setVideoEmotions, audioEmotions, setAudioEmotions, overAllEmotions, setOverAllEmotions, studentLiveEmotions, setStudentLiveEmotions }}>
+        <emotionsContext.Provider value={{
+            textEmotions, setTextEmotions, videoEmotions,
+            setVideoEmotions, audioEmotions, setAudioEmotions, overAllEmotions, setOverAllEmotions,
+            studentLiveEmotions, setStudentLiveEmotions, lastSync, setLastSync
+        }}>
             {children}
         </emotionsContext.Provider>
     )

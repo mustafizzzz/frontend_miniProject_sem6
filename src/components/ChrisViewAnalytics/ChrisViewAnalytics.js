@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Analytics from './Analytics';
 import "./Analytics.css";
+import { emotionsContext } from '../../ContextApi/emotionsContext';
 
 
 const style = {
@@ -22,9 +23,12 @@ const style = {
 };
 
 const ChrisViewAnalytics = () => {
+    const { lastSync } = React.useContext(emotionsContext);
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+
 
     return (
         <>
@@ -37,12 +41,12 @@ const ChrisViewAnalytics = () => {
                 <div className="modal fade" id="exampleModal" tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog  modal-xl modal-dialog-scrollable">
                         <div className="modal-content">
-                            <div className="modal-header px-3 py-2">
+                            <div className="modal-header px-4 pt-3 pb-0">
                                 <h2 className="modal-title" id="exampleModalLabel">Live emotions</h2>
                                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                             </div>
-                            <div className="last-sync-text px-3">
-                                <p className='p-0 m-0 fw-bold text-muted'>Last synced 35 seconds ago</p>
+                            <div className="last-sync-text px-4 py-2">
+                                <p className='p-0 m-0 fw-bold text-muted'>Last synced {lastSync.toString()} seconds ago</p>
                             </div>
 
                             <div className="modal-body">

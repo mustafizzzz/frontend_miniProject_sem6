@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useState } from "react";
 import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJs } from "chart.js/auto";
@@ -13,7 +13,7 @@ import { emotionsContext } from "../../ContextApi/emotionsContext";
 
 const Analytics = () => {
   // const navigate = useNavigate();
-  const { textEmotions, videoEmotions, audioEmotions, overAllEmotions, studentLiveEmotions } = useContext(emotionsContext);
+  const { textEmotions, videoEmotions, audioEmotions, overAllEmotions, studentLiveEmotions, setLastSync } = useContext(emotionsContext);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -56,6 +56,25 @@ const Analytics = () => {
     setSelectedStudent(studentData[0]);
   };
 
+  //Sync time effect
+
+  // Initialize a ref for the start time
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    // Calculate the elapsed time in seconds
+    const elapsedSec = parseInt((Date.now() - startRef.current) / 1000);
+    console.log(`Elapsed time: ${elapsedSec} seconds`);
+
+    // Update the last sync time
+    setLastSync(elapsedSec);
+
+    // Update the start time
+    startRef.current = Date.now();
+
+
+  }, [overAllEmotions]);
+  //Sync time effect end
 
 
 
@@ -233,6 +252,16 @@ const Analytics = () => {
       },
 
     },
+  };
+
+  console.log('%cstudentLiveEmotions', 'color:red', studentLiveEmotions);
+
+  //gte the text colour
+  const getColor = (emotion) => {
+    if (emotion === 'happy') return '#006400'; // Dark green
+    if (emotion === 'bored') return 'yellow'; // Saddle brown
+    if (emotion === 'confused') return 'red'; // Dark red
+    return 'black'; // Default color
   };
 
 
@@ -418,43 +447,33 @@ const Analytics = () => {
                 aria-controls={`panel${index + 1}-content`}
                 id={`panel${index + 1}-header`}
               >
-                <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: "bold" }}>
+                <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: 'bold' }}>
                   {student.username}
                 </Typography>
-                <Typography sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                <Typography sx={{ fontWeight: 'bold' }}>Average: </Typography>
+                <Typography sx={{ color: getColor(student.overall_emotion), fontWeight: 'bold' }}>
                   {student.overall_emotion}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <div className="emotion-details d-flex flex-column">
-                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
-                    <Typography variant="body1" className="fw-bold">Text:</Typography>
-                    <div className="progress w-75">
-                      <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${student.text_emotion * 10}%` }} aria-valuenow={student.text_emotion} aria-valuemin="0" aria-valuemax="100">
-                        {student.text_emotion}%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
-                    <Typography variant="body1" className="fw-bold">Audio:</Typography>
-                    <div className="progress w-75">
-                      <div className="progress-bar bg-info" role="progressbar" style={{ width: `${student.audio_emotion * 10}%` }} aria-valuenow={student.audio_emotion} aria-valuemin="0" aria-valuemax="100">
-                        {student.audio_emotion}%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                <div className="emotion-details d-flex px-4  justify-content-evenly">
+                  <div className="emotion-detail-heading d-flex flex-column my-2 ">
+
                     <Typography variant="body1" className="fw-bold">Video:</Typography>
-                    <div className="progress w-75">
-                      <div className="progress-bar bg-success" role="progressbar" style={{ width: `${student.video_emotion * 10}%` }} aria-valuenow={student.video_emotion} aria-valuemin="0" aria-valuemax="100">
-                        {student.video_emotion}%
-                      </div>
-                    </div>
+                    <Typography variant="body1" className="fw-bold ">Audio:</Typography>
+                    <Typography variant="body1" className="fw-bold " >Text:</Typography>
+
                   </div>
+                  <div className="emotion-detail-text d-flex flex-column my-2 ">
+                    <Typography variant="body1" className="fw-bold" style={{ color: getColor(student.video_emotion) }}>{student.video_emotion || 'No data'}</Typography>
+                    <Typography variant="body1" className="fw-bold" style={{ color: getColor(student.audio_emotion) }}>{student.audio_emotion || 'No data'}</Typography>
+                    <Typography variant="body1" className="fw-bold" style={{ color: getColor(student.text_emotion) }}>{student.text_emotion || 'No data'}</Typography>
+                  </div>
+
                 </div>
               </AccordionDetails>
             </Accordion>
-          )) : <h2>No student joined</h2>}
+          )) : <h4 className="mx-4">No Student join yet</h4>}
 
         </div>
 

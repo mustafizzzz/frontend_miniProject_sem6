@@ -154,7 +154,7 @@ const JoinMeetPage = () => {
             open={backdropOpen}
           >
             <CircularProgress color="inherit" />
-            <p className='m-0 p-0 fs-4 mx-2'>Creating meet please wait...</p>
+            <p className='m-0 p-0 fs-4 mx-2'>Joining please wait...</p>
           </Backdrop>
 
 

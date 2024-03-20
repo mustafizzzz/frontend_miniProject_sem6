@@ -220,6 +220,7 @@ const RoomFrame = () => {
             setOverAllEmotions(overallEmotions);
             setStudentLiveEmotions(studentLiveEmotions);
             console.log('Response from emotion API:', response.data);
+
         } catch (error) {
 
             console.log('error in api calling', error.message);
@@ -418,7 +419,7 @@ const RoomFrame = () => {
                     meet_id: parseInt(roomId),
                     host_id: currentUser.hostId,
                     time_stamp: getCurrentTimeTeacher(),
-                    studentPID: parseInt(dataText.fromUser.userID),
+                    studentPID: currentUser.hostId,
                     message: dataText.message
                 });
 
