@@ -13,7 +13,7 @@ import { emotionsContext } from "../../ContextApi/emotionsContext";
 
 const Analytics = () => {
   // const navigate = useNavigate();
-  const { textEmotions, videoEmotions, audioEmotions, overAllEmotions } = useContext(emotionsContext);
+  const { textEmotions, videoEmotions, audioEmotions, overAllEmotions, studentLiveEmotions } = useContext(emotionsContext);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -274,9 +274,9 @@ const Analytics = () => {
         </div>
 
 
-        <div className="accordio-box">
+        <div className="accordion-box">
 
-          <Accordion className="my-3" >
+          {/* <Accordion className="my-3" >
             <AccordionSummary
               expandIcon={<ArrowDownwardIcon />}
               aria-controls="panel1-content"
@@ -409,7 +409,52 @@ const Analytics = () => {
 
             </AccordionDetails>
 
-          </Accordion>
+          </Accordion> */}
+
+          {studentLiveEmotions ? studentLiveEmotions?.map((student, index) => (
+            <Accordion key={index} className="my-3">
+              <AccordionSummary
+                expandIcon={<ArrowDownwardIcon />}
+                aria-controls={`panel${index + 1}-content`}
+                id={`panel${index + 1}-header`}
+              >
+                <Typography sx={{ width: '65%', flexShrink: 0, fontWeight: "bold" }}>
+                  {student.username}
+                </Typography>
+                <Typography sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                  {student.overall_emotion}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <div className="emotion-details d-flex flex-column">
+                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                    <Typography variant="body1" className="fw-bold">Text:</Typography>
+                    <div className="progress w-75">
+                      <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${student.text_emotion * 10}%` }} aria-valuenow={student.text_emotion} aria-valuemin="0" aria-valuemax="100">
+                        {student.text_emotion}%
+                      </div>
+                    </div>
+                  </div>
+                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                    <Typography variant="body1" className="fw-bold">Audio:</Typography>
+                    <div className="progress w-75">
+                      <div className="progress-bar bg-info" role="progressbar" style={{ width: `${student.audio_emotion * 10}%` }} aria-valuenow={student.audio_emotion} aria-valuemin="0" aria-valuemax="100">
+                        {student.audio_emotion}%
+                      </div>
+                    </div>
+                  </div>
+                  <div className="emotion-detail d-flex align-items-center justify-content-evenly my-2">
+                    <Typography variant="body1" className="fw-bold">Video:</Typography>
+                    <div className="progress w-75">
+                      <div className="progress-bar bg-success" role="progressbar" style={{ width: `${student.video_emotion * 10}%` }} aria-valuenow={student.video_emotion} aria-valuemin="0" aria-valuemax="100">
+                        {student.video_emotion}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AccordionDetails>
+            </Accordion>
+          )) : <h2>No student joined</h2>}
 
         </div>
 

@@ -23,7 +23,7 @@ const RoomFrame = () => {
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
     const location = useLocation();
-    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions } = useContext(emotionsContext);
+    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
 
 
 
@@ -218,6 +218,7 @@ const RoomFrame = () => {
             setVideoEmotions(video_emotions[0]);
             setAudioEmotions(audio_emotions[0]);
             setOverAllEmotions(overallEmotions);
+            setStudentLiveEmotions(studentLiveEmotions);
             console.log('Response from emotion API:', response.data);
         } catch (error) {
 
@@ -427,16 +428,6 @@ const RoomFrame = () => {
                 console.error('Error in audio emotion detection:', error);
             }
         }
-
-        // const stopCameraStream = () => {
-        //     if (stream) {
-        //         // Stop all tracks in the camera stream
-        //         stream.getTracks().forEach(track => {
-        //             track.stop(); // Stop the track
-        //         });
-        //         console.log('Camera stream stopped');
-        //     }
-        // };
 
 
         ui.joinRoom({

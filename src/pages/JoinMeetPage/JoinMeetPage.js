@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import './JoinMeetPage.css'
 import { useNavigate } from 'react-router-dom';
+import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
+import axios from 'axios';
+import { set } from 'firebase/database';
 
 const JoinMeetPage = () => {
 
@@ -14,6 +17,19 @@ const JoinMeetPage = () => {
   const [errors, setErrors] = useState({
     message: ''
   });
+
+  const [snackbarInfo, setSnackbarInfo] = useState({ open: false, severity: 'info', message: '' });
+  const [backdropOpen, setBackdropOpen] = useState(false)
+
+  //close snackbar
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarInfo({ ...snackbarInfo, open: false });
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,8 +45,9 @@ const JoinMeetPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setBackdropOpen(true);
     // Perform validation
     let newErrors = {};
     if (formData.joinCode.trim() === '' && formData.meetLink.trim() === '') {
@@ -41,11 +58,42 @@ const JoinMeetPage = () => {
 
     // If any field is empty, show alert and return
     if (Object.keys(newErrors).length > 0) {
-      alert('Please fill any one  fields');
+      setBackdropOpen(false);
+      setSnackbarInfo({ open: true, severity: 'error', message: 'Any one field is required' });
       return;
     }
     console.log('Join meet form submitted successfully:', formData);
-    navigate(`/room/${formData.joinCode || formData.meetLink}`)
+
+    //is meet link is not empty then navigate to meet link
+    if (formData.meetLink.trim() !== '') {
+      setBackdropOpen(false);
+      navigate(`/${formData.meetLink}`);
+      return;
+    }
+
+
+    try {
+      const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/meeting/join_meeting`,
+        {
+          meet_id: parseInt(formData.joinCode)
+        });
+      console.log('Join meet form submitted successfully:', response);
+      if (response) {
+        setSnackbarInfo({ open: true, severity: 'success', message: 'Meeting joined successfully' });
+        setBackdropOpen(false);
+        navigate(`/room/${formData.joinCode}`)
+
+      }
+
+
+
+    } catch (error) {
+      console.log('Join meet form submitted error:', error);
+      setBackdropOpen(false);
+      setSnackbarInfo({ open: true, severity: 'error', message: 'Meeting not found' });
+
+    }
+
 
   }
 
@@ -99,9 +147,26 @@ const JoinMeetPage = () => {
             </div>
 
           </div>
+
+          {/* Backdrops and snackbar */}
+          <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+            open={backdropOpen}
+          >
+            <CircularProgress color="inherit" />
+            <p className='m-0 p-0 fs-4 mx-2'>Creating meet please wait...</p>
+          </Backdrop>
+
+
         </div>
 
       </div>
+      {/* Common snackbar */}
+      <Snackbar open={snackbarInfo.open} autoHideDuration={4000} onClose={handleCloseSnackBar}>
+        <Alert onClose={handleCloseSnackBar} severity={snackbarInfo.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbarInfo.message}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
