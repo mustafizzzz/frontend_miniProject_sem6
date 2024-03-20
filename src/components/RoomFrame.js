@@ -27,7 +27,6 @@ const RoomFrame = () => {
 
 
 
-
     //helper function
     const getCurrentTimeStudent = () => {
         const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
@@ -49,90 +48,120 @@ const RoomFrame = () => {
         return `${hours}:${minutes}`; // Concatenate hours and minutes
     };
 
+
+
     //Only for student
     const captureImage = async () => {
+        if (!isCapturing && currentUser.role === 'teacher') {
+            return;
+        };
+        // Stop the stream after 5 seconds if isCapturing is false
 
-        if (!isCapturing && currentUser.role === 'teacher') return;
-        const mainFrame = document.querySelector('.mainFrame');
-        if (mainFrame) {
-            const videoElement = mainFrame.querySelector('video');
-            if (videoElement) {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+        // const mainFrame = document.querySelector('.mainFrame');
+        // // if (!mainFrame) return;
+        // const videoElement = mainFrame.querySelector('video');
+        // // if (!videoElement) return;
+        // const canvas = document.createElement('canvas');
+        // const context = canvas.getContext('2d');
 
-                // Set canvas dimensions to match the video element
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
+        // // Set canvas dimensions to match the video element
+        // canvas.width = videoElement.videoWidth;
+        // canvas.height = videoElement.videoHeight;
 
-                // Draw video frame onto the canvas
-                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        // // Draw video frame onto the canvas
+        // context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-                // Convert canvas to base64 data URL
-                const imageDataURL = await new Promise((resolve) => {
+        // // Convert canvas to base64 data URL
+        // const imageDataURL = await new Promise((resolve) => {
 
-                    canvas.toBlob((blob) => {
+        //     canvas.toBlob((blob) => {
 
-                        if (blob) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                                resolve(reader.result);
-                                reader.readAsDataURL(blob);
-                            }
+        //         if (blob) {
+        //             const reader = new FileReader();
+        //             reader.onloadend = () => {
+        //                 resolve(reader.result);
+        //                 reader.readAsDataURL(blob);
+        //             }
 
-                        } else {
-                            resolve(null);
-                        }
+        //         } else {
+        //             resolve(null);
+        //         }
 
-                    }, 'image/jpeg');
+        //     }, 'image/jpeg');
 
-                });
+        // });
 
+        // Access the camera stream
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
+        // Create a video element to capture the stream
+        console.log('capture stream is : ', stream);
+        const videoElement = document.createElement('video');
+        videoElement.srcObject = stream;
+        videoElement.play();
 
-                try {
+        // Wait for the video to load and play
+        await new Promise(resolve => videoElement.addEventListener('playing', resolve));
 
-                    if (!imageDataURL) {
-                        console.log('No image data URL found');
-                        return;
-                    }
-                    // Construct the image path with student ID
-                    const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
+        // Create a canvas element to capture a frame from the video
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-                    // Generate a unique image name using the current timestamp
-                    const timestamp = getCurrentTimeStudent(); // Current timestamp in "12":"33"
-                    const imageName = `${currentUser.pid}_${timestamp}.jpg`;
-
-                    // Upload image to Firebase Storage with the constructed image path and name
-                    const imageRef = ref(storage, `${studentImagePath}/${imageName}`);
-                    await uploadString(imageRef, imageDataURL, 'data_url');
-
-                    // Get the download URL for the uploaded image
-                    const downloadURL = await getDownloadURL(imageRef);
-
-                    // Construct the image path with room ID
-                    const roomDbPath = `Rooms/${roomId}`;
-
-                    // Upload image URL to Firebase Database with the constructed path and student PID
-                    await set(dbref(db, `${roomDbPath}/${currentUser.userName}`), {
-                        studentPID: currentUser.pid,
-                        imageUrl: downloadURL,
-                    });
-
-                    // Add image data to state
-                    setImageData(prevImageData => [
-                        ...prevImageData,
-                        { studentPID: currentUser.pid, imageUrl: downloadURL }
-                    ]);
+        // Convert the captured frame to a data URL
+        const imageDataURL = canvas.toDataURL('image/png');
+        //stop the camera after image get captured
+        stream.getTracks().forEach(track => track.stop());
 
 
-                } catch (error) {
-                    console.error('Error uploading image:', error);
-                }
-                // Add image data URL to the images array
-                // setImages(prevImages => [...prevImages, imageDataURL]);
+        try {
+
+            if (!imageDataURL) {
+                console.log('No image data URL found');
+                return;
             }
+            // Construct the image path with student ID
+            const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
+
+            // Generate a unique image name using the current timestamp
+            const timestamp = getCurrentTimeStudent(); // Current timestamp in "12":"33"
+            const imageName = `${currentUser.pid}_${timestamp}.jpg`;
+
+            // Upload image to Firebase Storage with the constructed image path and name
+            const imageRef = ref(storage, `${studentImagePath}/${imageName}`);
+            await uploadString(imageRef, imageDataURL, 'data_url');
+
+            // Get the download URL for the uploaded image
+            const downloadURL = await getDownloadURL(imageRef);
+
+            // Construct the image path with room ID
+            const roomDbPath = `Rooms/${roomId}`;
+
+            // Upload image URL to Firebase Database with the constructed path and student PID
+            await set(dbref(db, `${roomDbPath}/${currentUser.userName}`), {
+                studentPID: currentUser.pid,
+                imageUrl: downloadURL,
+            });
+
+            // Add image data to state
+            setImageData(prevImageData => [
+                ...prevImageData,
+                { studentPID: currentUser.pid, imageUrl: downloadURL }
+            ]);
+
+
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
         }
+        // Add image data URL to the images array
+        // setImages(prevImages => [...prevImages, imageDataURL]);
+
+
     };
+
 
     // <========================================>
     // useEffect(() => {
@@ -398,6 +427,16 @@ const RoomFrame = () => {
                 console.error('Error in audio emotion detection:', error);
             }
         }
+
+        // const stopCameraStream = () => {
+        //     if (stream) {
+        //         // Stop all tracks in the camera stream
+        //         stream.getTracks().forEach(track => {
+        //             track.stop(); // Stop the track
+        //         });
+        //         console.log('Camera stream stopped');
+        //     }
+        // };
 
 
         ui.joinRoom({

@@ -6,6 +6,7 @@ const TestCapture = () => {
     const [captureInterval, setCaptureInterval] = useState(null);
     const [captureManual, setCaptureManual] = useState(false);
 
+
     const captureImage = async () => {
         try {
             // Access the camera stream
@@ -38,6 +39,7 @@ const TestCapture = () => {
             console.error('Error capturing image:', error);
         }
     };
+
 
     const processCapturedImage = async (imageDataURL) => {
         try {
