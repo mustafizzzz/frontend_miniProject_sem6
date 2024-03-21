@@ -64,12 +64,47 @@ const JoinMeetPage = () => {
     }
     console.log('Join meet form submitted successfully:', formData);
 
+
+    //Link handle
     //is meet link is not empty then navigate to meet link
-    if (formData.meetLink.trim() !== '') {
-      setBackdropOpen(false);
-      navigate(`/${formData.meetLink}`);
+    // if (formData.meetLink.trim() !== '') {
+    //   setBackdropOpen(false);
+    //   await new Promise(resolve => setTimeout(resolve, 2000));
+    //   // navigate(`/${formData.meetLink}`);
+    //   window.location.href = formData.meetLink;
+    //   return;
+    // }
+
+
+
+    if (formData.meetLink.includes('/room/')) {
+      const meetId = formData.meetLink.split('/room/')[1]; // Extract digits after '/room/'
+      try {
+        const response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/meeting/join_meeting`, {
+          meet_id: parseInt(meetId)
+        });
+        console.log('Join meet form submitted successfully:', response);
+        if (response?.data.success) {
+          setSnackbarInfo({ open: true, severity: 'success', message: response.data.message });
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setBackdropOpen(false);
+          navigate(`/room/${meetId}`);
+
+        } else {
+          setSnackbarInfo({ open: true, severity: 'error', message: response.data.message });
+          setBackdropOpen(false);
+        }
+      } catch (error) {
+        console.log('Join meet form submitted error:', error);
+        setBackdropOpen(false);
+        setSnackbarInfo({ open: true, severity: 'error', message: 'Meeting not found' });
+      }
       return;
     }
+
+    //link handle end
+
+
 
 
     try {
@@ -77,11 +112,15 @@ const JoinMeetPage = () => {
         {
           meet_id: parseInt(formData.joinCode)
         });
-      console.log('Join meet form submitted successfully:', response.message);
-      if (response) {
-        setSnackbarInfo({ open: true, severity: 'success', message: 'Meeting joined successfully' });
+      console.log('Join meet form submitted successfully:', response);
+      if (response?.data.success) {
+        setSnackbarInfo({ open: true, severity: 'success', message: response.data.message });
         setBackdropOpen(false);
         navigate(`/room/${formData.joinCode}`)
+
+      } else {
+        setSnackbarInfo({ open: true, severity: 'error', message: response.data.message });
+        setBackdropOpen(false);
 
       }
 

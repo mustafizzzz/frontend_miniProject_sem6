@@ -421,7 +421,7 @@ const RoomFrame = () => {
                     meet_id: parseInt(roomId),
                     host_id: currentUser.hostId,
                     time_stamp: getCurrentTimeTeacher(),
-                    studentPID: currentUser.hostId,
+                    username: dataText.fromUser.userName,
                     message: dataText.message
                 });
 
