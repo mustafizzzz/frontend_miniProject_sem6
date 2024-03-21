@@ -15,9 +15,9 @@ import AdbIcon from '@mui/icons-material/Adb';
 import './NavTopComponent.css';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../ContextApi/userContex';
-// import logo from '../../assets/MOODLENS-bgLess.svg'
+import logo from '../../assets/moodlens_logo1.PNG'
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Account', 'Logout'];
 
 const NavTopComponent = () => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -52,7 +52,6 @@ const NavTopComponent = () => {
               variant="h6"
               noWrap
               component="a"
-              href="#app-bar-with-responsive-menu"
               sx={{
                 mr: 2,
                 display: { xs: 'none', md: 'flex' },
@@ -65,8 +64,7 @@ const NavTopComponent = () => {
                 alignItems: 'center', // Center the logo vertically
               }}
             >
-              {/* <img src={logo} alt="Logo" className='moodlens-logo border' /> */}
-              LOGO
+              {logo ? (<img src={logo} alt="Logo" className='moodlens-logo' />) : 'LOGO'}
             </Typography>
 
             {/* <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> */}

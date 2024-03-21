@@ -7,6 +7,9 @@ const AlanProvider = ({ children }) => {
   const [loginUserName, setLoginUserName] = useState('');
   const [loginStatus, setLoginStatus] = useState(false);
 
+
+  const [loginAlanMethod, setLoginAlanMethod] = useState('image')
+
   //image verify modal in login page
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -16,7 +19,12 @@ const AlanProvider = ({ children }) => {
 
 
   return (
-    <AlanContext.Provider value={{ loginUserName, setLoginUserName, open, setOpen, handleOpen, handleClose, loginStatus, setLoginStatus }}>
+    <AlanContext.Provider value={{
+      loginUserName, setLoginUserName,
+      open, setOpen, handleOpen, handleClose,
+      loginStatus, setLoginStatus,
+      loginAlanMethod, setLoginAlanMethod
+    }}>
       {children}
     </AlanContext.Provider>
   )

@@ -16,7 +16,7 @@ const AlanAiContainer = () => {
 
     useEffect(() => {
         window.alanBtnInstance = alanBtn({
-            key: '604046f361fd8463cd587654400759792e956eca572e1d8b807a3e2338fdd0dc/stage',
+            key: '8dbb5a96589bcce4042beb0a45c06e472e956eca572e1d8b807a3e2338fdd0dc/stage',
             onButtonState: async (status) => {
 
                 // if (status === "ONLINE" && !window.welcomeMsgPlayed) {
@@ -52,11 +52,15 @@ const AlanAiContainer = () => {
         });
     }, []);
 
+    //send the path to alan
     useEffect(() => {
         window.alanBtnInstance.setVisualState({ "path": location.pathname })
-        console.log(location.pathname);
+        console.log('%cAlan path', 'color:yellow', location.pathname);
     }, [location])
 
+
+
+    //activate and deactivate alan
     useEffect(() => {
         const handleKeyPress = (event) => {
             if (event.ctrlKey && event.code === 'ArrowRight') {

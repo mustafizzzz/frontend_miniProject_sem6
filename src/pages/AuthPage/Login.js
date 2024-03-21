@@ -20,13 +20,14 @@ import { set } from 'firebase/database';
 
 
 const Login = () => {
+
   const { setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const [loginImage, setLoginImage] = useState('');
   const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
   const [isImageCaptured, setIsImageCaptured] = useState(false);
-  const { open, setOpen, handleClose } = useContext(AlanContext);
+  const { open, setOpen, handleClose, loginAlanMethod } = useContext(AlanContext);
 
   //identify the user
   const [loginType, setLoginType] = useState('');
@@ -449,10 +450,10 @@ const Login = () => {
                           <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
                         </div>
 
-                        {/* Register buttons */}
-                        <div className="text-center">
+                        {/* Google Register buttons */}
+                        {/* <div className="text-center">
                           <GoogleButton className='m-auto' onClick={googleLoginHandle} label='Sign up with Google' />
-                        </div>
+                        </div> */}
 
                       </form>
                     )
@@ -526,10 +527,10 @@ const Login = () => {
                           <p>Not a member? <NavLink to='/register'>Register</NavLink></p>
                         </div>
 
-                        {/* Register buttons */}
-                        <div className="text-center">
+                        {/* Google Register buttons */}
+                        {/* <div className="text-center">
                           <GoogleButton className='m-auto' onClick={googleLoginHandle} label='Sign up with Google' />
-                        </div>
+                        </div> */}
 
                       </form>
                     )
