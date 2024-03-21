@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import './JoinMeetPage.css'
 import { useNavigate } from 'react-router-dom';
 import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
 import axios from 'axios';
 import { set } from 'firebase/database';
+import { AlanContext } from '../../ContextApi/AlanContext';
 
 const JoinMeetPage = () => {
+  const { joinCodeAlan, setJoinCodeAlan } = useContext(AlanContext);
 
   const navigate = useNavigate();
 
@@ -156,7 +158,7 @@ const JoinMeetPage = () => {
               <label for="joinCode" className="form-label">Enter a code</label>
               <input type="text" className="form-control" id="joinCode" aria-describedby="emailHelp"
                 name="joinCode"
-                value={formData.joinCode}
+                value={formData.joinCode || joinCodeAlan}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />

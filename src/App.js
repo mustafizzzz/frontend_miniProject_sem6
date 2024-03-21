@@ -21,8 +21,15 @@ import ErrorPage from './pages/404ErrorPage/ErrorPage';
 import LoginImageVerify from './components/LoginImageVerify';
 import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 import TestCapture from './pages/TestCapture';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    if (window.location.pathname === '/') {
+      window.location.href = '/login';
+    }
+  }, []);
+
   return (
     <div className="App">
       <Routes>

@@ -9,6 +9,7 @@ const AlanProvider = ({ children }) => {
   const [loginAlanType, setLoginAlanType] = useState('');
   const [showFormAlan, setShowFormAlan] = useState(false);
   const [isAlanActive, setIsAlanActive] = useState(false);
+  const [joinCodeAlan, setJoinCodeAlan] = useState(0);
   const loginButtonRef = useRef(null);
 
   //image verify modal in login page
@@ -26,7 +27,8 @@ const AlanProvider = ({ children }) => {
       loginStatusAlan, setLoginStatusAlan,
       loginAlanType, setLoginAlanType,
       showFormAlan, setShowFormAlan,
-      isAlanActive, setIsAlanActive,loginButtonRef
+      isAlanActive, setIsAlanActive, loginButtonRef,
+      joinCodeAlan, setJoinCodeAlan
     }}>
       {children}
     </AlanContext.Provider>

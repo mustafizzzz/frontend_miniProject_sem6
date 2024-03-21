@@ -34,7 +34,7 @@ const Login = () => {
     loginUserNameAlan,
     loginAlanType, setLoginAlanType,
     showFormAlan, setShowFormAlan,
-    loginButtonRef
+    loginButtonRef, loginStatusAlan, setLoginStatusAlan
   } = useContext(AlanContext);
 
   //identify the user
@@ -104,7 +104,7 @@ const Login = () => {
   };;
 
   const studentLoginUser = async (e) => {
-    console.log('student login....');
+    console.log('ALan status in login....', loginStatusAlan);
     setLoading(true);
     e.preventDefault();
     let newErrors = {};
@@ -134,6 +134,7 @@ const Login = () => {
 
         if (!isImageCaptured) {
           setLoading(false);
+          setLoginStatusAlan(false);
           setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Capture image for face ID', open: true });
           return;
         }
@@ -168,6 +169,7 @@ const Login = () => {
         response.data.message === 'Incorrect username' ||
         response.data === 'User not found') {
         setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: response.data.message || response.data || 'Error in student login', open: true });
+        setLoginStatusAlan(false);
         setLoading(false);
       } else {
         setCurrentUser({
@@ -178,11 +180,14 @@ const Login = () => {
         setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
         setLoading(false);
+        setLoginStatusAlan(true);
+        console.log('ALan status in login....', loginStatusAlan);
         navigate('/dashboard');
       }
 
     } catch (error) {
       setLoading(false);
+      setLoginStatusAlan(false);
       setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error in student login', open: true });
       console.log('Error in student image loginUser', error);
 
@@ -442,7 +447,8 @@ const Login = () => {
                               setLoginImage={setLoginImage}
                               setIsImageCaptured={setIsImageCaptured}
                               formData={formData}
-                              loginUserNameAlan={loginUserNameAlan} />
+                              loginUserNameAlan={loginUserNameAlan}
+                            />
                           </div>
                         }
 

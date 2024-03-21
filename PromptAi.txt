@@ -6,6 +6,10 @@ intent('Hey Alan quit', (p) => {
     p.play({ command: 'deactivate' });
 });
 
+const vGetLogin = visual({"path":"/login"})
+const vGetDashboard = visual({"path":"/dashboard"})
+
+
 intent("start login", async p => {
     p.play({command:'start login'})
     let usernameConfirmed = false;
@@ -43,9 +47,70 @@ intent("start login", async p => {
 //     p.play("You are logged in!");
 });
 
+const vGetRoom = visual({"path":"/room/.*"})
+
+intent("join lecture", p => {
+     p.play({command:'joinMeet'})    
+});
+
+// intent("meet code is $(NUMBER)",async p=>{
+//     let meetCodeConfirmed = false;
+//     })
+//     while (!meetCodeConfirmed) {
+//         p.play("Please provide the meet code.");
+//         const meetcode = await p.then(getMeetCode);
+//         console.log(meetcode)
+//         p.play(`You provided the meet code: ${meetcode}. Is that correct?`);
+//         const confirmation = await p.then(confirm);
+//         if (confirmation.value === "yes") {
+//             meetCodeConfirmed = true;
+//             p.play({ command: 'getMeetCode' ,data: meetcode});
+//             
+//         } else {
+//             p.play("Okay, let's try again.");
+//         }
+//     }
+intent("code is $(NUMBER)", async p => {
+    let meetCodeConfirmed = false;
+    while (!meetCodeConfirmed) {
+       
+        p.play("Please provide the meet code.");
+        const meetCode = await p.then(getMeetCode);
+          console.log(meetCode)
+       
+        p.play(`You entered the meet code: ${meetCode}. Is that correct?`);
+        const confirmation = await p.then(confirm);
+       
+        if (confirmation.value.toLowerCase() === "yes") {
+            meetCodeConfirmed = true;
+             p.play({ command: 'inMeet' ,data:meetCode});
+            p.play("You are in the meet.");
+           
+        } else {
+           
+            p.play("Okay, please enter the meet code again.");
+           
+            meetCodeConfirmed = false;
+        }
+    }
+});
+
+// Context function to capture the meet code
+const getMeetCode = context(() => {
+    intent("$(NUMBER* .+)", p => p.resolve(p.NUMBER));
+});
+    
+
+
+intent(vGetRoom,"leave", p => {
+     p.play({command:'leaveMeet'})
+    p.play("Leaving the meet.");
+});
+
 const getEmail = context(() => {
     intent("$(USERNAME* .+)", p => p.resolve(p.USERNAME));
 });
+
 
 // const getPassword = context(() => {
 //     intent("$(PASSWORD* .+)", p => p.resolve(p.PASSWORD));
@@ -57,11 +122,15 @@ const confirm = context(() => {
 
 
 // Define a method to handle the API call
-const setLoginStatus = (p, { loginStatus }) => {
+const setLoginStatus = (p, { loginStatus },callback) => {
     // Use the loginStatus parameter to update the login status in your logic
+    console.log(loginStatus);
     if (loginStatus) {
         p.play("You are logged in successfully.");
+          p.play({ command: 'loginSucess' });
+       
     } else {
+         p.play({ command: 'loginFail' });
         p.play("Login failed. Please try again later.");
     }
 };

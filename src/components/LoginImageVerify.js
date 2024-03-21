@@ -25,7 +25,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const { openAlan, setOpenAlan, handleCloseAlanCapture ,} = React.useContext(AlanContext);
+    const { openAlan, setOpenAlan, handleCloseAlanCapture } = React.useContext(AlanContext);
 
     React.useEffect(() => {
         if (openAlan) {
@@ -44,6 +44,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
                 videoRef.current.srcObject = stream;
             })
             .catch(error => {
+
                 console.error('Error accessing camera:', error);
             });
     };
@@ -61,6 +62,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
         try {
 
             if (!imageData) {
+                setIsImageCaptured(false);
                 console.log('No image captured');
                 return;
             }
@@ -79,6 +81,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
 
         } catch (error) {
             console.error('Error uploading image:', error);
+            setIsImageCaptured(false);
         }
 
 
