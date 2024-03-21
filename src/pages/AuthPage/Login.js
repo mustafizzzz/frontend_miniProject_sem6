@@ -24,14 +24,23 @@ const Login = () => {
   const { setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
+
+
   const [loginImage, setLoginImage] = useState('');
-  const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
+  const [loginMethod, setLoginMethod] = useState('image'); // Default to password login
   const [isImageCaptured, setIsImageCaptured] = useState(false);
-  const { open, setOpen, handleClose, loginAlanMethod } = useContext(AlanContext);
+  const {
+    openAlan, setOpenAlan, handleOpenAlanCapture, handleCloseAlanCapture,
+    loginUserNameAlan,
+    loginAlanType, setLoginAlanType,
+    showFormAlan, setShowFormAlan,
+    loginButtonRef
+  } = useContext(AlanContext);
 
   //identify the user
-  const [loginType, setLoginType] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  // const [loginType, setLoginType] = useState('');
+  // const [showForm, setShowForm] = useState(false);
+
 
   //loding state
   const [loading, setLoading] = useState(false);
@@ -59,8 +68,8 @@ const Login = () => {
   };
 
   const handleLoginType = (type) => {
-    setLoginType(type);
-    setShowForm(true);
+    setLoginAlanType(type);
+    setShowFormAlan(true);
   };
 
 
@@ -95,11 +104,12 @@ const Login = () => {
   };;
 
   const studentLoginUser = async (e) => {
+    console.log('student login....');
     setLoading(true);
     e.preventDefault();
     let newErrors = {};
 
-    if (!formData.username) {
+    if (loginUserNameAlan === '' && !formData.username) {
       newErrors.username = 'Username is required';
     }
 
@@ -130,7 +140,7 @@ const Login = () => {
 
         response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/login`,
           {
-            username: formData.username,
+            username: formData?.username || loginUserNameAlan,
             imageUrl: loginImage
           });
         // setCurrentUser(data.data);
@@ -286,11 +296,11 @@ const Login = () => {
 
                     <div className="back-icon-btn-login mb-4  d-flex justify-content-between p-2 align-items-center">
 
-                      <h1 className="card-title m-0">Login {loginType ? loginType : ''}</h1>
+                      <h1 className="card-title m-0">Login {loginAlanType ? loginAlanType : ''}</h1>
 
                       <Button onClick={() => {
-                        setShowForm(false);
-                        setLoginType('');
+                        setShowFormAlan(false);
+                        setLoginAlanType('');
                       }}
                         style={{ borderRadius: '1rem', border: 'none', padding: '0.2rem 0.8rem' }}
                         variant="outlined" className=' fw-bold mx-2 fs-3' size="large">
@@ -299,7 +309,7 @@ const Login = () => {
 
                     </div>
 
-                    {!showForm && (
+                    {!showFormAlan && (
                       <div className="select-login-type-wrapper">
 
                         <div className="select-login-type d-flex justify-content-around align-items-center ">
@@ -323,7 +333,7 @@ const Login = () => {
                     )
                     }
 
-                    {loginType === 'student' ? (
+                    {loginAlanType === 'student' ? (
                       <form onSubmit={studentLoginUser}>
 
                         {/* username input */}
@@ -336,7 +346,7 @@ const Login = () => {
                             placeholder="name@example.com"
                             onChange={handleChange}
                             onBlur={handleBlur} // Validate onBlur
-                            value={formData.username}
+                            value={loginUserNameAlan || formData.username}
                           />
                           <label htmlFor="floatingInput">User name</label>
 
@@ -415,7 +425,7 @@ const Login = () => {
                         {loginMethod === 'image' &&
                           <div className="labels-main">
                             <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between"
-                              onClick={() => setOpen(true)}>
+                              onClick={() => setOpenAlan(true)}>
                               <div className="text-div d-flex align-items-center">
                                 <i className="bi bi-card-image fs-4 me-3"></i>
                                 <p className='p-0 mb-0'>Image verification</p>
@@ -431,13 +441,14 @@ const Login = () => {
                             <LoginImageVerify
                               setLoginImage={setLoginImage}
                               setIsImageCaptured={setIsImageCaptured}
-                              formData={formData} />
+                              formData={formData}
+                              loginUserNameAlan={loginUserNameAlan} />
                           </div>
                         }
 
 
                         {/* Submit button */}
-                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                        <Button ref={loginButtonRef} type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
                           {loading ? (
                             <>
                               <CircularProgress size={24} color="inherit" className='mx-2' />
@@ -459,7 +470,7 @@ const Login = () => {
                     )
                       : null}
 
-                    {loginType === 'teacher' ? (
+                    {loginAlanType === 'teacher' ? (
                       <form onSubmit={teacherloginUser}>
 
                         {/* username input */}

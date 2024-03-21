@@ -26,9 +26,6 @@ intent("start login", async p => {
     }
     p.play("wait few moment for image verification.");
      p.play({command:'captureLogin'})
-    setTimeout(() => {
-    p.play({ command: 'loginStatus' });
-}, 10000);
     
     
 //     while (!passwordConfirmed) {

@@ -1,29 +1,32 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { createContext, useEffect, useState } from "react";
 
 export const AlanContext = createContext();
 
 const AlanProvider = ({ children }) => {
-  const [loginUserName, setLoginUserName] = useState('');
-  const [loginStatus, setLoginStatus] = useState(false);
-
-
-  const [loginAlanMethod, setLoginAlanMethod] = useState('image')
+  const [loginUserNameAlan, setLoginUserNameAlan] = useState('');
+  const [loginStatusAlan, setLoginStatusAlan] = useState(false);
+  const [loginAlanType, setLoginAlanType] = useState('');
+  const [showFormAlan, setShowFormAlan] = useState(false);
+  const [isAlanActive, setIsAlanActive] = useState(false);
+  const loginButtonRef = useRef(null);
 
   //image verify modal in login page
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [openAlan, setOpenAlan] = useState(false);
+  const handleOpenAlanCapture = () => setOpenAlan(true);
+  const handleCloseAlanCapture = () => setOpenAlan(false);
 
 
 
 
   return (
     <AlanContext.Provider value={{
-      loginUserName, setLoginUserName,
-      open, setOpen, handleOpen, handleClose,
-      loginStatus, setLoginStatus,
-      loginAlanMethod, setLoginAlanMethod
+      loginUserNameAlan, setLoginUserNameAlan,
+      openAlan, setOpenAlan, handleOpenAlanCapture, handleCloseAlanCapture,
+      loginStatusAlan, setLoginStatusAlan,
+      loginAlanType, setLoginAlanType,
+      showFormAlan, setShowFormAlan,
+      isAlanActive, setIsAlanActive,loginButtonRef
     }}>
       {children}
     </AlanContext.Provider>

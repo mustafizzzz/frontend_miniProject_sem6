@@ -21,21 +21,19 @@ const style = {
     p: 2,
 };
 
-const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData }) => {
-    // const [open, setOpen] = React.useState(false);
-    // const handleOpen = () => setOpen(true);
-    // const handleClose = () => setOpen(false);
+const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUserNameAlan }) => {
+
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const { open, setOpen, handleClose } = React.useContext(AlanContext);
+    const { openAlan, setOpenAlan, handleCloseAlanCapture ,} = React.useContext(AlanContext);
 
     React.useEffect(() => {
-        if (open) {
+        if (openAlan) {
             startCamera();
             const captureTimeout = setTimeout(captureImage, 4000); // Capture image after 4 seconds
             return () => clearTimeout(captureTimeout);
         }
-    }, [open]); // Run when open changes
+    }, [openAlan]); // Run when open changes
 
 
 
@@ -51,6 +49,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData }) => {
     };
 
     const captureImage = async () => {
+
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -60,8 +59,14 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData }) => {
         // Convert canvas image to base64
         const imageData = canvas.toDataURL('image/png');
         try {
+
+            if (!imageData) {
+                console.log('No image captured');
+                return;
+            }
+
             // Create a reference to the storage location
-            const storageRef = ref(storage, `loginTemp/${formData.username}`);
+            const storageRef = ref(storage, `loginTemp/${formData.username || loginUserNameAlan}`);
             // Upload the file
             const snapshot = await uploadString(storageRef, imageData, 'data_url');
             console.log('Uploaded a data URL string!');
@@ -75,22 +80,22 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData }) => {
         } catch (error) {
             console.error('Error uploading image:', error);
         }
-        console.log('Captured image:', imageData);
+
 
         // Stop the media stream
         const stream = video.srcObject;
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
         video.style.display = 'none';
-        handleClose();
+        handleCloseAlanCapture();
     };
 
     return (
         <div>
             {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
-                open={open}
-                onClose={handleClose}
+                open={openAlan}
+                onClose={handleCloseAlanCapture}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >

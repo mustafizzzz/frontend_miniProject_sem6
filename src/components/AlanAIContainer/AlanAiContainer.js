@@ -7,12 +7,16 @@ import { set } from 'firebase/database';
 const AlanAiContainer = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [isAlanActive, setIsAlanActive] = useState(false);
 
     //context import
-    const { loginUserName, setLoginUserName, handleOpen,
-        handleClose, loginStatus } = useContext(AlanContext);
-    console.log('context.....', loginUserName);
+    const { loginUserNameAlan, setLoginUserNameAlan,
+        handleOpenAlanCapture,
+        loginStatusAlan,
+        isAlanActive, setIsAlanActive,
+        setLoginAlanType,
+        setShowFormAlan, loginButtonRef } = useContext(AlanContext);
+    console.log('Neme of user after call.....', loginUserNameAlan);
+    console.log('button.....', loginButtonRef.current);
 
     useEffect(() => {
         window.alanBtnInstance = alanBtn({
@@ -28,6 +32,8 @@ const AlanAiContainer = () => {
 
             onCommand: (commandData) => {
                 if (commandData.command === 'start login') {
+                    setLoginAlanType('student')
+                    setShowFormAlan(true);
                     navigate('/login');
                 }
                 if (commandData.command === 'deactivate') {
@@ -36,17 +42,27 @@ const AlanAiContainer = () => {
                     window.alanBtnInstance.deactivate();
                 }
                 if (commandData.command === 'getUsername') {
-
-                    setLoginUserName(commandData.data.value);
+                    // console.log('iam dataaaaa', commandData.command.data.value);
+                    const userNametoLower = commandData.data.value.toLowerCase();
+                    setLoginUserNameAlan(userNametoLower);
                 }
                 if (commandData.command === 'captureLogin') {
-                    handleOpen();
+                    handleOpenAlanCapture();
+
+                    setTimeout(() => {
+                        if (loginButtonRef.current) {
+                            loginButtonRef.current.click();
+                        }
+                    }, 10000);
+
+
+
                 }
 
-                if (commandData.command === 'loginStatus') {
 
-                    window.alanBtnInstance.callProjectApi("setLoginStatus", { loginStatus: loginStatus }, function (error, result) { });
-                }
+                // if (commandData.command === 'loginStatus') {
+                //     window.alanBtnInstance.callProjectApi("setLoginStatus", { loginStatus: loginStatusAlan }, function (error, result) { });
+                // }
                 console.log(commandData);
             }
         });
