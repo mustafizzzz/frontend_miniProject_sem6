@@ -71,7 +71,7 @@ const AlanAiContainer = () => {
                     console.log(commandData);
                     setJoinCodeAlan(commandData.data.value);
                     setTimeout(() => {
-                        window.location.href = `/room/${joinCodeAlan}`;
+                        window.location.href = `/room/${commandData.data.value}`;
                     }, 5000);
                 }
 
