@@ -23,11 +23,11 @@ const AlanAiContainer = () => {
             key: 'ba0a1a712e203cf823cee102dcae85a02e956eca572e1d8b807a3e2338fdd0dc/stage',
             onButtonState: async (status) => {
 
-                if (status === "ONLINE" && !window.welcomeMsgPlayed) {
-                    window.alanBtnInstance.activate();
-                    window.alanBtnInstance.playText('You are online now. You can give me commands for your login just say start login.');
-                    window.welcomeMsgPlayed = true;
-                }
+                // if (status === "ONLINE" && !window.welcomeMsgPlayed) {
+                //     window.alanBtnInstance.activate();
+                //     window.alanBtnInstance.playText('You are online now. You can give me commands for your login just say start login.');
+                //     window.welcomeMsgPlayed = true;
+                // }
             },
 
             onCommand: (commandData) => {
@@ -52,12 +52,8 @@ const AlanAiContainer = () => {
 
                         if (loginButtonRef.current) {
                             loginButtonRef.current.click();
-                        } else {
-                            window.alanBtnInstance.activate();
-                            window.alanBtnInstance.playText('Sorry, I could not verify your face. Please try again.');
-                            window.alanBtnInstance.deactivate();
                         }
-                    }, 10000);
+                    }, 21000);
                 }
                 if (commandData.command === 'loginSucess') {
                     window.alanBtnInstance.activate();
@@ -73,6 +69,18 @@ const AlanAiContainer = () => {
                 }
                 if (commandData.command === 'inMeet') {
                     console.log(commandData);
+                    setJoinCodeAlan(commandData.data.value);
+                    setTimeout(() => {
+                        window.location.href = `/room/${joinCodeAlan}`;
+                    }, 5000);
+                }
+
+                if (commandData.command === 'leaveMeet') {
+                    window.alanBtnInstance.activate();
+                    window.alanBtnInstance.playText('You are leaving the meeting.');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 5000);
                 }
                 // if (commandData.command === 'loginStatus') {
                 //     window.alanBtnInstance.callProjectApi("setLoginStatus", { loginStatus: loginStatusAlan }, function (error, result) { });
@@ -89,12 +97,12 @@ const AlanAiContainer = () => {
     }, [location])
 
     useEffect(() => {
-        if (loginStatusAlan) {
+        if (loginStatusAlan === true) {
             console.log('loginStatusAlan', loginStatusAlan);
             window.alanBtnInstance.activate();
-            window.alanBtnInstance.playText('Login successful. press control + right arrow key and Say join meet.');
+            window.alanBtnInstance.playText('Login successful. press control + right arrow key and Say join lecture.');
             window.alanBtnInstance.deactivate();
-            setLoginStatusAlan(false);
+
         }
     }, [loginStatusAlan]);
 
