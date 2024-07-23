@@ -3,7 +3,6 @@ import './JoinMeetPage.css'
 import { useNavigate } from 'react-router-dom';
 import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
 import axios from 'axios';
-import { set } from 'firebase/database';
 import { AlanContext } from '../../ContextApi/AlanContext';
 
 const JoinMeetPage = () => {
@@ -12,7 +11,7 @@ const JoinMeetPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    joinCode: '',
+    joinCode: `${joinCodeAlan == 0 ? '123' : joinCodeAlan}`,
     meetLink: ''
   });
 
@@ -158,7 +157,7 @@ const JoinMeetPage = () => {
               <label for="joinCode" className="form-label">Enter a code</label>
               <input type="text" className="form-control" id="joinCode" aria-describedby="emailHelp"
                 name="joinCode"
-                value={formData.joinCode || joinCodeAlan}
+                value={formData.joinCode}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />

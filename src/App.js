@@ -65,7 +65,7 @@ function App() {
 
 
       </Routes>
-      <AlanAiContainer />
+      {/* <AlanAiContainer /> */}
     </div>
   );
 }
