@@ -11,7 +11,7 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 
 //firebase Imports
 import db, { storage } from '../firbaseConfig';
-import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import { deleteObject, getDownloadURL, listAll, ref, uploadString } from 'firebase/storage';
 import { set, ref as dbref, get } from 'firebase/database';
 
 
@@ -24,13 +24,13 @@ const RoomFrame = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
-
+    const isCancelled = useRef(false); // To track unmounting
+    const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
 
 
     //helper function
     const getCurrentTimeStudent = () => {
         const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
-
         const now = new Date(); // Get current date and time
         const hours = padZero(now.getHours()); // Get current hours and pad if necessary
         const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
@@ -38,6 +38,7 @@ const RoomFrame = () => {
 
         return `${hours}:${minutes}:${seconds}`; // Concatenate hours, minutes, and seconds
     };
+
     const getCurrentTimeTeacher = () => {
         const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
 
@@ -48,6 +49,29 @@ const RoomFrame = () => {
         return `${hours}:${minutes}`; // Concatenate hours and minutes
     };
 
+    // <========================================>
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (isCapturing) {
+    //             captureImage();
+    //         }
+    //     }, 3000); // Capture image every 3 seconds
+
+    //     if (isCapturing) {
+    //         setTimeout(() => {
+    //             setIsCapturing(false); // Pause capturing during emotion detection
+    //             emotionDetect().then(() => {
+    //                 setIsCapturing(true); // Resume capturing after emotion detection
+    //             });
+    //         }, 15000); // Wait for 15 seconds before emotion detection
+    //     }
+
+    //     // Cleanup interval
+    //     return () => clearInterval(interval);
+    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
+
+    // <====================================================>
+
 
 
     //Only for student
@@ -55,41 +79,6 @@ const RoomFrame = () => {
         if (!isCapturing && currentUser.role === 'teacher') {
             return;
         };
-        // Stop the stream after 5 seconds if isCapturing is false
-
-        // const mainFrame = document.querySelector('.mainFrame');
-        // // if (!mainFrame) return;
-        // const videoElement = mainFrame.querySelector('video');
-        // // if (!videoElement) return;
-        // const canvas = document.createElement('canvas');
-        // const context = canvas.getContext('2d');
-
-        // // Set canvas dimensions to match the video element
-        // canvas.width = videoElement.videoWidth;
-        // canvas.height = videoElement.videoHeight;
-
-        // // Draw video frame onto the canvas
-        // context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // // Convert canvas to base64 data URL
-        // const imageDataURL = await new Promise((resolve) => {
-
-        //     canvas.toBlob((blob) => {
-
-        //         if (blob) {
-        //             const reader = new FileReader();
-        //             reader.onloadend = () => {
-        //                 resolve(reader.result);
-        //                 reader.readAsDataURL(blob);
-        //             }
-
-        //         } else {
-        //             resolve(null);
-        //         }
-
-        //     }, 'image/jpeg');
-
-        // });
 
         // Access the camera stream
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -162,31 +151,6 @@ const RoomFrame = () => {
 
     };
 
-
-    // <========================================>
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         if (isCapturing) {
-    //             captureImage();
-    //         }
-    //     }, 3000); // Capture image every 3 seconds
-
-    //     if (isCapturing) {
-    //         setTimeout(() => {
-    //             setIsCapturing(false); // Pause capturing during emotion detection
-    //             emotionDetect().then(() => {
-    //                 setIsCapturing(true); // Resume capturing after emotion detection
-    //             });
-    //         }, 15000); // Wait for 15 seconds before emotion detection
-    //     }
-
-    //     // Cleanup interval
-    //     return () => clearInterval(interval);
-    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
-
-    // <====================================================>
-
-
     const emotionDetect = async () => {
         try {
             // Fetch image URLs for all students under the room ID
@@ -203,7 +167,7 @@ const RoomFrame = () => {
                 // Add student PID and image URL to the array
                 imageUrls.push({ studentPID: studentPID, imageUrl: imageUrl });
             });
-            console.log('Image URLs:', imageUrls);
+            // console.log('Image URLs:', imageUrls);
 
             // Call the API with the fetched image URLs
             const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/video/video_to_emotion', {
@@ -228,66 +192,60 @@ const RoomFrame = () => {
         }
 
 
-    };//only for teacher
-
-    // useEffect(() => {
-
-    //     const interval = setInterval(async () => {
-    //         if (isCapturing) {
-    //             console.log('Image capturing start now count  5 sec');
-    //             await captureImage();
-    //         }
-    //     }, 5000); // Capture image every 3 seconds
-
-    //     const runEmotionDetection = async () => {
-
-    //         if (isCapturing && currentUser.role === 'teacher') {
-    //             setIsCapturing(false); // Pause capturing during emotion detection
-    //             try {
-    //                 await emotionDetect();
-    //                 setIsCapturing(true);
-    //             } catch (error) {
-    //                 console.error('Error in emotion detection:', error);
-    //             }
-    //         }
-    //     };
-
-    //     let timeout;
-
-    //     if (currentUser.role === 'teacher') {
-    //         timeout = setTimeout(runEmotionDetection, 15000); // Wait for 15 seconds before emotion detection
-    //     }
-
-
-    //     // Cleanup interval and timeout
-    //     return () => {
-    //         console.log('interval cleaning');
-    //         clearInterval(interval);
-    //         if (currentUser.role === 'teacher') {
-    //             clearTimeout(timeout);
-    //         }
-    //     };
-    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
+    };
 
     //test useEffect
 
-    useEffect(() => {
-        if (!isCapturing) return;
-        const interval = setInterval(async () => {
+    // useEffect(() => {
+    //     if (!isCapturing) return;
+    //     const interval = setInterval(async () => {
+    //         if (currentUser.role === 'teacher') {
+    //             console.log('emotion detetction start now count  25 sec');
+    //             await emotionDetect(); // Call emotion detection for teacher
+    //             console.log('One call emotion detetction completed');
+    //         } else if (currentUser.role === 'student') {
+    //             console.log('Image capturing start now count  10 sec');
+    //             await captureImage(); // Call image capture for student
+    //         }
+
+    //     }, currentUser.role === 'teacher' ? 15000 : 10000); // Interval based on role
+
+    //     return () => clearInterval(interval);
+
+    // }, [isCapturing, currentUser]);
+
+    const continuouslyProcess = async () => {
+        while (!isCancelled.current) {
+            setIsProcessing(true);
             if (currentUser.role === 'teacher') {
-                console.log('emotion detetction start now count  25 sec');
-                await emotionDetect(); // Call emotion detection for teacher
-                console.log('One call emotion detetction completed');
+                console.log('Starting emotion detection...');
+                await emotionDetect();
+                console.log('Emotion detection completed.');
             } else if (currentUser.role === 'student') {
-                console.log('Image capturing start now count  10 sec');
-                await captureImage(); // Call image capture for student
+                console.log('Starting image capture...');
+                await captureImage();
+                console.log('Image capture completed.');
             }
 
-        }, currentUser.role === 'teacher' ? 15000 : 10000); // Interval based on role
+            setIsProcessing(false);
+            const delay = currentUser.role === 'teacher' ? 10000 : 8000;
+            console.log(`Waiting for ${delay / 1000} seconds before the next process...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        console.log('Process stopped.');
+    };
 
-        return () => clearInterval(interval);
+    useEffect(() => {
+        if (!isCapturing) return;
 
-    }, [isCapturing, currentUser]);
+        isCancelled.current = false; // Ensure the process is running
+        continuouslyProcess(); // Start the continuous process
+
+        return () => {
+            console.log('Component unmounting, stopping process...');
+            isCancelled.current = true; // Stop process on unmount
+        };
+    }, [isCapturing]);
 
     //<===================audio emotion start===================>
 
@@ -431,6 +389,7 @@ const RoomFrame = () => {
                 console.error('Error in audio emotion detection:', error);
             }
         }
+
         //end the meet api call
         const endMeetingCall = async () => {
 
@@ -440,6 +399,20 @@ const RoomFrame = () => {
                     endTime: getCurrentTimeTeacher(),
                 });
                 console.log('Response from end meeting API:', response);
+                const imagesRef = ref(storage, 'InCallstudentsImage'); // Reference to the InCallstudentsImage directory
+
+                // List all images in the InCallstudentsImage directory
+                const listResponse = await listAll(imagesRef);
+                const deletePromises = listResponse.items.map(item => {
+                    return deleteObject(item).catch(error => {
+                        console.error(`Error deleting image ${item.name}:`, error);
+                    });
+                });
+
+                // Wait for all deletions to complete
+                await Promise.all(deletePromises);
+                console.log('All images in InCallstudentsImage deleted successfully.');
+
             } catch (error) {
                 console.error('Error in ending meeting:', error);
             }
@@ -488,7 +461,7 @@ const RoomFrame = () => {
     };
 
     // console.log(imageData);
-    console.log('%cSaved text:', 'color:orange', recognizedText);
+    // console.log('%cSaved text:', 'color:orange', recognizedText);
 
 
 

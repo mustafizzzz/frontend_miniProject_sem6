@@ -64,7 +64,7 @@ const Analytics = () => {
   useEffect(() => {
     // Calculate the elapsed time in seconds
     const elapsedSec = parseInt((Date.now() - startRef.current) / 1000);
-    console.log(`Elapsed time: ${elapsedSec} seconds`);
+    // console.log(`Elapsed time: ${elapsedSec} seconds`);
 
     // Update the last sync time
     setLastSync(elapsedSec);
@@ -254,7 +254,7 @@ const Analytics = () => {
     },
   };
 
-  console.log('%cstudentLiveEmotions', 'color:red', studentLiveEmotions);
+  // console.log('%cstudentLiveEmotions', 'color:red', studentLiveEmotions);
 
   //gte the text colour
   const getColor = (emotion) => {

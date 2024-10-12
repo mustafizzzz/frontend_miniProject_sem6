@@ -22,6 +22,7 @@ import LoginImageVerify from './components/LoginImageVerify';
 import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 import TestCapture from './pages/TestCapture';
 import { useEffect } from 'react';
+import TestPageNotesVideo from './pages/TestPageNotesVideo';
 
 function App() {
   useEffect(() => {
@@ -35,7 +36,8 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route path='/testSpeech' element={<TestPage />} />
+        <Route path='/testVideo' element={<TestPage />} />
+        <Route path='/test-notes' element={<TestPageNotesVideo />} />
         <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
