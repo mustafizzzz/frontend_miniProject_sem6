@@ -1,15 +1,20 @@
-// src/components/ScreenRecorder.js
-import React, { useState, useRef } from 'react';
-import { storage } from '../firbaseConfig';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+// TestPage.js
+import React, { useState, useRef, useEffect } from "react";
+import { Switch } from "@mui/material";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../firbaseConfig";
+
 
 
 const TestPage = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const [downloadURL, setDownloadURL] = useState('');
+    const [downloadURLs, setDownloadURLs] = useState([]);
     const mediaRecorderRef = useRef(null);
     const chunks = useRef([]);
+    const intervalRef = useRef(null);
+    const videoCount = useRef(0);
 
+    // Start recording
     const startRecording = async () => {
         try {
             // Capture the screen stream
@@ -30,7 +35,7 @@ const TestPage = () => {
             ]);
 
             mediaRecorderRef.current = new MediaRecorder(combinedStream, {
-                mimeType: 'video/webm; codecs=vp9,opus',
+                mimeType: "video/webm; codecs=vp9,opus",
             });
             chunks.current = [];
 
@@ -41,69 +46,84 @@ const TestPage = () => {
             };
 
             mediaRecorderRef.current.onstop = () => {
-                const blob = new Blob(chunks.current, { type: 'video/webm' });
-                uploadRecording(blob);
-                // Stop all tracks to release resources
-                combinedStream.getTracks().forEach((track) => track.stop());
-                screenStream.getTracks().forEach((track) => track.stop());
-                audioStream.getTracks().forEach((track) => track.stop());
+                const blob = new Blob(chunks.current, { type: "video/webm" });
+                saveSegment(blob); // Save the final segment
+                chunks.current = []; // Clear chunks after saving
             };
 
-            mediaRecorderRef.current.start();
+            mediaRecorderRef.current.start(1000); // Collect data every second
             setIsRecording(true);
+
+            // Save segments every 3 minutes (180000 ms)
+            intervalRef.current = setInterval(() => {
+                mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
+                mediaRecorderRef.current.start(); // Restart to begin a new segment
+            }, 180000); // 3 minutes
         } catch (error) {
-            console.error('Error starting screen recording:', error);
+            console.error("Error starting screen recording:", error);
         }
     };
 
+    // Stop recording
     const stopRecording = () => {
+        clearInterval(intervalRef.current);
         mediaRecorderRef.current.stop();
         setIsRecording(false);
     };
 
-    const uploadRecording = (blob) => {
-        const storageRef = ref(storage, `recordings/${Date.now()}.webm`);
-        const uploadTask = uploadBytesResumable(storageRef, blob);
+    // Save video/audio segment to Firebase
+    const saveSegment = (blob) => {
+        const storageRef = ref(storage, `recordings/segment_${videoCount.current}.webm`);
+        videoCount.current += 1;
 
+        const uploadTask = uploadBytesResumable(storageRef, blob);
         uploadTask.on(
-            'state_changed',
+            "state_changed",
             (snapshot) => {
-                const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 console.log(`Upload is ${progress}% done`);
             },
             (error) => {
-                console.error('Upload failed:', error);
+                console.error("Upload failed:", error);
             },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                    setDownloadURL(url);
-                    console.log('File available at:', url);
+                    setDownloadURLs((prevURLs) => [...prevURLs, url]);
+                    console.log("File available at:", url);
                 });
             }
         );
     };
 
+    // Handle switch toggle
+    const handleSwitchChange = (event) => {
+        if (event.target.checked) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    };
+
     return (
         <div>
             <h2>Screen Recorder</h2>
-            {!isRecording ? (
-                <button onClick={startRecording}>Start Recording</button>
-            ) : (
-                <button onClick={stopRecording}>Stop Recording</button>
-            )}
+            <Switch checked={isRecording} onChange={handleSwitchChange} />
+            <p>{isRecording ? "Recording..." : "Recording stopped"}</p>
 
-            {downloadURL && (
+            {downloadURLs.length > 0 && (
                 <div>
-                    <p>Recording uploaded successfully:</p>
-                    <a href={downloadURL} target="_blank" rel="noopener noreferrer">
-                        Download Link
-                    </a>
+                    <h3>Uploaded Recordings</h3>
+                    {downloadURLs.map((url, index) => (
+                        <div key={index}>
+                            <a href={url} target="_blank" rel="noopener noreferrer">
+                                Download Segment {index + 1}
+                            </a>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
     );
 };
-
 
 export default TestPage;
