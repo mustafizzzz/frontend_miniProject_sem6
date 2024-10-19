@@ -9,26 +9,27 @@ import { UserContext } from '../ContextApi/userContex';
 import { emotionsContext } from '../ContextApi/emotionsContext';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
-//firebase Imports
+//firebase Imports for recording
 import db, { storage } from '../firbaseConfig';
-import { deleteObject, getDownloadURL, listAll, ref, uploadString } from 'firebase/storage';
+import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable, uploadString } from 'firebase/storage';
 import { set, ref as dbref, get } from 'firebase/database';
 
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 
+const queryClient = new QueryClient();
 const RoomFrame = () => {
+
     const { roomId } = useParams();
     const [imageData, setImageData] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
-    const location = useLocation();
     const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
-    const isCancelled = useRef(false); // To track unmounting
     const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
 
 
-    //helper function
+    //helper function to get current time
     const getCurrentTimeStudent = () => {
         const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
         const now = new Date(); // Get current date and time
@@ -49,31 +50,6 @@ const RoomFrame = () => {
         return `${hours}:${minutes}`; // Concatenate hours and minutes
     };
 
-    // <========================================>
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         if (isCapturing) {
-    //             captureImage();
-    //         }
-    //     }, 3000); // Capture image every 3 seconds
-
-    //     if (isCapturing) {
-    //         setTimeout(() => {
-    //             setIsCapturing(false); // Pause capturing during emotion detection
-    //             emotionDetect().then(() => {
-    //                 setIsCapturing(true); // Resume capturing after emotion detection
-    //             });
-    //         }, 15000); // Wait for 15 seconds before emotion detection
-    //     }
-
-    //     // Cleanup interval
-    //     return () => clearInterval(interval);
-    // }, [isCapturing]); // Re-run effect when 'isCapturing' changes
-
-    // <====================================================>
-
-
-
     //Only for student
     const captureImage = async () => {
         if (!isCapturing && currentUser.role === 'teacher') {
@@ -84,7 +60,6 @@ const RoomFrame = () => {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
         // Create a video element to capture the stream
-        console.log('capture stream is : ', stream);
         const videoElement = document.createElement('video');
         videoElement.srcObject = stream;
         videoElement.play();
@@ -139,6 +114,8 @@ const RoomFrame = () => {
                 ...prevImageData,
                 { studentPID: currentUser.pid, imageUrl: downloadURL }
             ]);
+            console.log('Image uploaded successfully:', downloadURL);
+
 
 
 
@@ -151,6 +128,7 @@ const RoomFrame = () => {
 
     };
 
+    //Only for teacher
     const emotionDetect = async () => {
         try {
             // Fetch image URLs for all students under the room ID
@@ -194,67 +172,44 @@ const RoomFrame = () => {
 
     };
 
-    //test useEffect
 
-    // useEffect(() => {
-    //     if (!isCapturing) return;
-    //     const interval = setInterval(async () => {
-    //         if (currentUser.role === 'teacher') {
-    //             console.log('emotion detetction start now count  25 sec');
-    //             await emotionDetect(); // Call emotion detection for teacher
-    //             console.log('One call emotion detetction completed');
-    //         } else if (currentUser.role === 'student') {
-    //             console.log('Image capturing start now count  10 sec');
-    //             await captureImage(); // Call image capture for student
-    //         }
-
-    //     }, currentUser.role === 'teacher' ? 15000 : 10000); // Interval based on role
-
-    //     return () => clearInterval(interval);
-
-    // }, [isCapturing, currentUser]);
-
-    const continuouslyProcess = async () => {
-        while (!isCancelled.current) {
-            setIsProcessing(true);
+    //==================testing tanstack query====================
+    const { data } = useQuery({
+        queryKey: ['continuousProcess', roomId, currentUser.role],
+        queryFn: async () => {
             if (currentUser.role === 'teacher') {
-                console.log('Starting emotion detection...');
+
                 await emotionDetect();
-                console.log('Emotion detection completed.');
+
+                return { status: 'emotionDetect completed' };
             } else if (currentUser.role === 'student') {
-                console.log('Starting image capture...');
                 await captureImage();
-                console.log('Image capture completed.');
+                return { status: 'captureImage completed' };
             }
-
-            setIsProcessing(false);
-            const delay = currentUser.role === 'teacher' ? 10000 : 8000;
-            console.log(`Waiting for ${delay / 1000} seconds before the next process...`);
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-        console.log('Process stopped.');
-    };
-
-    useEffect(() => {
-        if (!isCapturing) return;
-
-        isCancelled.current = false; // Ensure the process is running
-        continuouslyProcess(); // Start the continuous process
-
-        return () => {
-            console.log('Component unmounting, stopping process...');
-            isCancelled.current = true; // Stop process on unmount
-        };
-    }, [isCapturing]);
+            return { status: 'no action taken' }; // Handle the case where neither role matches
+        },
+        refetchInterval: currentUser.role == 'teacher' ? 10000 : 5000, // Interval based on role
+        refetchIntervalInBackground: true,
+        enabled: isProcessing, // Only run when processing is active
+        onSuccess: () => {
+            console.log('Process completed successfully.');
+        },
+        onError: (error) => {
+            console.error('Process failed:', error);
+        },
+        onSettled: () => {
+            console.log('Query has settled (either succeeded or failed).');
+        },
+    });
 
     //<===================audio emotion start===================>
-
-    const [recognizedText, setRecognizedText] = useState('');
     const [isListening, setIsListening] = useState(true);
-    const { transcript, resetTranscript, listening } = useSpeechRecognition();
+    const [audioList, setAudioList] = useState([]);
+    const mediaAudioRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const mediaStreamRef = useRef(null);
 
-
-
+    //audio button click event
     useEffect(() => {
 
         const handleClick = (event) => {
@@ -262,12 +217,11 @@ const RoomFrame = () => {
             if (currentUser.role === 'teacher') return; // Only for students
 
             if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7' || 'h2M8QwerO1XmsfrZlpv6')) {
-                console.log('Clicked on the button');
+                console.log('Clicked on the audio button');
                 setIsListening(prevIsListening => !prevIsListening);
-                if (isListening === true) {
-
+                console.log('Audio listening:', isListening);
+                if (isListening) {
                     startListening();
-
                 } else {
                     stopListening();
                 }
@@ -284,48 +238,42 @@ const RoomFrame = () => {
         };
     }, [isListening]);
 
-    useEffect(() => {
-        if (transcript !== '') {
-            setRecognizedText(transcript);
-        }
-    }, [transcript]);
+    const startListening = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream; // Store the media stream
+        mediaAudioRecorderRef.current = new MediaRecorder(stream);
 
-
-
-    const startListening = () => {
-        console.log('Start listening');
-        SpeechRecognition.startListening({ continuous: true });
-    };
-
-
-    const stopListening = () => {
-        console.log('Stop listening');
-        SpeechRecognition.stopListening();
-        resetTranscript(); // Clear transcript when stopped
-
-    }
-
-    //toggle api call audio emotion
-    useEffect(() => {
-
-        const sendTranscriptToAPI = async () => {
-            if (!listening && recognizedText.trim() !== '') {
-                console.log('%cStart api:', 'color:green', recognizedText);
-                try {
-                    await audioEmotion(recognizedText);
-                    console.log('Audio emotion analysis completed.');
-
-                    // Here you can optionally reset the recognized text
-                    // resetTranscript();
-                } catch (error) {
-                    console.error('Error in audio emotion analysis:', error);
-                }
-            }
+        mediaAudioRecorderRef.current.ondataavailable = (event) => {
+            audioChunksRef.current.push(event.data);
         };
 
-        sendTranscriptToAPI();
-    }, [listening]);
+        mediaAudioRecorderRef.current.onstop = () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setAudioList((prev) => [...prev, { url: audioUrl, blob: audioBlob }]);
 
+
+            audioChunksRef.current = []; // Reset chunks for next recording
+        };
+
+        mediaAudioRecorderRef.current.start();
+
+
+    };
+
+    console.log('Audio list:', audioList);
+
+
+
+    const stopListening = async () => {
+        mediaAudioRecorderRef.current.stop();
+        console.log('Stop listening');
+        // Stop all tracks of the media stream
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+
+
+        //send audio to emotion api logic
+    };
 
     //only for student
     const audioEmotion = async (text) => {
@@ -342,7 +290,7 @@ const RoomFrame = () => {
             // const { audio_emotions } = response?.data.updatedMeetReports;
             // setAudioEmotions(audio_emotions[0]);
             console.log('Response from audio emotion API:', response);
-            setRecognizedText('')
+
         } catch (error) {
             console.error('Error in audio emotion detection:', error);
         }
@@ -351,6 +299,115 @@ const RoomFrame = () => {
     //<===================audio emotion end===================>
 
 
+
+    //<===================Video recording code test===============================>
+
+    const [isRecording, setIsRecording] = useState(false);
+    const [downloadURLs, setDownloadURLs] = useState([]);
+    const mediaRecorderRef = useRef(null);
+    const chunks = useRef([]);
+    const intervalRef = useRef(null);
+    const videoCount = useRef(0);
+
+    // Start recording
+    const startRecording = async () => {
+        try {
+            // Capture the screen stream
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { width: 7680, height: 4320 }, // 4080p quality
+                audio: true, // Include system audio
+            });
+
+            // Capture the microphone audio stream
+            const audioStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+            });
+
+            // Combine the screen and microphone streams
+            const combinedStream = new MediaStream([
+                ...screenStream.getVideoTracks(),
+                ...audioStream.getAudioTracks(),
+            ]);
+
+            mediaRecorderRef.current = new MediaRecorder(combinedStream, {
+                mimeType: "video/webm; codecs=vp9,opus",
+            });
+            chunks.current = [];
+
+            mediaRecorderRef.current.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunks.current.push(event.data);
+                }
+            };
+
+            // Handle the event when screen sharing is manually stopped
+            screenStream.getVideoTracks()[0].onended = () => {
+                console.log('Screen sharing manually stopped');
+                stopRecording(); // Automatically stop recording and save
+            };
+
+            mediaRecorderRef.current.onstop = () => {
+                const blob = new Blob(chunks.current, { type: "video/webm" });
+                saveSegment(blob); // Save the final segment
+                chunks.current = []; // Clear chunks after saving
+            };
+
+            mediaRecorderRef.current.start(1000); // Collect data every second
+            setIsRecording(true);
+
+            // Save segments every 3 minutes (180000 ms)
+            intervalRef.current = setInterval(() => {
+                mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
+                mediaRecorderRef.current.start(); // Restart to begin a new segment
+            }, 180000); // 3 minutes
+        } catch (error) {
+            console.error("Error starting screen recording:", error);
+        }
+    };
+
+    // Stop recording
+    const stopRecording = () => {
+        clearInterval(intervalRef.current);
+        setIsRecording(false);
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop(); // Stop the MediaRecorder and save the video
+        }
+    };
+
+    // Save video/audio segment to Firebase
+    const saveSegment = (blob) => {
+        const storageRef = ref(storage, `recordings/segment_${videoCount.current}.webm`);
+        videoCount.current += 1;
+
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Upload is ${progress}% done`);
+            },
+            (error) => {
+                console.error("Upload failed:", error);
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+                    setDownloadURLs((prevURLs) => [...prevURLs, url]);
+                    console.log("File available at:", url);
+                });
+            }
+        );
+    };
+
+    // Handle switch toggle
+    const handleSwitchChange = () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
+    // <===================Video recording code test end==============================>
 
     //Meeting UI Code
     const meetingUI = async (element) => {
@@ -433,13 +490,14 @@ const RoomFrame = () => {
             turnOnMicrophoneWhenJoining: false,
 
             onJoinRoom: () => {
-                setIsCapturing(true);
+                // setIsCapturing(true);
+                setIsProcessing(true);
                 console.log('Joined the roommm');
             },
 
 
             onLeaveRoom: () => {
-                setIsCapturing(false);
+                setIsProcessing(false);
                 console.log('room leave....');
 
             },
@@ -457,22 +515,25 @@ const RoomFrame = () => {
                 }
                 navigate('/dashboard/join-meet');
             }
+
+
         });
     };
-
-    // console.log(imageData);
-    // console.log('%cSaved text:', 'color:orange', recognizedText);
-
-
 
 
     return (
         <>
             <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' ? 'block' : 'none' }}>
+
                 <ChrisViewAnalytics />
+
             </div>
 
-            {/* <div className="btn-box">
+            {/* <div className="button-record-box">
+                <button className={`btn ${isRecording ? 'recording' : ''}`} onClick={handleSwitchChange}>
+                    <i className="bi bi-filetype-ai fs-4" style={{ color: 'white' }}></i>
+                    <span className="take-notes-text text-white p-0 m-0"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
+                </button>
             </div> */}
 
             <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
@@ -484,4 +545,10 @@ const RoomFrame = () => {
 
 };
 
-export default RoomFrame;
+const RoomFrameTanStack = () => (
+    <QueryClientProvider client={queryClient}>
+        <RoomFrame />
+    </QueryClientProvider>
+);
+
+export default RoomFrameTanStack;

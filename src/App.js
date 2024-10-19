@@ -23,13 +23,20 @@ import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 import TestCapture from './pages/TestCapture';
 import { useEffect } from 'react';
 import TestPageNotesVideo from './pages/TestPageNotesVideo';
+import TestAudioList from './pages/TestAudioList';
+
 
 function App() {
+
   useEffect(() => {
     if (window.location.pathname === '/') {
       window.location.href = '/login';
     }
   }, []);
+
+
+
+
 
   return (
     <div className="App">
@@ -40,6 +47,7 @@ function App() {
         <Route path='/test-notes' element={<TestPageNotesVideo />} />
         <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
+        <Route path='/test-audio-list' element={<TestAudioList />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
 
@@ -60,10 +68,12 @@ function App() {
 
 
         {/* Video Pages */}
+
         <Route element={<ProtectedRoute />}>
           {/* <Route path='/' element={<VideoFrame />} /> */}
           <Route path='/room/:roomId' element={<RoomFrame />} />
         </Route>
+
 
 
       </Routes>

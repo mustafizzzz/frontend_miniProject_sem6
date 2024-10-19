@@ -30,7 +30,7 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
     React.useEffect(() => {
         if (openAlan) {
             startCamera();
-            const captureTimeout = setTimeout(captureImage, 4000); // Capture image after 4 seconds
+            const captureTimeout = setTimeout(captureImage, 2000); // Capture image after 4 seconds
             return () => clearTimeout(captureTimeout);
         }
     }, [openAlan]); // Run when open changes
