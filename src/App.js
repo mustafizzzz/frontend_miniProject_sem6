@@ -13,7 +13,7 @@ import ReportsPage from './pages/ReportsPage/ReportsPage';
 import MeetingPage from './pages/MeetingPage/MeetingPage';
 import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
 import SettingPage from './pages/SettingPage/SettingPage';
-import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
+// import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
 import CreatMeetPage from './pages/CreateMeetPage/CreatMeetPage';
 import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
