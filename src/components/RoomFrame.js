@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -7,14 +7,14 @@ import './Room.css'
 import ChrisViewAnalytics from './ChrisViewAnalytics/ChrisViewAnalytics';
 import { UserContext } from '../ContextApi/userContex';
 import { emotionsContext } from '../ContextApi/emotionsContext';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 //firebase Imports for recording
 import db, { storage } from '../firbaseConfig';
-import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable, uploadString } from 'firebase/storage';
-import { set, ref as dbref, get } from 'firebase/database';
+import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable } from 'firebase/storage';
 
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { startListening, stopListening } from '../RoomFunction/audioRecorder';
+import { captureImage, emotionDetect, getCurrentTimeTeacher } from '../RoomFunction/roomApiCalls';
 
 
 const queryClient = new QueryClient();
@@ -27,151 +27,7 @@ const RoomFrame = () => {
     const navigate = useNavigate();
     const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
     const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
-
-
-    //helper function to get current time
-    const getCurrentTimeStudent = () => {
-        const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
-        const now = new Date(); // Get current date and time
-        const hours = padZero(now.getHours()); // Get current hours and pad if necessary
-        const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
-        const seconds = padZero(now.getSeconds()); // Get current seconds and pad if necessary
-
-        return `${hours}:${minutes}:${seconds}`; // Concatenate hours, minutes, and seconds
-    };
-
-    const getCurrentTimeTeacher = () => {
-        const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
-
-        const now = new Date(); // Get current date and time
-        const hours = padZero(now.getHours()); // Get current hours and pad if necessary
-        const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
-
-        return `${hours}:${minutes}`; // Concatenate hours and minutes
-    };
-
-    //Only for student
-    const captureImage = async () => {
-        if (!isCapturing && currentUser.role === 'teacher') {
-            return;
-        };
-
-        // Access the camera stream
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-        // Create a video element to capture the stream
-        const videoElement = document.createElement('video');
-        videoElement.srcObject = stream;
-        videoElement.play();
-
-        // Wait for the video to load and play
-        await new Promise(resolve => videoElement.addEventListener('playing', resolve));
-
-        // Create a canvas element to capture a frame from the video
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // Convert the captured frame to a data URL
-        const imageDataURL = canvas.toDataURL('image/png');
-        //stop the camera after image get captured
-        stream.getTracks().forEach(track => track.stop());
-
-
-        try {
-
-            if (!imageDataURL) {
-                console.log('No image data URL found');
-                return;
-            }
-            // Construct the image path with student ID
-            const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
-
-            // Generate a unique image name using the current timestamp
-            const timestamp = getCurrentTimeStudent(); // Current timestamp in "12":"33"
-            const imageName = `${currentUser.pid}_${timestamp}.jpg`;
-
-            // Upload image to Firebase Storage with the constructed image path and name
-            const imageRef = ref(storage, `${studentImagePath}/${imageName}`);
-            await uploadString(imageRef, imageDataURL, 'data_url');
-
-            // Get the download URL for the uploaded image
-            const downloadURL = await getDownloadURL(imageRef);
-
-            // Construct the image path with room ID
-            const roomDbPath = `Rooms/${roomId}`;
-
-            // Upload image URL to Firebase Database with the constructed path and student PID
-            await set(dbref(db, `${roomDbPath}/${currentUser.userName}`), {
-                studentPID: currentUser.pid,
-                imageUrl: downloadURL,
-            });
-
-            // Add image data to state
-            setImageData(prevImageData => [
-                ...prevImageData,
-                { studentPID: currentUser.pid, imageUrl: downloadURL }
-            ]);
-            console.log('Image uploaded successfully:', downloadURL);
-
-
-
-
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
-        // Add image data URL to the images array
-        // setImages(prevImages => [...prevImages, imageDataURL]);
-
-
-    };
-
-    //Only for teacher
-    const emotionDetect = async () => {
-        try {
-            // Fetch image URLs for all students under the room ID
-            const roomImagesRef = dbref(db, `Rooms/${roomId}`);
-            const roomImagesSnapshot = await get(roomImagesRef);
-
-            const imageUrls = [];
-
-            // Iterate over the student PIDs and image URLs in the snapshot
-            roomImagesSnapshot.forEach((childSnapshot) => {
-                const studentPID = childSnapshot.val().studentPID;
-                const imageUrl = childSnapshot.val().imageUrl;
-
-                // Add student PID and image URL to the array
-                imageUrls.push({ studentPID: studentPID, imageUrl: imageUrl });
-            });
-            // console.log('Image URLs:', imageUrls);
-
-            // Call the API with the fetched image URLs
-            const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/video/video_to_emotion', {
-                meet_id: parseInt(roomId),
-                host_id: currentUser.hostId,
-                time_stamp: getCurrentTimeTeacher(),
-                imgUrls: imageUrls // Pass the fetched image URLs to the API
-            });
-            const { text_emotions, video_emotions, audio_emotions } = response?.data.updatedMeetReports;
-            const { overallEmotions, studentLiveEmotions } = response?.data;
-            setTextEmotions(text_emotions[0]);
-            setVideoEmotions(video_emotions[0]);
-            setAudioEmotions(audio_emotions[0]);
-            setOverAllEmotions(overallEmotions);
-            setStudentLiveEmotions(studentLiveEmotions);
-            console.log('Response from emotion API:', response.data);
-
-        } catch (error) {
-
-            console.log('error in api calling', error.message);
-
-        }
-
-
-    };
-
+    const [displayHelperButton, setDisplayHelperButton] = useState(false);
 
     //==================testing tanstack query====================
     const { data } = useQuery({
@@ -179,11 +35,14 @@ const RoomFrame = () => {
         queryFn: async () => {
             if (currentUser.role === 'teacher') {
 
-                await emotionDetect();
+                await emotionDetect(currentUser, roomId,
+                    setTextEmotions, setVideoEmotions, setAudioEmotions,
+                    setOverAllEmotions, setStudentLiveEmotions);
 
                 return { status: 'emotionDetect completed' };
             } else if (currentUser.role === 'student') {
-                await captureImage();
+                await captureImage(currentUser, roomId,
+                    setImageData, isCapturing);
                 return { status: 'captureImage completed' };
             }
             return { status: 'no action taken' }; // Handle the case where neither role matches
@@ -201,6 +60,7 @@ const RoomFrame = () => {
             console.log('Query has settled (either succeeded or failed).');
         },
     });
+    //==================testing tanstack query====================
 
     //<===================audio emotion start===================>
     const [isListening, setIsListening] = useState(true);
@@ -221,9 +81,9 @@ const RoomFrame = () => {
                 setIsListening(prevIsListening => !prevIsListening);
                 console.log('Audio listening:', isListening);
                 if (isListening) {
-                    startListening();
+                    startListening(mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList);
                 } else {
-                    stopListening();
+                    stopListening(mediaAudioRecorderRef, mediaStreamRef);
                 }
             }
 
@@ -238,76 +98,18 @@ const RoomFrame = () => {
         };
     }, [isListening]);
 
-    const startListening = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaStreamRef.current = stream; // Store the media stream
-        mediaAudioRecorderRef.current = new MediaRecorder(stream);
-
-        mediaAudioRecorderRef.current.ondataavailable = (event) => {
-            audioChunksRef.current.push(event.data);
-        };
-
-        mediaAudioRecorderRef.current.onstop = () => {
-            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            setAudioList((prev) => [...prev, { url: audioUrl, blob: audioBlob }]);
-
-
-            audioChunksRef.current = []; // Reset chunks for next recording
-        };
-
-        mediaAudioRecorderRef.current.start();
-
-
-    };
-
     console.log('Audio list:', audioList);
-
-
-
-    const stopListening = async () => {
-        mediaAudioRecorderRef.current.stop();
-        console.log('Stop listening');
-        // Stop all tracks of the media stream
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-
-
-        //send audio to emotion api logic
-    };
-
-    //only for student
-    const audioEmotion = async (text) => {
-
-
-        try {
-            const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
-                meet_id: parseInt(roomId),
-                host_id: currentUser.pid,
-                time_stamp: getCurrentTimeTeacher(),
-                studentPID: currentUser.pid,
-                audio_message: text
-            });
-            // const { audio_emotions } = response?.data.updatedMeetReports;
-            // setAudioEmotions(audio_emotions[0]);
-            console.log('Response from audio emotion API:', response);
-
-        } catch (error) {
-            console.error('Error in audio emotion detection:', error);
-        }
-    }
-
     //<===================audio emotion end===================>
-
-
 
     //<===================Video recording code test===============================>
 
     const [isRecording, setIsRecording] = useState(false);
-    const [downloadURLs, setDownloadURLs] = useState([]);
+    const [videoDownloadURLs, setVideoDownloadURLs] = useState([]);
     const mediaRecorderRef = useRef(null);
     const chunks = useRef([]);
     const intervalRef = useRef(null);
     const videoCount = useRef(0);
+    const [simplifiedNotes, setSimplifiedNotes] = useState(null);
 
     // Start recording
     const startRecording = async () => {
@@ -340,7 +142,7 @@ const RoomFrame = () => {
                 }
             };
 
-            // Handle the event when screen sharing is manually stopped
+            // when screen sharing is manually stopped
             screenStream.getVideoTracks()[0].onended = () => {
                 console.log('Screen sharing manually stopped');
                 stopRecording(); // Automatically stop recording and save
@@ -355,7 +157,7 @@ const RoomFrame = () => {
             mediaRecorderRef.current.start(1000); // Collect data every second
             setIsRecording(true);
 
-            // Save segments every 3 minutes (180000 ms)
+            // Save segments 
             intervalRef.current = setInterval(() => {
                 mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
                 mediaRecorderRef.current.start(); // Restart to begin a new segment
@@ -369,14 +171,34 @@ const RoomFrame = () => {
     const stopRecording = () => {
         clearInterval(intervalRef.current);
         setIsRecording(false);
+        // Stop all tracks of the screen stream
         if (mediaRecorderRef.current) {
+            const tracks = mediaRecorderRef.current.stream.getTracks();
+            tracks.forEach(track => track.stop()); // Stop each track of the stream
+
             mediaRecorderRef.current.stop(); // Stop the MediaRecorder and save the video
         }
     };
 
+
+    const callSimplifyNotesAPI = (notes) => {
+        // Call the API without waiting for its response
+        axios.post('http://localhost:5000/api/v1/notes/process_video', { videoUrl: notes, meet_id: roomId })
+            .then((response) => {
+                console.log('Simplified notes received:', response.data.CurrentNotes);
+                setSimplifiedNotes(response.data.CurrentNotes); // Store the response in state
+            })
+            .catch((error) => {
+                console.error('Error while simplifying notes:', error);
+            });
+
+        // Proceed without waiting for the response
+        console.log('API call made, waiting for response...');
+    };
+
     // Save video/audio segment to Firebase
     const saveSegment = (blob) => {
-        const storageRef = ref(storage, `recordings/segment_${videoCount.current}.webm`);
+        const storageRef = ref(storage, `recordings/segment_${roomId}_${videoCount.current}.webm`);
         videoCount.current += 1;
 
         const uploadTask = uploadBytesResumable(storageRef, blob);
@@ -391,8 +213,9 @@ const RoomFrame = () => {
             },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                    setDownloadURLs((prevURLs) => [...prevURLs, url]);
                     console.log("File available at:", url);
+                    // callSimplifyNotesAPI(url);
+                    setVideoDownloadURLs((prevURLs) => [...prevURLs, url]);
                 });
             }
         );
@@ -411,7 +234,6 @@ const RoomFrame = () => {
 
     //Meeting UI Code
     const meetingUI = async (element) => {
-        // Generate Kit Token (unchanged)
         const appID = 550381689;
         const serverSecret = '160ac07931324996010bd800396222e2';
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
@@ -456,19 +278,38 @@ const RoomFrame = () => {
                     endTime: getCurrentTimeTeacher(),
                 });
                 console.log('Response from end meeting API:', response);
-                const imagesRef = ref(storage, 'InCallstudentsImage'); // Reference to the InCallstudentsImage directory
+                // const imagesRef = ref(storage, `InCallstudentsImage/${currentUser.pid}`); // Reference to the InCallstudentsImage directory
 
-                // List all images in the InCallstudentsImage directory
-                const listResponse = await listAll(imagesRef);
-                const deletePromises = listResponse.items.map(item => {
-                    return deleteObject(item).catch(error => {
-                        console.error(`Error deleting image ${item.name}:`, error);
+                // // List all images in the InCallstudentsImage directory
+                // const listResponse = await listAll(imagesRef);
+                // const deletePromises = listResponse.items.map(item => {
+                //     return deleteObject(item).catch(error => {
+                //         console.error(`Error deleting image ${item.name}:`, error);
+                //     });
+                // });
+
+                // // Wait for all deletions to complete
+                // await Promise.all(deletePromises);
+                // console.log('All images in InCallstudentsImage deleted successfully.');
+
+                const folderPath = `InCallstudentsImage/${currentUser.pid}`; // Path to the folder in Firebase Storage
+                const folderRef = ref(storage, folderPath);
+
+                try {
+                    // List all items in the folder
+                    const listResult = await listAll(folderRef);
+
+                    // Delete each file in the folder
+                    const deletePromises = listResult.items.map((item) => {
+                        return deleteObject(item);
                     });
-                });
 
-                // Wait for all deletions to complete
-                await Promise.all(deletePromises);
-                console.log('All images in InCallstudentsImage deleted successfully.');
+                    await Promise.all(deletePromises); // Wait for all deletions to complete
+
+                    console.log(`All files in folder ${folderPath} deleted successfully.`);
+                } catch (error) {
+                    console.error("Error deleting files from Firebase:", error);
+                }
 
             } catch (error) {
                 console.error('Error in ending meeting:', error);
@@ -492,12 +333,14 @@ const RoomFrame = () => {
             onJoinRoom: () => {
                 // setIsCapturing(true);
                 setIsProcessing(true);
+                setDisplayHelperButton(true);
                 console.log('Joined the roommm');
             },
 
 
             onLeaveRoom: () => {
                 setIsProcessing(false);
+                setDisplayHelperButton(false);
                 console.log('room leave....');
 
             },
@@ -510,11 +353,13 @@ const RoomFrame = () => {
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
+                setIsProcessing(false);
                 if (currentUser.role === 'teacher') {
                     endMeetingCall();
                 }
                 navigate('/dashboard/join-meet');
-            }
+            },
+
 
 
         });
@@ -523,18 +368,18 @@ const RoomFrame = () => {
 
     return (
         <>
-            <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' ? 'block' : 'none' }}>
+            <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' && displayHelperButton ? 'block' : 'none' }}>
 
                 <ChrisViewAnalytics />
 
             </div>
 
-            {/* <div className="button-record-box">
+            <div className={`${currentUser.role === 'teacher' && displayHelperButton ? 'd-block' : 'd-none'}  button-record-box`}>
                 <button className={`btn ${isRecording ? 'recording' : ''}`} onClick={handleSwitchChange}>
                     <i className="bi bi-filetype-ai fs-4" style={{ color: 'white' }}></i>
-                    <span className="take-notes-text text-white p-0 m-0"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
+                    <span className="take-notes-text text-white p-0 m-0 fw-bold"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
                 </button>
-            </div> */}
+            </div>
 
             <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
 

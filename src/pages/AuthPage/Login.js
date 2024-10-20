@@ -458,7 +458,7 @@ const Login = () => {
                           {loading ? (
                             <>
                               <CircularProgress size={24} color="inherit" className='mx-2' />
-                              Logging in...
+                              Please wait...
                             </>
                           ) : 'Login'}
                         </Button>
@@ -535,7 +535,7 @@ const Login = () => {
                           {loading ? (
                             <>
                               <CircularProgress size={24} color="inherit" className='mx-2' />
-                              Logging in...
+                              Please wait...
                             </>
                           ) : 'Login'}
                         </Button>

@@ -426,9 +426,9 @@ const Register = () => {
                         {loading ? (
                           <>
                             <CircularProgress size={24} color="inherit" className='mx-2' />
-                            Signing in...
+                            Please wait...
                           </>
-                        ) : 'Signin'}
+                        ) : 'Sign in'}
                       </Button>
 
                       <div className="text-center">

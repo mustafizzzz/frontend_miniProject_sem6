@@ -49,6 +49,7 @@
 }
 
 .button-record-box button:hover {
+    background-color: #454a62;
     padding-right: 1rem;
 
 }

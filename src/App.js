@@ -24,6 +24,7 @@ import TestCapture from './pages/TestCapture';
 import { useEffect } from 'react';
 import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
+import TestImageDelete from './pages/TestImageDelete';
 
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/test-audio-list' element={<TestAudioList />} />
+        <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
 

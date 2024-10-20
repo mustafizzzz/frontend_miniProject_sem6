@@ -76,7 +76,7 @@
     // }, [isCapturing]);
 
 
-    //===================RoomFrame audioCapture=============\
+    //=============================RoomFrame audioCapture=================================
      const [recognizedText, setRecognizedText] = useState('');
     const [isListening, setIsListening] = useState(true);
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
@@ -176,3 +176,241 @@
         }
     }
 
+
+//=================================Room Frame Audio before export=============================
+
+const [isListening, setIsListening] = useState(true);
+    const [audioList, setAudioList] = useState([]);
+    const mediaAudioRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const mediaStreamRef = useRef(null);
+
+   useEffect(() => {
+
+        const handleClick = (event) => {
+
+            if (currentUser.role === 'teacher') return; // Only for students
+
+            if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7' || 'h2M8QwerO1XmsfrZlpv6')) {
+                console.log('Clicked on the audio button');
+                setIsListening(prevIsListening => !prevIsListening);
+                console.log('Audio listening:', isListening);
+                if (isListening) {
+                    startListening();
+                } else {
+                    stopListening();
+                }
+            }
+
+        };
+
+        // Add event listener to document for click events
+        document.addEventListener('click', handleClick);
+
+        // Cleanup function to remove event listener when component unmounts
+        return () => {
+            document.removeEventListener('click', handleClick);
+        };
+    }, [isListening]);
+
+// const startListening = async () => {
+    //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    //     mediaStreamRef.current = stream; // Store the media stream
+    //     mediaAudioRecorderRef.current = new MediaRecorder(stream);
+
+    //     mediaAudioRecorderRef.current.ondataavailable = (event) => {
+    //         audioChunksRef.current.push(event.data);
+    //     };
+
+    //     mediaAudioRecorderRef.current.onstop = () => {
+    //         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+    //         const audioUrl = URL.createObjectURL(audioBlob);
+    //         setAudioList((prev) => [...prev, { url: audioUrl, blob: audioBlob }]);
+
+
+    //         audioChunksRef.current = []; // Reset chunks for next recording
+    //     };
+
+    //     mediaAudioRecorderRef.current.start();
+
+
+    // };
+
+     // const stopListening = async () => {
+    //     mediaAudioRecorderRef.current.stop();
+    //     console.log('Stop listening');
+    //     // Stop all tracks of the media stream
+    //     mediaStreamRef.current.getTracks().forEach(track => track.stop());
+
+
+    //     //send audio to emotion api logic
+    // };
+
+    // //only for student
+    // const audioEmotion = async (text) => {
+
+
+    //     try {
+    //         const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
+    //             meet_id: parseInt(roomId),
+    //             host_id: currentUser.pid,
+    //             time_stamp: getCurrentTimeTeacher(),
+    //             studentPID: currentUser.pid,
+    //             audio_message: text
+    //         });
+    //         // const { audio_emotions } = response?.data.updatedMeetReports;
+    //         // setAudioEmotions(audio_emotions[0]);
+    //         console.log('Response from audio emotion API:', response);
+
+    //     } catch (error) {
+    //         console.error('Error in audio emotion detection:', error);
+    //     }
+    // }
+
+
+
+    //==================================Emotions Apis functions====================================
+
+    
+    // //helper function to get current time
+    // const getCurrentTimeStudent = () => {
+    //     const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
+    //     const now = new Date(); // Get current date and time
+    //     const hours = padZero(now.getHours()); // Get current hours and pad if necessary
+    //     const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
+    //     const seconds = padZero(now.getSeconds()); // Get current seconds and pad if necessary
+
+    //     return `${hours}:${minutes}:${seconds}`; // Concatenate hours, minutes, and seconds
+    // };
+
+    // const getCurrentTimeTeacher = () => {
+    //     const padZero = (num) => (num < 10 ? `0${num}` : num); // Function to pad single digits with zero
+
+    //     const now = new Date(); // Get current date and time
+    //     const hours = padZero(now.getHours()); // Get current hours and pad if necessary
+    //     const minutes = padZero(now.getMinutes()); // Get current minutes and pad if necessary
+
+    //     return `${hours}:${minutes}`; // Concatenate hours and minutes
+    // };
+
+    // //Only for student
+    // const captureImage = async () => {
+    //     if (!isCapturing && currentUser.role === 'teacher') {
+    //         return;
+    //     };
+
+    //     // Access the camera stream
+    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+    //     // Create a video element to capture the stream
+    //     const videoElement = document.createElement('video');
+    //     videoElement.srcObject = stream;
+    //     videoElement.play();
+
+    //     // Wait for the video to load and play
+    //     await new Promise(resolve => videoElement.addEventListener('playing', resolve));
+
+    //     // Create a canvas element to capture a frame from the video
+    //     const canvas = document.createElement('canvas');
+    //     canvas.width = videoElement.videoWidth;
+    //     canvas.height = videoElement.videoHeight;
+    //     const ctx = canvas.getContext('2d');
+    //     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+    //     // Convert the captured frame to a data URL
+    //     const imageDataURL = canvas.toDataURL('image/png');
+    //     //stop the camera after image get captured
+    //     stream.getTracks().forEach(track => track.stop());
+
+
+    //     try {
+
+    //         if (!imageDataURL) {
+    //             console.log('No image data URL found');
+    //             return;
+    //         }
+    //         // Construct the image path with student ID
+    //         const studentImagePath = `InCallstudentsImage/${currentUser.pid}`;
+
+    //         // Generate a unique image name using the current timestamp
+    //         const timestamp = getCurrentTimeStudent(); // Current timestamp in "12":"33"
+    //         const imageName = `${currentUser.pid}_${timestamp}.jpg`;
+
+    //         // Upload image to Firebase Storage with the constructed image path and name
+    //         const imageRef = ref(storage, `${studentImagePath}/${imageName}`);
+    //         await uploadString(imageRef, imageDataURL, 'data_url');
+
+    //         // Get the download URL for the uploaded image
+    //         const downloadURL = await getDownloadURL(imageRef);
+
+    //         // Construct the image path with room ID
+    //         const roomDbPath = `Rooms/${roomId}`;
+
+    //         // Upload image URL to Firebase Database with the constructed path and student PID
+    //         await set(dbref(db, `${roomDbPath}/${currentUser.userName}`), {
+    //             studentPID: currentUser.pid,
+    //             imageUrl: downloadURL,
+    //         });
+
+    //         // Add image data to state
+    //         setImageData(prevImageData => [
+    //             ...prevImageData,
+    //             { studentPID: currentUser.pid, imageUrl: downloadURL }
+    //         ]);
+    //         console.log('Image uploaded successfully:', downloadURL);
+
+
+
+
+    //     } catch (error) {
+    //         console.error('Error uploading image:', error);
+    //     }
+    //     // Add image data URL to the images array
+    //     // setImages(prevImages => [...prevImages, imageDataURL]);
+
+
+    // };
+
+    // //Only for teacher
+    // const emotionDetect = async () => {
+    //     try {
+    //         // Fetch image URLs for all students under the room ID
+    //         const roomImagesRef = dbref(db, `Rooms/${roomId}`);
+    //         const roomImagesSnapshot = await get(roomImagesRef);
+
+    //         const imageUrls = [];
+
+    //         // Iterate over the student PIDs and image URLs in the snapshot
+    //         roomImagesSnapshot.forEach((childSnapshot) => {
+    //             const studentPID = childSnapshot.val().studentPID;
+    //             const imageUrl = childSnapshot.val().imageUrl;
+
+    //             // Add student PID and image URL to the array
+    //             imageUrls.push({ studentPID: studentPID, imageUrl: imageUrl });
+    //         });
+    //         // console.log('Image URLs:', imageUrls);
+
+    //         // Call the API with the fetched image URLs
+    //         const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/video/video_to_emotion', {
+    //             meet_id: parseInt(roomId),
+    //             host_id: currentUser.hostId,
+    //             time_stamp: getCurrentTimeTeacher(),
+    //             imgUrls: imageUrls // Pass the fetched image URLs to the API
+    //         });
+    //         const { text_emotions, video_emotions, audio_emotions } = response?.data.updatedMeetReports;
+    //         const { overallEmotions, studentLiveEmotions } = response?.data;
+    //         setTextEmotions(text_emotions[0]);
+    //         setVideoEmotions(video_emotions[0]);
+    //         setAudioEmotions(audio_emotions[0]);
+    //         setOverAllEmotions(overallEmotions);
+    //         setStudentLiveEmotions(studentLiveEmotions);
+    //         console.log('Response from emotion API:', response.data);
+
+    //     } catch (error) {
+
+    //         console.log('error in api calling', error.message);
+
+    //     }
+
+
+    // };
