@@ -14,10 +14,13 @@ import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable } from
 
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { startListening, stopListening } from '../RoomFunction/audioRecorder';
-import { captureImage, emotionDetect, getCurrentTimeTeacher } from '../RoomFunction/roomApiCalls';
+import { captureImage, emotionDetect, getCurrentTimeTeacher, textEmotion } from '../RoomFunction/roomApiCalls';
+import { deleteStudentImage } from '../RoomFunction/deleteStudentImage';
 
 
 const queryClient = new QueryClient();
+
+
 const RoomFrame = () => {
 
     const { roomId } = useParams();
@@ -250,24 +253,24 @@ const RoomFrame = () => {
         const ui = ZegoUIKitPrebuilt.create(kitToken);
 
 
-        //text emotion api function
-        const textEmotion = async (dataText) => {
+        // //text emotion api function
+        // const textEmotion = async (dataText) => {
 
-            try {
-                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
-                    meet_id: parseInt(roomId),
-                    host_id: currentUser.hostId,
-                    time_stamp: getCurrentTimeTeacher(),
-                    username: dataText.fromUser.userName,
-                    message: dataText.message
-                });
+        //     try {
+        //         const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
+        //             meet_id: parseInt(roomId),
+        //             host_id: currentUser.hostId,
+        //             time_stamp: getCurrentTimeTeacher(),
+        //             username: dataText.fromUser.userName,
+        //             message: dataText.message
+        //         });
 
-                console.log('Response from text emotion API:', response);
+        //         console.log('Response from text emotion API:', response);
 
-            } catch (error) {
-                console.error('Error in audio emotion detection:', error);
-            }
-        }
+        //     } catch (error) {
+        //         console.error('Error in audio emotion detection:', error);
+        //     }
+        // }
 
         //end the meet api call
         const endMeetingCall = async () => {
@@ -348,15 +351,14 @@ const RoomFrame = () => {
             onInRoomMessageReceived: (data) => {
                 console.log('In room message in text:', data);
                 if (currentUser.role !== 'teacher') return;
-                textEmotion(data);
+                textEmotion(data, roomId, currentUser);
+
 
             },
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
                 setIsProcessing(false);
-                if (currentUser.role === 'teacher') {
-                    endMeetingCall();
-                }
+                currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
                 navigate('/dashboard/join-meet');
             },
 

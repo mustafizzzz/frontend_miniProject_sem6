@@ -123,3 +123,22 @@ export const emotionDetect = async (
         console.error('Error in emotion detection API call:', error);
     }
 };
+
+//function of text emotion detection
+export const textEmotion = async (dataText, roomId, currentUser) => {
+
+    try {
+        const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
+            meet_id: parseInt(roomId),
+            host_id: currentUser.hostId,
+            time_stamp: getCurrentTimeTeacher(),
+            username: dataText.fromUser.userName,
+            message: dataText.message
+        });
+
+        console.log('Response from text emotion API:', response);
+
+    } catch (error) {
+        console.error('Error in audio emotion detection:', error);
+    }
+}
