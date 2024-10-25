@@ -6,6 +6,7 @@ import axios from 'axios';
 import { AlanContext } from '../../ContextApi/AlanContext';
 
 const JoinMeetPage = () => {
+
   if (window.stream) {
     console.log('Closing the camera stream...');
 

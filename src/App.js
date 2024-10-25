@@ -25,6 +25,8 @@ import { useEffect } from 'react';
 import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
+import TestSidebar from './pages/TestSidebar';
+import TestSocket from './pages/TestSocket';
 
 
 function App() {
@@ -44,12 +46,16 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        {/* <=======================Test Pages====================> */}
         <Route path='/testVideo' element={<TestPage />} />
         <Route path='/test-notes' element={<TestPageNotesVideo />} />
         <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/test-audio-list' element={<TestAudioList />} />
         <Route path='/test-image-delete' element={<TestImageDelete />} />
+        <Route path='/test-sidebar' element={<TestSidebar />} />
+        <Route path='/test-socket' element={<TestSocket />} />
+        {/* <=======================Test Pages====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
 

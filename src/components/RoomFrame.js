@@ -50,7 +50,7 @@ const RoomFrame = () => {
             }
             return { status: 'no action taken' }; // Handle the case where neither role matches
         },
-        refetchInterval: currentUser.role == 'teacher' ? 10000 : 5000, // Interval based on role
+        refetchInterval: currentUser.role === 'teacher' ? 10000 : 5000, // Interval based on role
         refetchIntervalInBackground: true,
         enabled: isProcessing, // Only run when processing is active
         onSuccess: () => {
@@ -253,25 +253,6 @@ const RoomFrame = () => {
         const ui = ZegoUIKitPrebuilt.create(kitToken);
 
 
-        // //text emotion api function
-        // const textEmotion = async (dataText) => {
-
-        //     try {
-        //         const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
-        //             meet_id: parseInt(roomId),
-        //             host_id: currentUser.hostId,
-        //             time_stamp: getCurrentTimeTeacher(),
-        //             username: dataText.fromUser.userName,
-        //             message: dataText.message
-        //         });
-
-        //         console.log('Response from text emotion API:', response);
-
-        //     } catch (error) {
-        //         console.error('Error in audio emotion detection:', error);
-        //     }
-        // }
-
         //end the meet api call
         const endMeetingCall = async () => {
 
@@ -281,19 +262,6 @@ const RoomFrame = () => {
                     endTime: getCurrentTimeTeacher(),
                 });
                 console.log('Response from end meeting API:', response);
-                // const imagesRef = ref(storage, `InCallstudentsImage/${currentUser.pid}`); // Reference to the InCallstudentsImage directory
-
-                // // List all images in the InCallstudentsImage directory
-                // const listResponse = await listAll(imagesRef);
-                // const deletePromises = listResponse.items.map(item => {
-                //     return deleteObject(item).catch(error => {
-                //         console.error(`Error deleting image ${item.name}:`, error);
-                //     });
-                // });
-
-                // // Wait for all deletions to complete
-                // await Promise.all(deletePromises);
-                // console.log('All images in InCallstudentsImage deleted successfully.');
 
                 const folderPath = `InCallstudentsImage/${currentUser.pid}`; // Path to the folder in Firebase Storage
                 const folderRef = ref(storage, folderPath);
