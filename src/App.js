@@ -27,6 +27,7 @@ import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
 import TestSidebar from './pages/TestSidebar';
 import TestSocket from './pages/TestSocket';
+import ElevenLabTest from './pages/ElevenLabTest';
 
 
 function App() {
@@ -55,6 +56,8 @@ function App() {
         <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/test-sidebar' element={<TestSidebar />} />
         <Route path='/test-socket' element={<TestSocket />} />
+        <Route path='/test-socket' element={<TestSocket />} />
+        <Route path='/test-11' element={<ElevenLabTest />} />
         {/* <=======================Test Pages====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
