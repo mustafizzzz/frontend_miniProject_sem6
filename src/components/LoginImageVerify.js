@@ -3,8 +3,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import { useRef } from 'react';
-import { AlanContext } from '../ContextApi/AlanContext';
+import { useRef, useState, useEffect } from 'react';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { storage } from '../firbaseConfig';
 
@@ -13,35 +12,36 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: 600,
     bgcolor: 'background.paper',
     border: '1px solid #000',
-    borderRadius: 4,
+    borderRadius: 2,
     boxShadow: 15,
     p: 2,
 };
 
-const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUserNameAlan }) => {
+const LoginImageVerify = () => {
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const { openAlan, setOpenAlan, handleCloseAlanCapture } = React.useContext(AlanContext);
 
-    React.useEffect(() => {
-        if (openAlan) {
-            startCamera();
-            const captureTimeout = setTimeout(captureImage, 2000); // Capture image after 4 seconds
-            return () => clearTimeout(captureTimeout);
-        }
-    }, [openAlan]); // Run when open changes
+    const [open, setOpen] = useState(false); // State to manage modal open/close
 
+    const handleOpen = () => {
+        setOpen(true);
+        startCamera(); // Start camera when opening modal
+    };
 
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const startCamera = () => {
 
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 videoRef.current.srcObject = stream;
+                setTimeout(captureImage, 3000); // Capture image after 3 seconds
             })
             .catch(error => {
 
@@ -62,26 +62,24 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
         try {
 
             if (!imageData) {
-                setIsImageCaptured(false);
+
                 console.log('No image captured');
                 return;
             }
 
             // Create a reference to the storage location
-            const storageRef = ref(storage, `loginTemp/${formData.username || loginUserNameAlan}`);
+            const storageRef = ref(storage, `loginTemp/Demo_image_fizz`);
             // Upload the file
             const snapshot = await uploadString(storageRef, imageData, 'data_url');
             console.log('Uploaded a data URL string!');
             // Get the download URL
             const downloadURL = await getDownloadURL(snapshot.ref);
             console.log('File available at', downloadURL);
-            setLoginImage(downloadURL);
-            setIsImageCaptured(true);
 
 
         } catch (error) {
             console.error('Error uploading image:', error);
-            setIsImageCaptured(false);
+
         }
 
 
@@ -90,28 +88,36 @@ const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginUs
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
         video.style.display = 'none';
-        handleCloseAlanCapture();
+
+        handleClose();
     };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setOpen(true); // Open modal after 3 seconds
+            startCamera(); // Start camera when opening modal
+        }, 3000);
+
+        return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    }, []);
 
     return (
         <div>
             {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
-                open={openAlan}
-                onClose={handleCloseAlanCapture}
+                open={open} // Open modal based on state
+                onClose={handleClose} // Close modal
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
                     <div className='image-capture-frame d-flex flex-column justify-content-center align-items-center'>
-                        {/* <button onClick={startCamera}>Start Camera</button>
-                        <button onClick={captureImage}>Capture Image</button> */}
                         <p className='fw-bold fs-4'>Look in the camera</p>
                         <div>
-                            <video ref={videoRef} width="300" height="400" autoPlay muted></video>
+                            <video ref={videoRef} width="600" height="400" autoPlay muted></video>
                         </div>
                         <div>
-                            <canvas ref={canvasRef} width="400" height="400" style={{ display: 'none' }}></canvas>
+                            <canvas ref={canvasRef} width="600" height="400" style={{ display: 'none' }}></canvas>
                         </div>
                     </div>
 
