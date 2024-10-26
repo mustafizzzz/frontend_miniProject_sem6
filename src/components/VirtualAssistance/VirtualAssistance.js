@@ -1,116 +1,139 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import { Fab, Zoom } from '@mui/material';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import StopIcon from '@mui/icons-material/Stop';
 
 const VirtualAssistant = () => {
-
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [voices, setVoices] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [spokenCommand, setSpokenCommand] = useState("");
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef(null);
+    const listenTimeoutRef = useRef(null);
 
-    const vpnText = "A VPN, or Virtual Private Network, is a service that encrypts your internet connection to secure it and protect your privacy online.";
+
+
+    const handleToggleAssistant = async () => {
+        if (!isVisible) {
+            setIsVisible(true);
+            await handleSpeak("Hello Mustafiz");
+            startListening();
+        } else {
+            handleExit();
+        }
+    };
+
+    const handleSpeak = (text) => {
+        return new Promise((resolve) => {
+            window.speechSynthesis.cancel();
+            setIsSpeaking(true);
+
+            const utterance = new SpeechSynthesisUtterance(text);
+
+            utterance.onend = () => {
+                setIsSpeaking(false);
+                resolve();
+            };
+
+            utterance.onerror = () => {
+                setIsSpeaking(false);
+                resolve();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        });
+    };
+
+    const startListening = () => {
+        try {
+            recognitionRef.current.start();
+        } catch (error) {
+            console.error('Failed to start listening:', error);
+        }
+    };
+
+    const stopListening = () => {
+        try {
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        } catch (error) {
+            console.error('Failed to stop listening:', error);
+        }
+    };
+
+    const handleExit = async () => {
+        stopListening();
+        clearTimeout(listenTimeoutRef.current);
+        await handleSpeak("Thank you Mustafiz");
+        setIsVisible(false);
+    };
 
     useEffect(() => {
+        // Initialize speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false; // Changed to false for 6-second chunks
+        recognitionRef.current.interimResults = false;
+
+        recognitionRef.current.onstart = () => {
+            console.log('Started listening');
+            setIsListening(true);
+
+            // Set timeout to stop listening after 6 seconds
+            listenTimeoutRef.current = setTimeout(() => {
+
+                handleSpeak("Exiting see you later buddy."); // Speak before stopping
+                stopListening(); // Stop listening
+
+            }, 6000);
+        };
+
+        recognitionRef.current.onend = (event) => {
+            console.log('Stopped listening');
+            console.log('Event:', event);
+
+            setIsListening(false);
+            clearTimeout(listenTimeoutRef.current);
+        };
+
+        recognitionRef.current.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript.trim().toLowerCase();
+            console.log('Transcript:', transcript);
+
+            if (transcript === 'exit') {
+                handleExit();
+            } else {
+                await handleSpeak(`You said: ${transcript}`);
+
+                // Start listening again after speaking
+                startListening();
+            }
+        };
+
+        recognitionRef.current.onerror = (event) => {
+            console.error('Recognition error:', event);
+            // Restart listening if it's not a no-speech error
+            if (event.error !== 'no-speech' && isVisible) {
+                startListening();
+            }
+        };
+
         const handleKeyPress = (event) => {
             if (event.ctrlKey && event.key === '0') {
                 event.preventDefault();
-                setIsVisible((prev) => {
-                    if (!prev) {
-                        handleSpeak(vpnText);
-                        startListening();
-                    } else {
-                        handleSpeak("Goodbye!");
-                        stopListening(); // Stop listening
-                    }
-                    return !prev; // Toggle visibility
-                });
-
+                handleToggleAssistant();
             }
         };
 
         document.addEventListener('keydown', handleKeyPress);
-        console.log('Virtual Assistant is ready!');
 
         return () => {
             document.removeEventListener('keydown', handleKeyPress);
-            window.speechSynthesis.cancel();
-            stopListening(); // Stop listening
+            clearTimeout(listenTimeoutRef.current);
+            stopListening();
         };
-    }, []);
-
-    const handleSpeak = async (text) => {
-
-        window.speechSynthesis.cancel();
-        if (isSpeaking) {
-            setIsSpeaking(false);
-            return;
-        }
-
-        try {
-            const speech = new SpeechSynthesisUtterance(text);
-            speech.onend = () => {
-                setIsSpeaking(false);
-                window.speechSynthesis.cancel(); // Ensure cleanup after speaking
-            };
-
-            speech.onerror = (event) => {
-                console.error('Speech synthesis error:', event);
-                setIsSpeaking(false);
-                window.speechSynthesis.cancel();
-            };
-
-            // console.log(window.speechSynthesis.speak(speech));
-
-            window.speechSynthesis.speak(speech);
-            setIsSpeaking(true);
-
-
-        } catch (error) {
-            console.error('Speech synthesis failed:', error);
-            setIsSpeaking(false);
-        }
-    };
-
-    // Speech Recognition for capturing commands
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true; // Enable continuous listening
-    recognition.interimResults = false;
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[event.results.length - 1][0].transcript.trim();
-        setSpokenCommand(transcript);
-        console.log("Command:", transcript);
-
-        // Perform actions based on command
-        if (transcript.toLowerCase() === 'exit') {
-            handleSpeak("Goodbye!"); // Provide feedback on exit
-            stopListening(); // Stop listening when "exit" is detected
-            setIsVisible(false);
-        } else if (transcript.toLowerCase().includes('navigate home')) {
-            console.log('Navigating to Home...');
-            // Add navigation logic here
-        }
-        // Restart listening for further commands
-        // recognition.start();
-    };
-
-    recognition.onerror = (event) => {
-        console.error('Recognition error:', event);
-        recognition.start(); // Restart listening on error
-    };
-
-    const startListening = () => {
-        recognition.start();
-    };
-
-    const stopListening = () => {
-        recognition.stop();
-    };
+    }, [isVisible]);
 
     return (
         isVisible && (
@@ -127,18 +150,14 @@ const VirtualAssistant = () => {
                 >
                     <Fab
                         color={isSpeaking ? "secondary" : "primary"}
-                        onClick={() => {
-                            handleSpeak('Goodbye , have a nice day!');
-                            stopListening();
-                            setIsVisible(false)
-                        }}
+                        onClick={handleExit}
                         sx={{
                             boxShadow: 3,
                             '&:hover': {
                                 transform: 'scale(1.1)',
                                 transition: 'transform 0.2s ease-in-out',
                             },
-                            animation: isSpeaking ? 'pulse 1.5s ease-in-out infinite' : 'none',
+                            animation: isListening ? 'pulse 1.5s ease-in-out infinite' : 'none',
                             '@keyframes pulse': {
                                 '0%': {
                                     boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.4)',
@@ -160,9 +179,8 @@ const VirtualAssistant = () => {
                     </Fab>
                 </Box>
             </Zoom>
-
         )
-    )
+    );
 };
 
 export default VirtualAssistant;
