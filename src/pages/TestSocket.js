@@ -1,104 +1,105 @@
-import React, { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
+// import React, { useEffect, useRef, useState } from 'react';
+// import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+// let socket = io('http://localhost:5000');
 
-const TestSocket = () => {
-    const [question, setQuestion] = useState([]);
-    const [answer, setAnswer] = useState(''); // To store user's answer
-    const test_id = '6719fb40f1230bb78e7c4740'; // Example test ID
-    const chatContainerRef = useRef(null)
+// const TestSocket = () => {
+//     const [question, setQuestion] = useState([]);
+//     const [answer, setAnswer] = useState(''); // To store user's answer
+//     const test_id = '6719fb40f1230bb78e7c4740'; // Example test ID
+//     const chatContainerRef = useRef(null)
 
-    useEffect(() => {
-        if (window.location.pathname === '/test-socket') {
-            // Emit `start_test` event with the test_id when component mounts
-            socket.emit('start_test', { test_id });
+//     useEffect(() => {
 
-            // Listen for questions from the server
-            socket.on('questions', (data) => {
-                setQuestion((prevMessages) => [...prevMessages, { type: 'question', text: data }]);
-                console.log('Question received:', data);
+//         if (window.location.pathname === '/test-socket') {
+//             // Emit `start_test` event with the test_id when component mounts
+//             socket.emit('start_test', { test_id });
 
-                // Emit two functions after receiving the question
-                socket.emit('question_ack', { message: 'Question received' });
-                socket.emit('ready_for_next', { message: 'Ready for next question' });
-            });
+//             // Listen for questions from the server
+//             socket.on('questions', (data) => {
+//                 setQuestion((prevMessages) => [...prevMessages, { type: 'question', text: data }]);
+//                 console.log('Question received:', data);
 
-            //listend for the next question
-            socket.on('response', (response) => {
-                setQuestion((prevMessages) => [
-                    ...prevMessages,
-                    { type: 'question', text: response } // Add new question
-                ]);
-                console.log('Response received:', response);
-            });
+//                 // Emit two functions after receiving the question
+//                 socket.emit('question_ack', { message: 'Question received' });
+//                 socket.emit('ready_for_next', { message: 'Ready for next question' });
+//             });
 
-
-
-            // Handle errors by displaying an alert
-            socket.on('error', (errorMessage) => {
-                alert(`Error: ${errorMessage}`);
-            });
-        }
-
-        // Cleanup on component unmount
-        return () => {
-            socket.off('questions');
-            socket.off('response');
-            socket.off('error');
-        };
-    }, []);
+//             //listend for the next question
+//             socket.on('response', (response) => {
+//                 setQuestion((prevMessages) => [
+//                     ...prevMessages,
+//                     { type: 'question', text: response } // Add new question
+//                 ]);
+//                 console.log('Response received:', response);
+//             });
 
 
 
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, []);
+//             // Handle errors by displaying an alert
+//             socket.on('error', (errorMessage) => {
+//                 alert(`Error: ${errorMessage}`);
+//             });
+//         }
 
-    // Handle answer submission
-    const handleAnswerSubmit = () => {
+//         // Cleanup on component unmount
+//         return () => {
+//             socket.off('questions');
+//             socket.off('response');
+//             socket.off('error');
+//         };
+//     }, []);
 
-        if (answer.trim() !== '') {
 
-            setQuestion((prevMessages) => [
-                ...prevMessages,
-                { type: 'answer', text: answer }
-            ]);
-            // Emit the answer to the server
-            socket.emit('message', { message: answer });
 
-            setAnswer(''); // Clear the input box after submission
-        } else {
-            alert('Please enter an answer before submitting.');
-        }
-    };
+//     useEffect(() => {
+//         if (chatContainerRef.current) {
+//             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+//         }
+//     }, []);
 
-    return (
-        <div className="test-socket-container">
-            <h2>Viva Test</h2>
-            <div className="chat-box" ref={chatContainerRef}>
-                {question.map((msg, index) => (
-                    <div
-                        key={index}
-                        className={`chat-message ${msg.type === 'question' ? 'question' : 'answer'}`}
-                    >
-                        <p><strong>{msg.type === 'question' ? 'Question' : 'Your Answer'}:</strong> {msg.text}</p>
-                    </div>
-                ))}
-            </div>
-            <div className="input-container">
-                <input
-                    type="text"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    placeholder="Type your answer here"
-                />
-                <button onClick={handleAnswerSubmit}>Submit Answer</button>
-            </div>
-        </div>
-    );
-}
+//     // Handle answer submission
+//     const handleAnswerSubmit = () => {
 
-export default TestSocket
+//         if (answer.trim() !== '') {
+
+//             setQuestion((prevMessages) => [
+//                 ...prevMessages,
+//                 { type: 'answer', text: answer }
+//             ]);
+//             // Emit the answer to the server
+//             socket.emit('message', { message: answer });
+
+//             setAnswer(''); // Clear the input box after submission
+//         } else {
+//             alert('Please enter an answer before submitting.');
+//         }
+//     };
+
+//     return (
+//         <div className="test-socket-container">
+//             <h2>Viva Test</h2>
+//             <div className="chat-box" ref={chatContainerRef}>
+//                 {question.map((msg, index) => (
+//                     <div
+//                         key={index}
+//                         className={`chat-message ${msg.type === 'question' ? 'question' : 'answer'}`}
+//                     >
+//                         <p><strong>{msg.type === 'question' ? 'Question' : 'Your Answer'}:</strong> {msg.text}</p>
+//                     </div>
+//                 ))}
+//             </div>
+//             <div className="input-container">
+//                 <input
+//                     type="text"
+//                     value={answer}
+//                     onChange={(e) => setAnswer(e.target.value)}
+//                     placeholder="Type your answer here"
+//                 />
+//                 <button onClick={handleAnswerSubmit}>Submit Answer</button>
+//             </div>
+//         </div>
+//     );
+// }
+
+// export default TestSocket

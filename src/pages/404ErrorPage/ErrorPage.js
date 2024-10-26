@@ -19,7 +19,7 @@ const ErrorPage = () => {
             Sorry, the page you're looking for doesn't exist. If you think something is broken, report a problem.
           </p>
           <div className="btns">
-            <NavLink to={'/'}>return home</NavLink>
+            <NavLink to={'/login'}>return home</NavLink>
           </div>
         </div>
       </div>

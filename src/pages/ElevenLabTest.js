@@ -20,7 +20,7 @@ import { PlayArrow, Stop, VolumeUp, Settings } from '@mui/icons-material';
 
 const ElevenLabTest = () => {
     const [text, setText] = useState('');
-    const [apiKey, setApiKey] = useState('sk_6124526dcc5e20eeed692caf5203269f3b01a5bdcd852783');
+    const [apiKey, setApiKey] = useState('sk_cfa00b39624fd4f551595e6927daef5d1e1fda1ad8919117');
     const [voices, setVoices] = useState([]);
     const [selectedVoice, setSelectedVoice] = useState('');
     const [loading, setLoading] = useState(false);

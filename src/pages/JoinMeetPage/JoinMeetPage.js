@@ -1,9 +1,8 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import './JoinMeetPage.css'
 import { useNavigate } from 'react-router-dom';
 import { Alert, Backdrop, CircularProgress, Snackbar } from '@mui/material';
 import axios from 'axios';
-import { AlanContext } from '../../ContextApi/AlanContext';
 
 const JoinMeetPage = () => {
 
@@ -14,12 +13,11 @@ const JoinMeetPage = () => {
     window.stream.getTracks().forEach(track => track.stop());
     window.stream = null; // Clear the global stream reference
   }
-  const { joinCodeAlan, setJoinCodeAlan } = useContext(AlanContext);
 
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    joinCode: `${joinCodeAlan == 0 ? '123' : joinCodeAlan}`,
+    joinCode: `123`,
     meetLink: ''
   });
 

@@ -8,7 +8,6 @@ import { UserContext } from '../../ContextApi/userContex';
 import GoogleButton from 'react-google-button'
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../firbaseConfig';
-import { AlanContext } from '../../ContextApi/AlanContext';
 import TypewriterAnimation from '../../components/TypewriterAnimation/TypewriterAnimation';
 import LoginImageVerify from '../../components/LoginImageVerify';
 
@@ -27,15 +26,11 @@ const Login = () => {
 
 
   const [loginImage, setLoginImage] = useState('');
-  const [loginMethod, setLoginMethod] = useState('image'); // Default to password login
+  const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
+  const [loginType, setLoginType] = useState('');
+  const [showForm, setShowForm] = useState(false);
   const [isImageCaptured, setIsImageCaptured] = useState(false);
-  const {
-    openAlan, setOpenAlan, handleOpenAlanCapture, handleCloseAlanCapture,
-    loginUserNameAlan,
-    loginAlanType, setLoginAlanType,
-    showFormAlan, setShowFormAlan,
-    loginButtonRef, loginStatusAlan, setLoginStatusAlan
-  } = useContext(AlanContext);
+
 
   //identify the user
   // const [loginType, setLoginType] = useState('');
@@ -68,8 +63,8 @@ const Login = () => {
   };
 
   const handleLoginType = (type) => {
-    setLoginAlanType(type);
-    setShowFormAlan(true);
+    setLoginType(type);
+    setShowForm(true);
   };
 
 
@@ -104,12 +99,11 @@ const Login = () => {
   };;
 
   const studentLoginUser = async (e) => {
-    console.log('ALan status in login....', loginStatusAlan);
     setLoading(true);
     e.preventDefault();
     let newErrors = {};
 
-    if (loginUserNameAlan === '' && !formData.username) {
+    if (!formData.username) {
       newErrors.username = 'Username is required';
     }
 
@@ -134,14 +128,14 @@ const Login = () => {
 
         if (!isImageCaptured) {
           setLoading(false);
-          setLoginStatusAlan(false);
+
           setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Capture image for face ID', open: true });
           return;
         }
 
         response = await axios.post(`https://mood-lens-server.onrender.com/api/v1/user/login`,
           {
-            username: formData?.username || loginUserNameAlan,
+            username: formData?.username,
             imageUrl: loginImage
           });
         // setCurrentUser(data.data);
@@ -169,7 +163,7 @@ const Login = () => {
         response.data.message === 'Incorrect username' ||
         response.data === 'User not found') {
         setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: response.data.message || response.data || 'Error in student login', open: true });
-        setLoginStatusAlan(false);
+
         setLoading(false);
       } else {
         setCurrentUser({
@@ -180,14 +174,11 @@ const Login = () => {
         setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
         setLoading(false);
-        setLoginStatusAlan(true);
-        console.log('ALan status in login....', loginStatusAlan);
         navigate('/dashboard');
       }
 
     } catch (error) {
       setLoading(false);
-      setLoginStatusAlan(false);
       setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Error in student login', open: true });
       console.log('Error in student image loginUser', error);
 
@@ -301,11 +292,11 @@ const Login = () => {
 
                     <div className="back-icon-btn-login mb-4  d-flex justify-content-between p-2 align-items-center">
 
-                      <h1 className="card-title m-0">Login {loginAlanType ? loginAlanType : ''}</h1>
+                      <h1 className="card-title m-0">Login {loginType ? loginType : ''}</h1>
 
                       <Button onClick={() => {
-                        setShowFormAlan(false);
-                        setLoginAlanType('');
+                        setShowForm(false);
+                        setLoginType('');
                       }}
                         style={{ borderRadius: '1rem', border: 'none', padding: '0.2rem 0.8rem' }}
                         variant="outlined" className=' fw-bold mx-2 fs-3' size="large">
@@ -314,7 +305,9 @@ const Login = () => {
 
                     </div>
 
-                    {!showFormAlan && (
+                    {/*=================== Konsa Login karna he================= */}
+
+                    {!showForm && (
                       <div className="select-login-type-wrapper">
 
                         <div className="select-login-type d-flex justify-content-around align-items-center ">
@@ -338,7 +331,9 @@ const Login = () => {
                     )
                     }
 
-                    {loginAlanType === 'student' ? (
+                    {/* =============Login Types================================ */}
+
+                    {loginType === 'student' ? (
                       <form onSubmit={studentLoginUser}>
 
                         {/* username input */}
@@ -351,7 +346,7 @@ const Login = () => {
                             placeholder="name@example.com"
                             onChange={handleChange}
                             onBlur={handleBlur} // Validate onBlur
-                            value={loginUserNameAlan || formData.username}
+                            value={formData.username}
                           />
                           <label htmlFor="floatingInput">User name</label>
 
@@ -396,7 +391,7 @@ const Login = () => {
 
                         </div>
 
-                        {/* Password input */}
+                        {/* ============Password input================ */}
                         {loginMethod === 'password' &&
                           <div className="form-floating mb-4">
 
@@ -425,9 +420,9 @@ const Login = () => {
                           </div>
                         }
 
-                        {/* Image verify */}
+                        {/* ==============Image verify in progress===================== */}
 
-                        {loginMethod === 'image' &&
+                        {/* {loginMethod === 'image' &&
                           <div className="labels-main">
                             <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between"
                               onClick={() => setOpenAlan(true)}>
@@ -447,14 +442,14 @@ const Login = () => {
                               setLoginImage={setLoginImage}
                               setIsImageCaptured={setIsImageCaptured}
                               formData={formData}
-                              loginUserNameAlan={loginUserNameAlan}
+                              loginUserNameAlan={"DemoName"}
                             />
                           </div>
-                        }
+                        } */}
 
 
                         {/* Submit button */}
-                        <Button ref={loginButtonRef} type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
                           {loading ? (
                             <>
                               <CircularProgress size={24} color="inherit" className='mx-2' />
@@ -476,7 +471,7 @@ const Login = () => {
                     )
                       : null}
 
-                    {loginAlanType === 'teacher' ? (
+                    {loginType === 'teacher' ? (
                       <form onSubmit={teacherloginUser}>
 
                         {/* username input */}

@@ -13,7 +13,6 @@ import ReportsPage from './pages/ReportsPage/ReportsPage';
 import MeetingPage from './pages/MeetingPage/MeetingPage';
 import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
 import SettingPage from './pages/SettingPage/SettingPage';
-import AlanAiContainer from './components/AlanAIContainer/AlanAiContainer';
 import ChrisViewAnalytics from './components/ChrisViewAnalytics/ChrisViewAnalytics';
 import CreatMeetPage from './pages/CreateMeetPage/CreatMeetPage';
 import JoinMeetPage from './pages/JoinMeetPage/JoinMeetPage';
@@ -26,8 +25,9 @@ import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
 import TestSidebar from './pages/TestSidebar';
-import TestSocket from './pages/TestSocket';
+// import TestSocket from './pages/TestSocket'; => Commented out because it's Socket
 import ElevenLabTest from './pages/ElevenLabTest';
+import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 
 
 function App() {
@@ -55,8 +55,7 @@ function App() {
         <Route path='/test-audio-list' element={<TestAudioList />} />
         <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/test-sidebar' element={<TestSidebar />} />
-        <Route path='/test-socket' element={<TestSocket />} />
-        <Route path='/test-socket' element={<TestSocket />} />
+        {/* <Route path='/test-socket' element={<TestSocket />} /> */}
         <Route path='/test-11' element={<ElevenLabTest />} />
         {/* <=======================Test Pages====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
@@ -88,7 +87,8 @@ function App() {
 
 
       </Routes>
-      {/* <AlanAiContainer /> */}
+      <VirtualAssistant />
+
     </div>
   );
 }
