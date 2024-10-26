@@ -278,7 +278,7 @@ const Login = () => {
               <div className="col-lg-6 mb-5 mb-lg-0">
                 <h1 className="my-5 display-3 fw-bold ls-tight">
                   <TypewriterAnimation />
-                  <span className="text-primary fw-bold">MoodLens Login</span>
+                  <span className="text-primary fw-bold">AEC Login</span>
                 </h1>
                 <p style={{ color: 'hsl(217, 10%, 50.8%)' }}>
                   Revolutionize online learning with MoodLens! Seamlessly connect students and teachers through interactive video calls. Enjoy features like real-time emotion analysis, message monitoring, intuitive voice commands, and detailed meeting history tracking. Redefine education for all, making it accessible and engaging.
