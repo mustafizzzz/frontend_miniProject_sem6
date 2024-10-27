@@ -15,18 +15,25 @@ import LoginImageVerify from '../../components/LoginImageVerify';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { set } from 'firebase/database';
+import { virtualContext } from '../../ContextApi/virtualContex';
 
 
 
 const Login = () => {
 
   const { setCurrentUser } = useContext(UserContext);
+  const { loginVirtualType, virtualShowForm,
+    setVirtualShowForm, setLoginVirtualType,
+    studentVirtualName, setStudentVirtualName,
+    openImageCapture, setOpenImageCapture,
+    captureStatus, setCaptureStatus, loginButtonRef
+  } = useContext(virtualContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
 
 
   const [loginImage, setLoginImage] = useState('');
-  const [loginMethod, setLoginMethod] = useState('password'); // Default to password login
+  const [loginMethod, setLoginMethod] = useState('image'); // Default to password login
   const [loginType, setLoginType] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [isImageCaptured, setIsImageCaptured] = useState(false);
@@ -128,8 +135,8 @@ const Login = () => {
 
         if (!isImageCaptured) {
           setLoading(false);
-
-          setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Capture image for face ID', open: true });
+          setCaptureStatus(false);
+          setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: 'Unable to Capture image for face ID', open: true });
           return;
         }
 
@@ -163,7 +170,7 @@ const Login = () => {
         response.data.message === 'Incorrect username' ||
         response.data === 'User not found') {
         setSnackbarInfo({ ...snackbarInfo, severity: 'error', message: response.data.message || response.data || 'Error in student login', open: true });
-
+        setCaptureStatus(false);
         setLoading(false);
       } else {
         setCurrentUser({
@@ -266,6 +273,16 @@ const Login = () => {
 
   }
 
+  //virtual context function 
+  useEffect(() => {
+    if (studentVirtualName) {
+      setFormData((prevData) => ({
+        ...prevData,
+        username: studentVirtualName,
+      }));
+    }
+  }, [studentVirtualName]);
+
 
   return (
     <>
@@ -296,7 +313,9 @@ const Login = () => {
 
                       <Button onClick={() => {
                         setShowForm(false);
+                        setVirtualShowForm(false);
                         setLoginType('');
+                        setLoginVirtualType('');
                       }}
                         style={{ borderRadius: '1rem', border: 'none', padding: '0.2rem 0.8rem' }}
                         variant="outlined" className=' fw-bold mx-2 fs-3' size="large">
@@ -307,7 +326,7 @@ const Login = () => {
 
                     {/*=================== Konsa Login karna he================= */}
 
-                    {!showForm && (
+                    {(!showForm && !virtualShowForm) && (
                       <div className="select-login-type-wrapper">
 
                         <div className="select-login-type d-flex justify-content-around align-items-center ">
@@ -333,7 +352,7 @@ const Login = () => {
 
                     {/* =============Login Types================================ */}
 
-                    {loginType === 'student' ? (
+                    {(loginType === 'student' || loginVirtualType === 'student') ? (
                       <form onSubmit={studentLoginUser}>
 
                         {/* username input */}
@@ -422,10 +441,10 @@ const Login = () => {
 
                         {/* ==============Image verify in progress===================== */}
 
-                        {/* {loginMethod === 'image' &&
+                        {loginMethod === 'image' &&
                           <div className="labels-main">
                             <div className="lable-field-box d-flex border px-3 py-2  mb-3 align-items-center justify-content-between"
-                              onClick={() => setOpenAlan(true)}>
+                              onClick={() => setOpenImageCapture(true)}>
                               <div className="text-div d-flex align-items-center">
                                 <i className="bi bi-card-image fs-4 me-3"></i>
                                 <p className='p-0 mb-0'>Image verification</p>
@@ -442,14 +461,14 @@ const Login = () => {
                               setLoginImage={setLoginImage}
                               setIsImageCaptured={setIsImageCaptured}
                               formData={formData}
-                              loginUserNameAlan={"DemoName"}
+                              loginVirtualName={studentVirtualName}
                             />
                           </div>
-                        } */}
+                        }
 
 
                         {/* Submit button */}
-                        <Button type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
+                        <Button ref={loginButtonRef} type='submit' variant="contained" className='w-100 mb-2 fw-bold' disabled={loading}>
                           {loading ? (
                             <>
                               <CircularProgress size={24} color="inherit" className='mx-2' />

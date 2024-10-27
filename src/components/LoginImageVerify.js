@@ -6,6 +6,8 @@ import Modal from '@mui/material/Modal';
 import { useRef, useState, useEffect } from 'react';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { storage } from '../firbaseConfig';
+import { virtualContext } from '../ContextApi/virtualContex';
+import { set } from 'firebase/database';
 
 const style = {
     position: 'absolute',
@@ -20,21 +22,12 @@ const style = {
     p: 2,
 };
 
-const LoginImageVerify = () => {
+const LoginImageVerify = ({ setLoginImage, setIsImageCaptured, formData, loginVirtualName }) => {
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
 
-    const [open, setOpen] = useState(false); // State to manage modal open/close
-
-    const handleOpen = () => {
-        setOpen(true);
-        startCamera(); // Start camera when opening modal
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
+    // const [open, setOpen] = useState(false); // State to manage modal open/close
 
     const startCamera = () => {
 
@@ -62,18 +55,20 @@ const LoginImageVerify = () => {
         try {
 
             if (!imageData) {
-
+                setIsImageCaptured(false);
                 console.log('No image captured');
                 return;
             }
 
             // Create a reference to the storage location
-            const storageRef = ref(storage, `loginTemp/Demo_image_fizz`);
+            const storageRef = ref(storage, `loginTemp/Demo_image_fizz/${loginVirtualName}`);
             // Upload the file
             const snapshot = await uploadString(storageRef, imageData, 'data_url');
             console.log('Uploaded a data URL string!');
             // Get the download URL
             const downloadURL = await getDownloadURL(snapshot.ref);
+            setLoginImage(downloadURL);
+            setIsImageCaptured(true);
             console.log('File available at', downloadURL);
 
 
@@ -89,24 +84,35 @@ const LoginImageVerify = () => {
         tracks.forEach(track => track.stop());
         video.style.display = 'none';
 
-        handleClose();
+        setOpenImageCapture(false);
     };
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setOpen(true); // Open modal after 3 seconds
-            startCamera(); // Start camera when opening modal
-        }, 3000);
+    const { openImageCapture, setOpenImageCapture } = React.useContext(virtualContext);
 
-        return () => clearTimeout(timer); // Cleanup the timer on component unmount
-    }, []);
+    React.useEffect(() => {
+        if (openImageCapture) {
+            console.log('Image verification runs');
+            startCamera();
+            const captureTimeout = setTimeout(captureImage, 2000); // Capture image after 2 seconds
+            return () => clearTimeout(captureTimeout);
+        }
+    }, [openImageCapture]); // Run when open changes
+
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         setOpen(true); // Open modal after 3 seconds
+    //         startCamera(); // Start camera when opening modal
+    //     }, 3000);
+
+    //     return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    // }, []);
 
     return (
         <div>
             {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
-                open={open} // Open modal based on state
-                onClose={handleClose} // Close modal
+                open={openImageCapture}
+                onClose={() => setOpenImageCapture(false)}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >

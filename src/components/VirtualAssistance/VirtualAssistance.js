@@ -1,219 +1,293 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import { Fab, Zoom } from '@mui/material';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+import Face2Icon from '@mui/icons-material/Face2';
 import StopIcon from '@mui/icons-material/Stop';
+import { set } from 'firebase/database';
+import { virtualContext } from '../../ContextApi/virtualContex';
+import { useNavigate } from 'react-router-dom';
+
+const soundOpen = new Audio('/open_sound_1.mp3');
+const soundListen = new Audio('/listen_sound_1.mp3');
+const soundClose = new Audio('/close_sound_1.mp3');
 
 const VirtualAssistant = () => {
-    const [isSpeaking, setIsSpeaking] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-    const [isListening, setIsListening] = useState(false);
-    const recognitionRef = useRef(null);
-    const shouldListenRef = useRef(false);
+	const { loginVirtualType, setLoginVirtualType,
+		virtualShowForm, setVirtualShowForm,
+		studentVirtualName, setStudentVirtualName,
+		openImageCapture, setOpenImageCapture,
+		captureStatus, setCaptureStatus, loginButtonRef
+	} = useContext(virtualContext);
+	const [validator, setValidator] = useState(false);
+	const navigate = useNavigate();
+	const [isSpeaking, setIsSpeaking] = useState(false);
+	const [isVisible, setIsVisible] = useState(false);
+	const [listening, setListening] = useState(false);
+	const recognitionRef = useRef(null);
+	const stopListeningTimeoutRef = useRef(null);
+	const previousCaptureStatusRef = useRef(captureStatus);
+	let username;
 
-    const initializeRecognition = () => {
+	useEffect(() => {
 
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("Sorry, your browser doesn't support Web Speech API.");
-            return;
-        }
+		// Initialize SpeechRecognition
+		if ('webkitSpeechRecognition' in window) {
+			recognitionRef.current = new window.webkitSpeechRecognition();
+			recognitionRef.current.continuous = true;
+			recognitionRef.current.interimResults = false;
+			recognitionRef.current.lang = 'en-US';
 
-        const SpeechRecognition = window.webkitSpeechRecognition;
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
+			recognitionRef.current.onresult = (event) => {
+				let current = event.resultIndex;
+				let spokenText = event.results[current][0].transcript;
+				spokenText = spokenText.toLowerCase().trim();
+				console.log("Captured text:", spokenText);
 
-        recognitionRef.current.onstart = () => {
-            console.log("Started listening...");
-            setIsListening(true);
-        };
+				//========commands for virtual assistant=========
+				// switch (true) {
+				// 	case spokenText.includes('start login'):
+				// 		setLoginVirtualType('student');
+				// 		setVirtualShowForm(true);
+				// 		navigate('/login');
+				// 		handleSpeak('Redirecting to login page. Please provide your name.');
+				// 		break;
 
-        recognitionRef.current.onresult = (event) => {
-            const lastIndex = event.results.length - 1;
-            const spokenText = event.results[lastIndex][0].transcript;
-            console.log("Spoken text:", spokenText);
+				// 	case spokenText.includes('start register'):
+				// 		navigate('/register');
+				// 		handleSpeak('Redirecting to register page');
+				// 		break;
 
-            handleSpeak(spokenText);
-        };
+				// 	case spokenText.includes('my name is'):
+				// 		username = spokenText.replace('my name is', '').trim();
+				// 		handleSpeak(`Your username is ${username} please verify`);
+				// 		setValidator(true);
+				// 		break;
 
-        recognitionRef.current.onend = () => {
-            console.log("Recognition ended");
-            // Check shouldListenRef instead of listening state
-            if (shouldListenRef.current) {
-                console.log("Restarting recognition...");
-                setTimeout(() => {
-                    try {
-                        console.log("Successfully restarted");
+				// 	case spokenText.includes('yes') && validator:
+				// 		setStudentVirtualName('user12');
+				// 		handleSpeak('Please be in frame for image verification');
+				// 		setOpenImageCapture(true);
+				// 		break;
 
-                        recognitionRef.current.start();
-                    } catch (error) {
-                        console.error("Error restarting recognition:", error);
-                        initializeRecognition();
-                        recognitionRef.current.start();
-                    }
-                }, 2000); // Increased delay slightly
-            } else {
-                setIsListening(false);
-            }
-        };
+				// 	case spokenText.split(' ').includes('no') && validator:
+				// 		handleSpeak('Okay, please say your username again.');
+				// 		setValidator(false); // Reset to not expecting password
+				// 		break;
 
-        recognitionRef.current.onerror = (event) => {
-            console.error("Recognition error:", event.error);
-            if (event.error === 'not-allowed') {
-                alert("Please allow microphone access to use this feature.");
-                shouldListenRef.current = false;
-                setIsListening(false);
-            } else if (event.error === 'no-speech') {
-                console.log("No speech detected, continuing...");
-                if (shouldListenRef.current) {
-                    recognitionRef.current.stop();
-                }
-            } else {
-                if (shouldListenRef.current) {
-                    recognitionRef.current.stop();
-                }
-            }
-        };
-    };
+				// 	default:
+				// 		handleSpeak('Sorry, I did not understand that');
+				// }
+				// handleSpeak(spokenText); // Speak the captured text
+				handleCommand(spokenText);
+			};
 
-    useEffect(() => {
-        initializeRecognition();
-        return () => {
-            shouldListenRef.current = false;
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-
-        const handleKeyPress = (event) => {
-            if (event.ctrlKey && event.key === '0') {
-                event.preventDefault();
-                handleToggleAssistant();
-            }
-        };
-        document.addEventListener('keydown', handleKeyPress);
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-            stopListening();
-        }
-    }, [])
+			recognitionRef.current.onend = () => {
 
 
+				console.log("Speech recognition ended.");
 
+			}
 
-    const handleToggleAssistant = () => {
-        if (!isVisible) {
-            setIsVisible(true);
-            handleSpeak("Hello Mustafiz");
-            startListening();
-        } else {
-            handleExit();
-        }
-    };
+			recognitionRef.current.onerror = (event) => {
+				console.error("Speech recognition error:", event.error);
+				stopListening(); // Stop listening if there's an error
+			};
+		} else {
+			alert("Sorry, your browser does not support the Web Speech API.");
+		}
+	}, []);
 
-    const handleSpeak = (text) => {
+	useEffect(() => {
+		const handleKeyPress = (event) => {
+			if (event.ctrlKey && event.key === '0') {
+				event.preventDefault();
+				handleToggleAssistant();
+			} if (event.ctrlKey && event.key === 'ArrowRight') {
+				event.preventDefault();
 
-        window.speechSynthesis.cancel();
-        setIsSpeaking(true);
-        const utterance = new SpeechSynthesisUtterance(text);
+				stopListening();
+				startListening();
 
-        utterance.onend = () => {
-            console.log("Finished speaking");
+			}
+		};
+		document.addEventListener('keydown', handleKeyPress);
+		return () => {
+			recognitionRef.current = null;
+			document.removeEventListener('keydown', handleKeyPress);
+			stopListening();
+		};
+	}, []);
 
-            setIsSpeaking(false);
+	// Command handler function
+	const handleCommand = (spokenText) => {
+		if (spokenText.includes('start login')) {
+			setLoginVirtualType('student');
+			setVirtualShowForm(true);
+			navigate('/login');
+			handleSpeak('Redirecting to login page. Please provide your name.');
+		} else if (spokenText.includes('start register')) {
+			navigate('/register');
+			handleSpeak('Redirecting to register page');
+		} else if (spokenText.includes('my name is')) {
+			username = spokenText.replace('my name is', '').trim();
+			handleSpeak(`Your username is ${username}. Please verify.`);
+			setValidator(true);
+		} else if (spokenText.includes('yes correct')) {
+			setStudentVirtualName(username);
+			handleSpeak('Please be in frame for image verification');
+			setOpenImageCapture(true);
+			setTimeout(() => {
+				if (captureStatus) {
+					handleSpeak('Face ID successfully Captured. Wait for few Second');
+					loginButtonRef.current.click();
+				} else {
+					handleSpeak('Face ID Capturing failed. Please try again.');
+					setCaptureStatus(true);
+				}
+			}, 10000);
+		} else if (spokenText.includes('no')) {
+			handleSpeak('Okay, please say your username again.');
+			setValidator(false); // Reset validator
+		} else {
+			handleSpeak('Sorry, I did not understand that');
+		}
+	};
 
-        };
+	const handleToggleAssistant = () => {
+		setIsVisible((prevVisible) => {
+			if (!prevVisible) {
+				soundOpen.play();
+				soundOpen.addEventListener('ended', startListening);
+			} else {
+				soundClose.play();
+				handleExit();
+			}
+			return !prevVisible;
+		});
+	};
 
-        utterance.onerror = () => {
-            setIsSpeaking(false);
+	const handleSpeak = (text) => {
+		console.log("Speaking:", text);
 
-        };
+		window.speechSynthesis.cancel();
+		setIsSpeaking(true);
+		stopListening(); // Ensure it’s not listening while speaking
 
-        window.speechSynthesis.speak(utterance);
+		const utterance = new SpeechSynthesisUtterance(text);
+		utterance.pitch = 1;
+		utterance.rate = 0.9;
+		utterance.volume = 1;
 
-    };
+		utterance.onend = () => {
+			setIsSpeaking(false);
+			startListening(); // Resume listening after speaking
+		};
 
-    const startListening = () => {
-        shouldListenRef.current = true;
-        setIsListening(true);
-        initializeRecognition();
-        try {
-            recognitionRef.current.start();
-        } catch (error) {
-            console.error("Error starting recognition:", error);
-        }
-    };
+		utterance.onerror = () => {
+			setIsSpeaking(false);
+			startListening();
+		};
 
-    const stopListening = () => {
-        shouldListenRef.current = false;
-        setIsListening(false);
-        if (recognitionRef.current) {
-            try {
-                recognitionRef.current.stop();
-            } catch (error) {
-                console.error("Error stopping recognition:", error);
-            }
-        }
-    };
+		window.speechSynthesis.speak(utterance);
+	};
 
-    const handleExit = () => {
-        stopListening();
-        handleSpeak("Thank you Mustafiz");
-        setIsVisible(false);
-    };
+	const startListening = () => {
 
+		if (recognitionRef.current && !isSpeaking) {
 
-    return (
-        isVisible && (
-            <Zoom in={isVisible} timeout={500}>
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        bottom: 32,
-                        right: 32,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <Fab
-                        color={isSpeaking ? "primary" : "secondary"}
-                        onClick={handleExit}
-                        sx={{
-                            boxShadow: 3,
-                            '&:hover': {
-                                transform: 'scale(1.1)',
-                                transition: 'transform 0.2s ease-in-out',
-                            },
-                            animation: isListening ? 'pulse 1.5s ease-in-out infinite' : 'none',
-                            '@keyframes pulse': {
-                                '0%': {
-                                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.4)',
-                                },
-                                '70%': {
-                                    boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)',
-                                },
-                                '100%': {
-                                    boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)',
-                                },
-                            },
-                        }}
-                    >
-                        {isSpeaking ? (
-                            <SmartToyIcon sx={{ fontSize: 24 }} />
+			try {
+				// First stop any existing recognition
+				if (listening) {
+					recognitionRef.current.stop();
+					clearTimeout(stopListeningTimeoutRef.current);
+				}
+				console.log("Listening for 6 seconds...");
+				setListening(true);
+				soundListen.play();
+				recognitionRef.current.start();
 
-                        ) : (
-                            <StopIcon sx={{ fontSize: 24 }} />
-                        )}
-                    </Fab>
-                </Box>
-            </Zoom>
-        )
-    );
+				// Stop listening after 6 seconds, ensuring strict timing
+				stopListeningTimeoutRef.current = setTimeout(() => {
+					recognitionRef.current.stop();
+					console.log("Speech recognition stopped after 6 seconds.");
+					setListening(false);
+				}, 8000);
+			} catch (error) {
+				console.error("Error starting speech recognition:", error);
+				stopListening();
+
+			}
+		}
+	};
+
+	const stopListening = () => {
+		try {
+			if (recognitionRef.current) {
+				recognitionRef.current.stop();
+			}
+		} catch (error) {
+			console.error("Error stopping speech recognition:", error);
+		}
+		clearTimeout(stopListeningTimeoutRef.current);
+		setListening(false);
+	};
+
+	const handleExit = () => {
+		stopListening();
+		setIsVisible(false);
+	};
+
+	// New effect to handle image capture status changes
+	useEffect(() => {
+		if (captureStatus !== previousCaptureStatusRef.current && openImageCapture) {
+			if (captureStatus === true) {
+				handleSpeak('Face ID successfully matched. You can proceed.');
+			} else if (captureStatus === false) {
+				handleSpeak('Face ID verification failed. Please try again.');
+			}
+			previousCaptureStatusRef.current = captureStatus;
+		}
+	}, [captureStatus, openImageCapture]);
+
+	return (
+		isVisible && (
+			<Zoom in={isVisible} timeout={500}>
+				<Box
+					sx={{
+						position: 'fixed',
+						bottom: 32,
+						right: 32,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center'
+					}}
+				>
+					<Fab
+						color={isSpeaking ? "primary" : "secondary"}
+						onClick={startListening}
+						sx={{
+							boxShadow: 3,
+							'&:hover': {
+								transform: 'scale(1.1)',
+								transition: 'transform 0.2s ease-in-out',
+							},
+							animation: listening ? 'pulse 1.5s ease-in-out infinite' : 'none',
+							'@keyframes pulse': {
+								'0%': { boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.4)' },
+								'70%': { boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)' },
+								'100%': { boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)' },
+							},
+						}}
+					>
+						{isSpeaking ?
+							<Face2Icon sx={{ fontSize: 24 }} /> :
+							<StopIcon sx={{ fontSize: 24 }} />
+						}
+					</Fab>
+				</Box>
+			</Zoom>
+		)
+	);
 };
 
 export default VirtualAssistant;
