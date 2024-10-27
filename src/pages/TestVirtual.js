@@ -1,91 +1,112 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function TestVirtual() {
     const [listening, setListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const recognitionRef = useRef(null);
-    const speakingRef = useRef(false); // To track if speaking is in progress
+    const shouldListenRef = useRef(false); // Add this to track listening state
 
-    useEffect(() => {
+    const initializeRecognition = () => {
         if (!('webkitSpeechRecognition' in window)) {
             alert("Sorry, your browser doesn't support Web Speech API.");
             return;
         }
 
-        // Initialize SpeechRecognition
         const SpeechRecognition = window.webkitSpeechRecognition;
         recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false; // Listen for each sentence separately
+        recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = false;
         recognitionRef.current.lang = 'en-US';
 
-        // When listening starts
         recognitionRef.current.onstart = () => {
-            console.log("Listening...");
+            console.log("Started listening...");
+            setListening(true);
         };
 
-        // When listening result is received
         recognitionRef.current.onresult = (event) => {
-            const spokenText = event.results[0][0].transcript;
-            setTranscript(spokenText);
-            speakText(spokenText); // Speak the recognized text
+            const lastIndex = event.results.length - 1;
+            const spokenText = event.results[lastIndex][0].transcript;
+            setTranscript(prevTranscript => prevTranscript + "__" + spokenText);
+            speakText(spokenText);
         };
 
-        // When listening stops naturally or due to stop call
         recognitionRef.current.onend = () => {
-            if (listening && !speakingRef.current) {
-                setTimeout(() => startListening(), 500); // Restart listening after speaking
+            console.log("Recognition ended");
+            // Check shouldListenRef instead of listening state
+            if (shouldListenRef.current) {
+                console.log("Restarting recognition...");
+                setTimeout(() => {
+                    try {
+                        recognitionRef.current.start();
+                    } catch (error) {
+                        console.error("Error restarting recognition:", error);
+                        initializeRecognition();
+                        recognitionRef.current.start();
+                    }
+                }, 2000); // Increased delay slightly
+            } else {
+                setListening(false);
             }
         };
 
         recognitionRef.current.onerror = (event) => {
             console.error("Recognition error:", event.error);
+            if (event.error === 'not-allowed') {
+                alert("Please allow microphone access to use this feature.");
+                shouldListenRef.current = false;
+                setListening(false);
+            } else if (event.error === 'no-speech') {
+                console.log("No speech detected, continuing...");
+                if (shouldListenRef.current) {
+                    recognitionRef.current.stop();
+                }
+            } else {
+                if (shouldListenRef.current) {
+                    recognitionRef.current.stop();
+                }
+            }
         };
+    };
 
+    useEffect(() => {
+        initializeRecognition();
         return () => {
-            if (recognitionRef.current) recognitionRef.current.stop();
+            shouldListenRef.current = false;
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
         };
-    }, [listening]);
+    }, []);
 
-    // Start listening function
     const startListening = () => {
-        if (recognitionRef.current && !speakingRef.current) {
-            recognitionRef.current.start();
-        }
-    };
-
-    // Stop listening function
-    const stopListening = () => {
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-        }
-    };
-
-    // Handle Start button
-    const handleStart = () => {
+        setTranscript('');
+        shouldListenRef.current = true;
         setListening(true);
-        startListening();
+
+        initializeRecognition();
+        try {
+            recognitionRef.current.start();
+        } catch (error) {
+            console.error("Error starting recognition:", error);
+        }
     };
 
-    // Handle Exit button
-    const handleExit = () => {
+    const stopListening = () => {
+        shouldListenRef.current = false;
         setListening(false);
-        stopListening();
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop();
+            } catch (error) {
+                console.error("Error stopping recognition:", error);
+            }
+        }
     };
 
-    // Function to speak recognized text
     const speakText = (text) => {
-        stopListening(); // Stop listening while speaking
-        speakingRef.current = true;
-
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.onend = () => {
-            speakingRef.current = false;
-
-            setTimeout(() => startListening(), 2000); // Restart listening after speaking
-
             console.log("Speaking ended");
-
         };
         speechSynthesis.speak(utterance);
     };
@@ -93,11 +114,57 @@ function TestVirtual() {
     return (
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <h2>Voice Repeater</h2>
-            <p>{transcript}</p>
+            <div style={{
+                maxHeight: '200px',
+                overflowY: 'auto',
+                margin: '20px auto',
+                padding: '10px',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                width: '80%',
+                backgroundColor: '#f9f9f9'
+            }}>
+                {transcript.split('\n').map((line, index) => (
+                    line && <p key={index} style={{ margin: '5px 0' }}>{line}</p>
+                ))}
+            </div>
             {!listening ? (
-                <button onClick={handleStart}>Start</button>
+                <button
+                    onClick={startListening}
+                    style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        transition: 'background-color 0.3s'
+                    }}
+                >
+                    Start Listening
+                </button>
             ) : (
-                <button onClick={handleExit}>Exit</button>
+                <button
+                    onClick={stopListening}
+                    style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        transition: 'background-color 0.3s'
+                    }}
+                >
+                    Stop Listening
+                </button>
+            )}
+            {listening && (
+                <p style={{ color: '#4CAF50', marginTop: '10px' }}>
+                    Listening... Speak something!
+                </p>
             )}
         </div>
     );

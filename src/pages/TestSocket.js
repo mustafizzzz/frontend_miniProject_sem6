@@ -1,13 +1,18 @@
 // import React, { useEffect, useRef, useState } from 'react';
 // import io from 'socket.io-client';
 
-// let socket = io('http://localhost:5000');
+// let socket = io('https://mood-lens-server.onrender.com');
+
+// console.log('Socket', socket);
+
 
 // const TestSocket = () => {
 //     const [question, setQuestion] = useState([]);
 //     const [answer, setAnswer] = useState(''); // To store user's answer
 //     const test_id = '6719fb40f1230bb78e7c4740'; // Example test ID
 //     const chatContainerRef = useRef(null)
+//     console.log('Check', process.env.REACT_APP_DEPLOY_URL);
+
 
 //     useEffect(() => {
 
