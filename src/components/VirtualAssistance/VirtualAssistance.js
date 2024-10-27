@@ -9,115 +9,85 @@ const VirtualAssistant = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef(null);
-    const listenTimeoutRef = useRef(null);
+    const shouldListenRef = useRef(false);
 
+    const initializeRecognition = () => {
 
-
-    const handleToggleAssistant = async () => {
-        if (!isVisible) {
-            setIsVisible(true);
-            await handleSpeak("Hello Mustafiz");
-            startListening();
-        } else {
-            handleExit();
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Sorry, your browser doesn't support Web Speech API.");
+            return;
         }
-    };
 
-    const handleSpeak = (text) => {
-        return new Promise((resolve) => {
-            window.speechSynthesis.cancel();
-            setIsSpeaking(true);
-
-            const utterance = new SpeechSynthesisUtterance(text);
-
-            utterance.onend = () => {
-                setIsSpeaking(false);
-                resolve();
-            };
-
-            utterance.onerror = () => {
-                setIsSpeaking(false);
-                resolve();
-            };
-
-            window.speechSynthesis.speak(utterance);
-        });
-    };
-
-    const startListening = () => {
-        try {
-            recognitionRef.current.start();
-        } catch (error) {
-            console.error('Failed to start listening:', error);
-        }
-    };
-
-    const stopListening = () => {
-        try {
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
-            }
-        } catch (error) {
-            console.error('Failed to stop listening:', error);
-        }
-    };
-
-    const handleExit = async () => {
-        stopListening();
-        clearTimeout(listenTimeoutRef.current);
-        await handleSpeak("Thank you Mustafiz");
-        setIsVisible(false);
-    };
-
-    useEffect(() => {
-        // Initialize speech recognition
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognition = window.webkitSpeechRecognition;
         recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false; // Changed to false for 6-second chunks
+        recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'en-US';
 
         recognitionRef.current.onstart = () => {
-            console.log('Started listening');
+            console.log("Started listening...");
             setIsListening(true);
-
-            // Set timeout to stop listening after 6 seconds
-            listenTimeoutRef.current = setTimeout(() => {
-
-                handleSpeak("Exiting see you later buddy."); // Speak before stopping
-                stopListening(); // Stop listening
-
-            }, 6000);
         };
 
-        recognitionRef.current.onend = (event) => {
-            console.log('Stopped listening');
-            console.log('Event:', event);
+        recognitionRef.current.onresult = (event) => {
+            const lastIndex = event.results.length - 1;
+            const spokenText = event.results[lastIndex][0].transcript;
+            console.log("Spoken text:", spokenText);
 
-            setIsListening(false);
-            clearTimeout(listenTimeoutRef.current);
+            handleSpeak(spokenText);
         };
 
-        recognitionRef.current.onresult = async (event) => {
-            const transcript = event.results[0][0].transcript.trim().toLowerCase();
-            console.log('Transcript:', transcript);
+        recognitionRef.current.onend = () => {
+            console.log("Recognition ended");
+            // Check shouldListenRef instead of listening state
+            if (shouldListenRef.current) {
+                console.log("Restarting recognition...");
+                setTimeout(() => {
+                    try {
+                        console.log("Successfully restarted");
 
-            if (transcript === 'exit') {
-                handleExit();
+                        recognitionRef.current.start();
+                    } catch (error) {
+                        console.error("Error restarting recognition:", error);
+                        initializeRecognition();
+                        recognitionRef.current.start();
+                    }
+                }, 2000); // Increased delay slightly
             } else {
-                await handleSpeak(`You said: ${transcript}`);
-
-                // Start listening again after speaking
-                startListening();
+                setIsListening(false);
             }
         };
 
         recognitionRef.current.onerror = (event) => {
-            console.error('Recognition error:', event);
-            // Restart listening if it's not a no-speech error
-            if (event.error !== 'no-speech' && isVisible) {
-                startListening();
+            console.error("Recognition error:", event.error);
+            if (event.error === 'not-allowed') {
+                alert("Please allow microphone access to use this feature.");
+                shouldListenRef.current = false;
+                setIsListening(false);
+            } else if (event.error === 'no-speech') {
+                console.log("No speech detected, continuing...");
+                if (shouldListenRef.current) {
+                    recognitionRef.current.stop();
+                }
+            } else {
+                if (shouldListenRef.current) {
+                    recognitionRef.current.stop();
+                }
             }
         };
+    };
+
+    useEffect(() => {
+        initializeRecognition();
+        return () => {
+            shouldListenRef.current = false;
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
 
         const handleKeyPress = (event) => {
             if (event.ctrlKey && event.key === '0') {
@@ -125,15 +95,77 @@ const VirtualAssistant = () => {
                 handleToggleAssistant();
             }
         };
-
         document.addEventListener('keydown', handleKeyPress);
-
         return () => {
             document.removeEventListener('keydown', handleKeyPress);
-            clearTimeout(listenTimeoutRef.current);
             stopListening();
+        }
+    }, [])
+
+
+
+
+    const handleToggleAssistant = () => {
+        if (!isVisible) {
+            setIsVisible(true);
+            handleSpeak("Hello Mustafiz");
+            startListening();
+        } else {
+            handleExit();
+        }
+    };
+
+    const handleSpeak = (text) => {
+
+        window.speechSynthesis.cancel();
+        setIsSpeaking(true);
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        utterance.onend = () => {
+            console.log("Finished speaking");
+
+            setIsSpeaking(false);
+
         };
-    }, [isVisible]);
+
+        utterance.onerror = () => {
+            setIsSpeaking(false);
+
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+    };
+
+    const startListening = () => {
+        shouldListenRef.current = true;
+        setIsListening(true);
+        initializeRecognition();
+        try {
+            recognitionRef.current.start();
+        } catch (error) {
+            console.error("Error starting recognition:", error);
+        }
+    };
+
+    const stopListening = () => {
+        shouldListenRef.current = false;
+        setIsListening(false);
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop();
+            } catch (error) {
+                console.error("Error stopping recognition:", error);
+            }
+        }
+    };
+
+    const handleExit = () => {
+        stopListening();
+        handleSpeak("Thank you Mustafiz");
+        setIsVisible(false);
+    };
+
 
     return (
         isVisible && (
@@ -149,7 +181,7 @@ const VirtualAssistant = () => {
                     }}
                 >
                     <Fab
-                        color={isSpeaking ? "secondary" : "primary"}
+                        color={isSpeaking ? "primary" : "secondary"}
                         onClick={handleExit}
                         sx={{
                             boxShadow: 3,
@@ -172,9 +204,10 @@ const VirtualAssistant = () => {
                         }}
                     >
                         {isSpeaking ? (
-                            <StopIcon sx={{ fontSize: 24 }} />
-                        ) : (
                             <SmartToyIcon sx={{ fontSize: 24 }} />
+
+                        ) : (
+                            <StopIcon sx={{ fontSize: 24 }} />
                         )}
                     </Fab>
                 </Box>

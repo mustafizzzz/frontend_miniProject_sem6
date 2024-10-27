@@ -1,0 +1,278 @@
+import React,
+{
+useState,
+useEffect,
+useRef
+}
+
+from 'react';
+import Box from '@mui/material/Box';
+
+import {
+    Fab,
+    Zoom
+}
+
+from '@mui/material';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import StopIcon from '@mui/icons-material/Stop';
+
+const VirtualAssistant=()=> {
+    const [isSpeaking,
+    setIsSpeaking]=useState(false);
+    const [isVisible,
+    setIsVisible]=useState(false);
+    const [isListening,
+    setIsListening]=useState(false);
+    const recognitionRef=useRef(null);
+    const listenTimeoutRef=useRef(null);
+
+
+
+    const handleToggleAssistant=async ()=> {
+        if ( !isVisible) {
+            setIsVisible(true);
+            await handleSpeak("Hello Mustafiz");
+            startListening();
+        }
+
+        else {
+            handleExit();
+        }
+    }
+
+    ;
+
+    const handleSpeak=(text)=> {
+        return new Promise((resolve)=> {
+                window.speechSynthesis.cancel();
+                setIsSpeaking(true);
+
+                const utterance=new SpeechSynthesisUtterance(text);
+
+                utterance.onend=()=> {
+                    setIsSpeaking(false);
+                    resolve();
+                }
+
+                ;
+
+                utterance.onerror=()=> {
+                    setIsSpeaking(false);
+                    resolve();
+                }
+
+                ;
+
+                window.speechSynthesis.speak(utterance);
+            });
+    }
+
+    ;
+
+    const startListening=()=> {
+        try {
+            recognitionRef.current.start();
+        }
+
+        catch (error) {
+            console.error('Failed to start listening:', error);
+        }
+    }
+
+    ;
+
+    const stopListening=()=> {
+        try {
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        }
+
+        catch (error) {
+            console.error('Failed to stop listening:', error);
+        }
+    }
+
+    ;
+
+    const handleExit=async ()=> {
+        stopListening();
+        clearTimeout(listenTimeoutRef.current);
+        await handleSpeak("Thank you Mustafiz");
+        setIsVisible(false);
+    }
+
+    ;
+
+    useEffect(()=> {
+            // Initialize speech recognition
+            const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognitionRef.current=new SpeechRecognition();
+            recognitionRef.current.continuous=false; // Changed to false for 6-second chunks
+            recognitionRef.current.interimResults=false;
+
+            recognitionRef.current.onstart=()=> {
+                console.log('Started listening');
+                setIsListening(true);
+
+                // Set timeout to stop listening after 6 seconds
+                listenTimeoutRef.current=setTimeout(()=> {
+
+                        handleSpeak("Exiting see you later buddy."); // Speak before stopping
+                        stopListening(); // Stop listening
+
+                    }
+
+                    , 6000);
+            }
+
+            ;
+
+            recognitionRef.current.onend=(event)=> {
+                console.log('Stopped listening');
+                console.log('Event:', event);
+
+                setIsListening(false);
+                clearTimeout(listenTimeoutRef.current);
+            }
+
+            ;
+
+            recognitionRef.current.onresult=async (event)=> {
+                const transcript=event.results[0][0].transcript.trim().toLowerCase();
+                console.log('Transcript:', transcript);
+
+                if (transcript==='exit') {
+                    handleExit();
+                }
+
+                else {
+                    await handleSpeak(`You said: $ {
+                            transcript
+                        }
+
+                        `);
+
+                    // Start listening again after speaking
+                    startListening();
+                }
+            }
+
+            ;
+
+            recognitionRef.current.onerror=(event)=> {
+                console.error('Recognition error:', event);
+
+                // Restart listening if it's not a no-speech error
+                if (event.error !=='no-speech' && isVisible) {
+                    startListening();
+                }
+            }
+
+            ;
+
+            const handleKeyPress=(event)=> {
+                if (event.ctrlKey && event.key==='0') {
+                    event.preventDefault();
+                    handleToggleAssistant();
+                }
+            }
+
+            ;
+
+            document.addEventListener('keydown', handleKeyPress);
+
+            return ()=> {
+                document.removeEventListener('keydown', handleKeyPress);
+                clearTimeout(listenTimeoutRef.current);
+                stopListening();
+            }
+
+            ;
+        }
+
+        , [isVisible]);
+
+    return (isVisible && (<Zoom in= {
+                isVisible
+            }
+
+            timeout= {
+                500
+            }
+
+            > <Box sx= {
+                    {
+                    position: 'fixed',
+                    bottom: 32,
+                    right: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }
+            }
+
+            > <Fab color= {
+                isSpeaking ? "secondary" : "primary"
+            }
+
+            onClick= {
+                handleExit
+            }
+
+            sx= {
+                    {
+
+                    boxShadow: 3,
+                    '&:hover': {
+                        transform: 'scale(1.1)',
+                        transition: 'transform 0.2s ease-in-out',
+                    }
+
+                    ,
+                    animation: isListening ? 'pulse 1.5s ease-in-out infinite' : 'none',
+                    '@keyframes pulse': {
+                        '0%': {
+                            boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.4)',
+                        }
+
+                        ,
+                        '70%': {
+                            boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)',
+                        }
+
+                        ,
+                        '100%': {
+                            boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)',
+                        }
+
+                        ,
+                    }
+
+                    ,
+                }
+            }
+
+            > {
+                isSpeaking ? (<StopIcon sx= {
+                            {
+                            fontSize: 24
+                        }
+                    }
+
+                    />) : (<SmartToyIcon sx= {
+                            {
+                            fontSize: 24
+                        }
+                    }
+
+                    />)
+            }
+
+            </Fab> </Box> </Zoom>));
+}
+
+;
+
+export default VirtualAssistant;
