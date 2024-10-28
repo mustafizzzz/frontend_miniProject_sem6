@@ -25,7 +25,7 @@ import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
 import TestSidebar from './pages/TestSidebar';
-// import TestSocket from './pages/TestSocket';// => Commented out because it's Socket
+import TestSocket from './pages/TestSocket';// => Commented out because it's Socket
 import ElevenLabTest from './pages/ElevenLabTest';
 import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
@@ -57,7 +57,7 @@ function App() {
         <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/test-sidebar' element={<TestSidebar />} />
         <Route path='/test-virtual' element={<TestVirtual />} />
-        {/* <Route path='/test-socket' element={<TestSocket />} /> */}
+        <Route path='/test-socket' element={<TestSocket />} />
         <Route path='/test-11' element={<ElevenLabTest />} />
         {/* <=======================Test Pages====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
