@@ -12,24 +12,25 @@ const DashboardLayout = ({ children }) => {
     setIsExpanded(!isExpanded);
   };
   return (
-    <div className='container-fluid dashboard-layout'>
+    <div className='container-fluid m-0'>
 
-      <div className="row navbar-content">
-        <div className="col-12 p-0 position-fixed">
+
+      <div className="sidebar-left row m-0 p-0 ">
+
+        <SidebarComponent />
+
+        <div className="navbar-right col p-0 m-0">
           <NavTopComponent />
+          <main className="content-wrapper border border-1">
+            <div className="content-scroll">
+              {children ? children : <Outlet />}
+            </div>
+          </main>
         </div>
       </div>
 
-      <div className="row sidebar-content">
-        <div className="col-4 col-md-2 p-0 position-fixed">
-          <SidebarComponent />
-        </div>
-        <div className="col-8 col-md-10  offset-md-2 offset-4 child-content-dashboard">
-          {children ? children : <Outlet />}
-        </div>
-      </div>
     </div>
-  )
+  );
 }
 
 export default DashboardLayout

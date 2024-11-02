@@ -7,7 +7,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Lexend', sans-serif;
+  font-family: 'Lexend',
+    sans-serif;
+
 }
 
 .option-radio-btn label {

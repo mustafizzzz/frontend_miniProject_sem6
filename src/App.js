@@ -24,11 +24,12 @@ import { useEffect } from 'react';
 import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
-import TestSidebar from './pages/TestSidebar';
+import TestSidebar from './pages/SidebarTest/TestSidebar';
 import TestSocket from './pages/TestSocket';// => Commented out because it's Socket
 import ElevenLabTest from './pages/ElevenLabTest';
 import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
+import TestLayout from './pages/TestLayout/TestLayout';
 
 
 function App() {
@@ -55,10 +56,12 @@ function App() {
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/test-audio-list' element={<TestAudioList />} />
         <Route path='/test-image-delete' element={<TestImageDelete />} />
-        <Route path='/test-sidebar' element={<TestSidebar />} />
         <Route path='/test-virtual' element={<TestVirtual />} />
         <Route path='/test-socket' element={<TestSocket />} />
         <Route path='/test-11' element={<ElevenLabTest />} />
+        <Route path='/test-sidebar' element={<TestLayout />}>
+          <Route path='home' element={<Home />} />
+        </Route>
         {/* <=======================Test Pages====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />

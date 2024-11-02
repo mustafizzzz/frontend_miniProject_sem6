@@ -4,7 +4,8 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
-let socket = io('wss://mood-lens-server.onrender.com');
+// let socket = io('wss://mood-lens-server.onrender.com');
+let socket = io('http://localhost:5000');
 
 const TestSocket = () => {
     const [question, setQuestion] = useState([]);
@@ -12,7 +13,7 @@ const TestSocket = () => {
     const test_id = '6719fb40f1230bb78e7c4740';
     const chatContainerRef = useRef(null);
     const videoRef = useRef(null);
-    const [apiKey, setApiKey] = useState('sk_cfa00b39624fd4f551595e6927daef5d1e1fda1ad8919117');
+    const [apiKey, setApiKey] = useState('sk_bc62db37c6c8fdcc1d4b7b517f0535f3403064f850647760');
     const audioRef = useRef(new Audio());
     const [selectedVoice, setSelectedVoice] = useState('');
     const [stability, setStability] = useState(0.3);

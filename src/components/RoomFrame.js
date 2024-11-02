@@ -237,8 +237,8 @@ const RoomFrame = () => {
 
     //Meeting UI Code
     const meetingUI = async (element) => {
-        const appID = 550381689;
-        const serverSecret = '160ac07931324996010bd800396222e2';
+        const appID = 793490608;
+        const serverSecret = '4a6b14f6b8b5ecd2cc72d4b190b010dd';
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
             appID,
             serverSecret,

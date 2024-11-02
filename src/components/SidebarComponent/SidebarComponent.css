@@ -1,97 +1,95 @@
-/* ICON CSS */
-
-.sidebar-nav li a i {
-  font-size: 1.75rem;
-  margin-right: 1rem;
-}
-
-.sidebar {
-  /* border: 2px solid orange; */
-  width: 100%;
-  height: 85vh;
+.sidebar-wrapper {
+  position: fixed;
+  height: 90vh;
+  width: 220px;
   background-color: #fff;
-  transition: width 0.3s ease;
+  border-radius: 1.5rem;
+  transition: 0.3s ease;
+  z-index: 1030;
   font-family: 'Lexend', sans-serif;
 }
 
-/* .sidebar-nav {
-  position: fixed;
-  top: 10%;
-  bottom: 0;
-  left: 0;
-  width: 275px;
-  overflow-y: auto;
-  z-index: 1000;
-} */
 
-.sidebar.expanded {
-  width: 35%;
+
+.sidebar-content {
+  height: 100%;
+
 }
 
-.sidebar-header {
+/* Logo Section */
+.logo-section {
+  padding: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-circle {
+  width: 32px;
+  height: 32px;
+  background-color: #fbbf24;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: end;
+  justify-content: center;
 }
 
-
-.sidebar-logo {
-  font-size: 1.5rem;
+.logo-circle span {
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.sidebar-nav {
+.logo-text {
+  font-weight: 600;
+  color: #111827;
+}
+
+.main-nav {
+  flex: 1;
+  padding: 1rem;
+}
+
+.nav-list {
   list-style: none;
   padding: 0;
-}
-
-.sidebar-nav li {
-
+  margin: 0;
   display: flex;
-  margin-bottom: 1rem;
-
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
-.sidebar-nav li a {
-  /* border: 1px solid #ec1515; */
-  text-decoration: none;
-  color: black;
+.nav-link {
   display: flex;
   align-items: center;
-  font-size: 1.16rem;
-  padding: 0.1rem 0rem 0.1rem 1.6rem;
-  border-radius: 0.8rem;
-  width: 100%;
-  font-weight: 600;
-}
-
-.sidebar-nav li a:hover {
-  background-color: #F1F2F5;
-}
-
-.sidebar-nav li a.active {
-  background-color: #d7d9e2
-}
-
-/* 
-.contact-us {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-}
-
-.contact-us a {
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
   text-decoration: none;
-  color: #333;
-} */
-
-.contact-us-btn-sidebar button {
-  width: 80%;
-  border-radius: 1rem;
-  font-weight: 600;
-  padding: 0.6rem 0rem;
+  color: #374151;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
 }
 
-.contact-us-btn-sidebar .bi-telephone {
-  font-size: 1.2rem;
-  margin-right: 0.6rem;
+.nav-link:hover {
+  background-color: #f3f4f6;
+  color: #374151;
 }
+
+.nav-link.active {
+  background-color: #90caf9;
+  color: black;
+  font-weight: 500;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  padding: 1rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+/* Icon Styles */

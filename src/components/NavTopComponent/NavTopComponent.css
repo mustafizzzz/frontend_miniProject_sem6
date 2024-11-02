@@ -1,42 +1,85 @@
-/* Nav Bar Css */
-.navbar-top-main-box {
-  font-family: 'Lexend', sans-serif;
+/* Search bar styles */
+.search-wrapper {
+  max-width: 400px;
+
 }
 
-.create-meet,
-.join-meet {
-  border-radius: 1rem;
-  font-weight: 600;
-  padding: 0.5rem 1.5rem;
+.search-icon {
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
 }
 
-.join-meet {
-  color: black;
-  font-weight: 600;
-}
-
-.join-meet-notification {
-  color: black;
-  font-size: 1.2rem;
-  /* border: none; */
-  background-color: rgb(237, 237, 237);
-
+.form-control-lg {
+  height: 48px;
+  font-size: 0.95rem;
   border-radius: 1rem;
 }
 
-.join-meet-notification:hover {
-  background-color: rgb(214, 214, 214);
-
-  color: black;
+.form-control:focus {
+  box-shadow: none;
+  background-color: #f8f9fa !important;
 }
 
-.user-name-navbar {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: black;
+/* Button styles */
+.btn-create-meet {
+  border: none;
+  color: white;
+  background-color: #0d47a1;
+  height: 40px;
+  font-weight: 500;
+  border-radius: 0.5rem;
 }
 
-.moodlens-logo {
-  width: 8%;
-  cursor: pointer;
+.btn-create-meet:hover {
+  color: white;
+  background-color: #073b8a;
+}
+
+.btn-notify {
+  border: none;
+  color: black;
+  background-color: #f3f4f6;
+  height: 40px;
+  font-weight: 500;
+  border-radius: 0.5rem;
+}
+
+.btn-notify:hover {
+  color: black;
+  background-color: #e5e7eb;
+}
+
+.btn-icon {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: #ffffff;
+}
+
+/* Avatar styles */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.navbar-top-box {
+  border-radius: 1.5rem;
+  position: sticky;
+  top: 42px;
 }

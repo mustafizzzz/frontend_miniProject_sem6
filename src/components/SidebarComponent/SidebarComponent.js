@@ -2,57 +2,94 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import './SidebarComponent.css';
 
+// Lucid react icons
+import { LayoutDashboard, LogOut } from 'lucide-react';
+import { Presentation } from 'lucide-react';
+import { ChartNoAxesCombined } from 'lucide-react';
+import { Settings } from 'lucide-react';
+import { Headset } from 'lucide-react';
+import { ClipboardMinus } from 'lucide-react';
+
 const SidebarComponent = () => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const menuItems = [
+    { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/dashboard/home' },
+    { icon: <Presentation size={20} />, label: 'Meetings', path: '/dashboard/meetings' },
+    { icon: <ClipboardMinus size={20} />, label: 'Assesments', path: '/dashboard/assesments' },
+    { icon: <ChartNoAxesCombined size={20} />, label: 'Reports', path: '/dashboard/reports' },
+    { icon: <Settings size={20} />, label: 'Settings', path: '/dashboard/setting' },
+  ];
+
+  const bottomItems = [
+    { icon: <Headset size={20} />, label: 'Contact us', path: '/dashboard/contact-us' },
+    { icon: <LogOut size={20} />, label: 'Log out' },
+  ];
 
   return (
 
-    <div className="sidebar-in-box">
-      <div className="sidebar  d-flex flex-column justify-content-between">
+    <div className={`${isExpanded ? 'col-md-2' : 'col-auto'} m-0 p-0`}>
+      <div className="sidebar-wrapper">
 
-        <ul className="sidebar-nav px-md-4 px-1">
-          <li>
-            <NavLink to="/dashboard/home" activeclassname="active"  >
-              <i className="bi bi-house"></i>
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/meetings" activeclassname="active">
-              <i className="bi bi-mic"></i>
-              Meetings
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/reports" activeclassname="active">
-              <i className="bi bi-bar-chart"></i>
-              Reports
-            </NavLink>
-          </li>
+        <div className="sidebar-content p-0 m-0 d-flex flex-column">
 
-          {/* <li>
-            <NavLink to="/dashboard/feedback" activeclassname="active">
-              Feedback
-            </NavLink>
-          </li> */}
+          {/* Logo */}
+          <div className="logo-section">
+            <div className="logo-container">
 
-          <li>
-            <NavLink to="/dashboard/setting" activeclassname="active">
-              <i className="bi bi-gear"></i>
-              Settings
-            </NavLink>
-          </li>
-        </ul>
+              <div className="logo-circle">
+                <span>AZ</span>
+              </div>
 
-        <div className="contact-us-btn-sidebar d-flex justify-content-center p-2 align-items-center">
-          <button type='button' className='btn btn-primary'>
-            <i className="bi bi-telephone"></i>
-            Contact us
-          </button>
+              <span className="logo-text">Moodlens</span>
+
+            </div>
+          </div>
+
+
+          {/* Main Navigation */}
+          <nav className="main-nav">
+
+            <ul className="nav-list">
+              {menuItems.map((item, index) => (
+                <li key={index}>
+                  <NavLink
+                    to={`${item.path}`}
+                    className={`nav-link ${item.active ? 'active' : ''}`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Bottom Navigation */}
+          <div className="bottom-nav">
+            <ul className="nav-list">
+              {bottomItems.map((item, index) => (
+                <li key={index}>
+                  <NavLink
+                    to={`${item.path}`}
+                    className={`nav-link ${item.active ? 'active' : ''}`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+
         </div>
-        {/* <div className="contact-us">
-          <Link to="/contact">Contact Us</Link>
-        </div> */}
       </div>
+
+
 
     </div >
 
