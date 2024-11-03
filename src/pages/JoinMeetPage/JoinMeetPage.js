@@ -133,7 +133,8 @@ const JoinMeetPage = () => {
 
 
 
-    } catch (error) {
+    }
+    catch (error) {
       console.log('Join meet form submitted error:', error);
       setBackdropOpen(false);
       setSnackbarInfo({ open: true, severity: 'error', message: 'Meeting not found' });

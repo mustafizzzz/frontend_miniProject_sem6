@@ -1,17 +1,6 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import './NavTopComponent.css';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../ContextApi/userContex';
@@ -21,28 +10,13 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import CreateInstantMeet from '../CreateInstantMeet/CreateInstantMeet';
 
-const settings = ['Profile', 'Setting', 'Logout'];
 
 const NavTopComponent = () => {
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
   const { currentUser, setCurrentUser } = React.useContext(UserContext);
   const userInitial = currentUser.userName ? currentUser.userName.charAt(0).toUpperCase() : '';
   const [avatarUrl, setAvatarUrl] = useState('');
   const navigate = useNavigate();
 
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = (setting) => {
-    console.log('setting:', setting);
-    if (setting === 'Logout') {
-      localStorage.removeItem('user');
-      setCurrentUser(null);
-      navigate('/login');
-    }
-    setAnchorElUser(null);
-  };
 
   const [createMeetAnchorEl, setCreateMeetAnchorEl] = useState(null);
   const [openInstantMeetDialog, setOpenInstantMeetDialog] = useState(false);
@@ -52,13 +26,21 @@ const NavTopComponent = () => {
   };
 
   const handleCreateMeetClose = () => {
-    setOpenInstantMeetDialog(true);
     setCreateMeetAnchorEl(null);
   };
+  const handleInstantMeetOpenDialog = () => {
+    setOpenInstantMeetDialog(true);
+    handleCreateMeetClose();
+  }
 
   const handleInstantMeetCloseDialog = () => {
     setOpenInstantMeetDialog(false);
   };
+
+  const handleJoinMeetClick = () => {
+    console.log('Join Meet clicked');
+
+  }
 
   useEffect(() => {
     const gender = Math.random() > 0.5 ? 'men' : 'women'; // Randomly choose gender
@@ -84,11 +66,30 @@ const NavTopComponent = () => {
         <div className="d-flex align-items-center gap-3">
 
           {/* New Meet Button */}
-          <button className="btn btn-create-meet px-3 d-flex align-items-center gap-1"
-            onClick={handleCreateMeetClick}>
-            <Plus size={20} />
-            <span>Create meet</span>
-          </button>
+          <div className="d-flex gap-2">
+            {/* Conditionally render Create Meet button if user is a teacher */}
+            {currentUser.role === 'teacher' && (
+              <button
+                className="btn btn-create-meet px-3 d-flex align-items-center gap-1"
+                onClick={handleCreateMeetClick}
+              >
+                <Plus size={20} />
+                <span>Create Meet</span>
+              </button>
+            )}
+
+            {/* Join Meet button */}
+            <button
+              className="btn btn-outline-secondary btn-join-meet px-3 "
+              onClick={handleJoinMeetClick}
+            >
+              Join Meet
+            </button>
+          </div>
+
+
+
+
           {/* Material UI Menu for Dropdown */}
           <Menu
 
@@ -104,7 +105,7 @@ const NavTopComponent = () => {
               horizontal: 'left',
             }}
           >
-            <MenuItem onClick={handleCreateMeetClose}>Start an Instant Meet</MenuItem>
+            <MenuItem onClick={handleInstantMeetOpenDialog}>Start an Instant Meet</MenuItem>
             <MenuItem onClick={handleCreateMeetClose}>Schedule a Meet</MenuItem>
           </Menu>
 
@@ -117,15 +118,25 @@ const NavTopComponent = () => {
           </button>
 
           {/* Profile Picture */}
-          <button className="btn btn-icon">
-            <div className="avatar">
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="rounded-circle"
-              />
-            </div>
-          </button>
+
+          <div className="d-flex align-items-center gap-2">
+
+            <span className="text-dark fw-bold">Hey, {currentUser.userName}</span>
+
+
+            <button className="btn btn-icon">
+              <div className="avatar">
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="rounded-circle"
+                  width={32}
+                  height={32}
+                />
+              </div>
+            </button>
+          </div>
+
 
         </div>
       </div>

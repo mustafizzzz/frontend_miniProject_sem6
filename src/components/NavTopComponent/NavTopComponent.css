@@ -28,11 +28,12 @@
   height: 40px;
   font-weight: 500;
   border-radius: 0.5rem;
+  transition: all 0.3s;
 }
 
 .btn-create-meet:hover {
   color: white;
-  background-color: #073b8a;
+  background-color: #053174;
 }
 
 .btn-notify {
@@ -53,7 +54,6 @@
   border: none;
   background: transparent;
   color: #ffffff;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,4 +81,10 @@
   border-radius: 1.5rem;
   position: sticky;
   top: 42px;
+}
+
+.btn-join-meet {
+  height: 40px;
+  font-weight: 500;
+  border-radius: 0.5rem;
 }
