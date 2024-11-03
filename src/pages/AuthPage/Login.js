@@ -181,7 +181,7 @@ const Login = () => {
         setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
         setLoading(false);
-        navigate('/dashboard');
+        navigate('/dashboard/home');
       }
 
     } catch (error) {
@@ -238,7 +238,7 @@ const Login = () => {
         setSnackbarInfo({ ...snackbarInfo, severity: 'success', message: 'Login successful!', open: true });
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate login process delay
         setLoading(false);
-        navigate('/dashboard');
+        navigate('/dashboard/home');
 
       }
 
@@ -265,7 +265,7 @@ const Login = () => {
       const { data } = await axios.post(`${process.env.REACT_APP_URL}/api/v1/users/google-sign-in`, googleData);
       setCurrentUser(data.data);
       console.log('google data', data.data);
-      navigate('/home');
+      navigate('dashboard/home');
     } catch (error) {
       console.log('error in google login', error);
 

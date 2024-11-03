@@ -214,6 +214,7 @@ const JoinMeetPage = () => {
           {snackbarInfo.message}
         </Alert>
       </Snackbar>
+
     </div>
   )
 }

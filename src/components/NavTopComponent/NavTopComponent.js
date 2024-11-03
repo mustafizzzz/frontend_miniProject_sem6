@@ -9,6 +9,7 @@ import { Bell, Plus, Search } from 'lucide-react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import CreateInstantMeet from '../CreateInstantMeet/CreateInstantMeet';
+import JoinMeet from '../JoinMeet/JoinMeet';
 
 
 const NavTopComponent = () => {
@@ -20,6 +21,7 @@ const NavTopComponent = () => {
 
   const [createMeetAnchorEl, setCreateMeetAnchorEl] = useState(null);
   const [openInstantMeetDialog, setOpenInstantMeetDialog] = useState(false);
+  const [openJoinMeetDialog, setOpenJoinMeetDialog] = useState(false);
 
   const handleCreateMeetClick = (event) => {
     setCreateMeetAnchorEl(event.currentTarget);
@@ -28,6 +30,7 @@ const NavTopComponent = () => {
   const handleCreateMeetClose = () => {
     setCreateMeetAnchorEl(null);
   };
+
   const handleInstantMeetOpenDialog = () => {
     setOpenInstantMeetDialog(true);
     handleCreateMeetClose();
@@ -39,7 +42,12 @@ const NavTopComponent = () => {
 
   const handleJoinMeetClick = () => {
     console.log('Join Meet clicked');
+    setOpenJoinMeetDialog(true);
 
+  }
+
+  const handleJoinMeetClose = () => {
+    setOpenJoinMeetDialog(false);
   }
 
   useEffect(() => {
@@ -111,6 +119,9 @@ const NavTopComponent = () => {
 
           {/* Create meet dialoug */}
           <CreateInstantMeet open={openInstantMeetDialog} onClose={handleInstantMeetCloseDialog} />
+
+          {/* Join meet dialoug */}
+          <JoinMeet open={openJoinMeetDialog} onClose={handleJoinMeetClose} />
 
           {/* Notification Button */}
           <button className="btn  btn-notify">
