@@ -21,12 +21,13 @@ const DashboardLayout = ({ children }) => {
 
         <div className="navbar-right col p-0 m-0">
           <NavTopComponent />
-          <main className="content-wrapper border border-1">
+          <main className="content-wrapper border border-2">
             <div className="content-scroll">
               {children ? children : <Outlet />}
             </div>
           </main>
         </div>
+
       </div>
 
     </div>

@@ -17,8 +17,7 @@
 }
 
 .form-control:focus {
-  box-shadow: none;
-  background-color: #f8f9fa !important;
+  background-color: #f1f9ff !important;
 }
 
 /* Button styles */

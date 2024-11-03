@@ -32,7 +32,7 @@ const SidebarComponent = () => {
 
   return (
 
-    <div className={`${isExpanded ? 'col-md-2' : 'col-auto'} m-0 p-0`}>
+    <div className={`${isExpanded ? 'col-md-2' : 'col-auto'} m-0 p-0 `}>
       <div className="sidebar-wrapper">
 
         <div className="sidebar-content p-0 m-0 d-flex flex-column">

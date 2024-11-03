@@ -19,6 +19,7 @@ import logo from '../../assets/moodlens_logo1.PNG'
 import { Bell, Plus, Search } from 'lucide-react';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import CreateInstantMeet from '../CreateInstantMeet/CreateInstantMeet';
 
 const settings = ['Profile', 'Setting', 'Logout'];
 
@@ -43,6 +44,22 @@ const NavTopComponent = () => {
     setAnchorElUser(null);
   };
 
+  const [createMeetAnchorEl, setCreateMeetAnchorEl] = useState(null);
+  const [openInstantMeetDialog, setOpenInstantMeetDialog] = useState(false);
+
+  const handleCreateMeetClick = (event) => {
+    setCreateMeetAnchorEl(event.currentTarget);
+  };
+
+  const handleCreateMeetClose = () => {
+    setOpenInstantMeetDialog(true);
+    setCreateMeetAnchorEl(null);
+  };
+
+  const handleInstantMeetCloseDialog = () => {
+    setOpenInstantMeetDialog(false);
+  };
+
   useEffect(() => {
     const gender = Math.random() > 0.5 ? 'men' : 'women'; // Randomly choose gender
     const id = Math.floor(Math.random() * 100); // Random ID between 0-99
@@ -65,11 +82,34 @@ const NavTopComponent = () => {
 
         {/* Right Side Icons */}
         <div className="d-flex align-items-center gap-3">
-          {/* New Task Button */}
-          <button className="btn btn-create-meet px-3 d-flex align-items-center gap-1">
+
+          {/* New Meet Button */}
+          <button className="btn btn-create-meet px-3 d-flex align-items-center gap-1"
+            onClick={handleCreateMeetClick}>
             <Plus size={20} />
             <span>Create meet</span>
           </button>
+          {/* Material UI Menu for Dropdown */}
+          <Menu
+
+            anchorEl={createMeetAnchorEl}
+            open={Boolean(createMeetAnchorEl)}
+            onClose={handleCreateMeetClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+          >
+            <MenuItem onClick={handleCreateMeetClose}>Start an Instant Meet</MenuItem>
+            <MenuItem onClick={handleCreateMeetClose}>Schedule a Meet</MenuItem>
+          </Menu>
+
+          {/* Create meet dialoug */}
+          <CreateInstantMeet open={openInstantMeetDialog} onClose={handleInstantMeetCloseDialog} />
 
           {/* Notification Button */}
           <button className="btn  btn-notify">
@@ -86,6 +126,7 @@ const NavTopComponent = () => {
               />
             </div>
           </button>
+
         </div>
       </div>
     </nav>
