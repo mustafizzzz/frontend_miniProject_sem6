@@ -30,6 +30,7 @@ import ElevenLabTest from './pages/ElevenLabTest';
 import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
 import TestLayout from './pages/TestLayout/TestLayout';
+import AssesmentsPage from './pages/AssesmentsPage/AssesmentsPage';
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
           <Route path='/dashboard' element={<DashboardLayout />}>
             <Route path='home' element={<Home />} />
             <Route path='meetings' element={<MeetingPage />} />
+            <Route path='assesments' element={<AssesmentsPage />} />
             <Route path='reports' element={<ReportsPage />} />
             <Route path='feedback' element={<FeedbackPage />} />
             <Route path='setting' element={<SettingPage />} />
