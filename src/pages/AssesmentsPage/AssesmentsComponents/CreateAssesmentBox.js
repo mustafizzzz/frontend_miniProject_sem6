@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Backdrop, CircularProgress } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -7,31 +7,87 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../../ContextApi/userContex';
 import { DatePicker, DesktopDatePicker, DesktopTimePicker, TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import { REACT_APP_DEPLOY } from '../../../config';
+import { set } from 'firebase/database';
 
 
-const CreateAssesmentBox = ({ open, onClose }) => {
+const CreateAssesmentBox = ({ open, onClose, selectedLecture, handelDeleteAssesment }) => {
+
+	const today = dayjs();
+	const todayStartOfTheDay = today.startOf('day');
 
 	const { currentUser } = useContext(UserContext)
 	const [testName, setTestName] = useState('');
-	const [startDate, setStartDate] = useState(null);
-	const [startTime, setStartTime] = useState(null);
-	const [endDate, setEndDate] = useState(null);
-	const [endTime, setEndTime] = useState(null);
+	const [startDate, setStartDate] = useState(today);
+	const [startTime, setStartTime] = useState(todayStartOfTheDay);
+	const [endDate, setEndDate] = useState(today);
+	const [endTime, setEndTime] = useState(todayStartOfTheDay);
 	const [maxDuration, setMaxDuration] = useState('');
 	const [maxMarks, setMaxMarks] = useState('');
 	//backdrop for loading
 	const [backdropOpen, setBackdropOpen] = useState(false)
 	const navigate = useNavigate();
 
-	const today = dayjs();
-	const todayStartOfTheDay = today.startOf('day');
+	useEffect(() => {
+		if (selectedLecture) {
+			setTestName(`${selectedLecture.lectureTitle}-Assesment-Test`);
+		}
+	}, [selectedLecture])
 
-	const handleProceed = () => {
-		setBackdropOpen(true);
-		setTimeout(() => {
+
+	const formatDateTime = (date, time) => {
+		if (!date || !time) return null;
+
+		// Combine date and time
+		const combinedDateTime = dayjs(date)
+			.hour(time.hour())
+			.minute(time.minute())
+			.second(0)
+			.millisecond(0);
+
+		// Format to required string
+		return combinedDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS');
+	};
+
+
+
+	const handleProceed = async () => {
+
+
+		try {
+			setBackdropOpen(true);
+			const formattedStartDateTime = formatDateTime(startDate, startTime);
+			const formattedEndDateTime = formatDateTime(endDate, endTime);
+			console.log('formatted start date:', formattedStartDateTime);
+
+			const formatData = {
+				lectureId: selectedLecture.lectureId,
+				createdBy: currentUser.hostId,
+				testName: testName,
+				context: {
+					lectureNotes: selectedLecture.note_id,
+					externalDocuments: [],
+				},
+				startDateAndTime: formattedStartDateTime,
+				endDateAndTime: formattedEndDateTime,
+				maxDuration: maxDuration,
+				maxMarks: maxMarks,
+
+			}
+
+			const response = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/create_test`, formatData);
+			console.log('response:', response);
 			setBackdropOpen(false);
+			handelDeleteAssesment(selectedLecture.lectureId);
 			onClose();
-		}, 2000);
+		} catch (error) {
+			setBackdropOpen(false);
+			console.log(error);
+		} finally {
+			setBackdropOpen(false);
+		}
+
+
 	};
 
 	return (
@@ -82,7 +138,7 @@ const CreateAssesmentBox = ({ open, onClose }) => {
 							<div className="w-50">
 								<TimePicker
 									defaultValue={todayStartOfTheDay}
-									disablePast
+
 									value={todayStartOfTheDay}
 									onChange={(time) => setStartTime(time)}
 									sx={{
@@ -128,7 +184,7 @@ const CreateAssesmentBox = ({ open, onClose }) => {
 							</div>
 
 							<div className="w-50">
-								<TimePicker defaultValue={todayStartOfTheDay} disablePast
+								<TimePicker defaultValue={todayStartOfTheDay}
 									value={todayStartOfTheDay}
 									onChange={(time) => setEndTime(time)}
 									sx={{

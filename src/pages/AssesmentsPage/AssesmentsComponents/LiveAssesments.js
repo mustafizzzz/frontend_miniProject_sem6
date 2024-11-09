@@ -1,52 +1,64 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './LiveAssesments.css';
 import { RefreshCw } from 'lucide-react';
+import axios from 'axios';
+import { REACT_APP_DEPLOY } from '../../../config';
 
-const LiveAssesments = () => {
+const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) => {
 
-  const liveAssessments = [
-    {
-      lectureTitle: 'Lecture 1',
-      complete: '80',
-      pending: '20',
-      scheduleOn: '2024-11-08',
-      endsOn: '2024-11-08',
-    },
-    {
-      lectureTitle: 'Lecture 2',
-      complete: '50',
-      pending: '50',
-      scheduleOn: '2024-11-09',
-      endsOn: '2024-11-09',
-    },
-    {
-      lectureTitle: 'Lecture 3',
-      complete: '30',
-      pending: '70',
-      scheduleOn: '2024-11-10',
-      endsOn: '2024-11-10',
-    },
-  ];
+
+  // const liveAssessments = [
+  //   {
+  //     lectureTitle: 'Lecture 1',
+  //     complete: '80',
+  //     pending: '20',
+  //     scheduleOn: '2024-11-08',
+  //     endsOn: '2024-11-08',
+  //   },
+  //   {
+  //     lectureTitle: 'Lecture 2',
+  //     complete: '50',
+  //     pending: '50',
+  //     scheduleOn: '2024-11-09',
+  //     endsOn: '2024-11-09',
+  //   },
+  //   {
+  //     lectureTitle: 'Lecture 3',
+  //     complete: '30',
+  //     pending: '70',
+  //     scheduleOn: '2024-11-10',
+  //     endsOn: '2024-11-10',
+  //   },
+  // ];
 
   //refresh function
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const refreshLiveAssessment = () => {
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+
+
+  const refreshLiveAssessment = async () => {
 
     setIsRefreshing(true);
-    setTimeout(() => {
-      console.log("Refreshing live assessments...");
-      setIsRefreshing(false);
-    }, 2000);
+    const liveAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, {
+      createdBy: currentUser.hostId
+    });
+    updateLiveAssessment(liveAssesmentsList.data);
 
+    setIsRefreshing(false);
   };
 
 
 
 
   return (
-    <div className="container mt-4 custom-table-container">
+
+    <div className="container mt-1 custom-table-container border">
       <div className="heading-btn-box d-flex justify-content-between align-items-center">
         <h5>Live Assessments</h5>
         <button
@@ -55,8 +67,7 @@ const LiveAssesments = () => {
           disabled={isRefreshing} // Disable button during refresh
         >
           {isRefreshing ? (
-            <div className="spinner-border spinner-border-sm" role="status">
-            </div>
+            <div className="spinner-border spinner-border-sm" role="status" />
           ) : (
             <RefreshCw size={20} />
           )}
@@ -75,17 +86,17 @@ const LiveAssesments = () => {
           </tr>
         </thead>
         <tbody>
-          {liveAssessments.map((assessment, index) => (
+          {liveAssesments?.map((assessment, index) => (
             <tr key={index} className="custom-table-row">
-              <td>{assessment.lectureTitle}</td>
-              <td className="status-complete">{assessment.complete}</td>
-              <td className="status-pending">{assessment.pending}</td>
-              <td>{assessment.scheduleOn}</td>
-              <td>{assessment.endsOn}</td>
+              <td>{assessment.test?.testName || "Unknown Lecture"}</td>
+              <td className="status-complete">{assessment.completedCount}</td>
+              <td className="status-pending">{assessment.pendingCount}</td>
+              <td>{formatDate(assessment.startDateAndTime)}</td>
+              <td>{formatDate(assessment.endDateAndTime)}</td>
               <td>
                 <button
-                  className="btn btn-sm btn-danger end-test-btn"
-                  onClick={() => alert(`Ending test for ${assessment.lectureTitle}`)}
+                  className="btn btn-danger end-test-btn"
+                  onClick={() => alert(`Ending test for ${assessment.test?.testName || "Unknown Lecture"}`)}
                 >
                   End Test
                 </button>
@@ -95,6 +106,7 @@ const LiveAssesments = () => {
         </tbody>
       </table>
     </div>
+
   )
 }
 

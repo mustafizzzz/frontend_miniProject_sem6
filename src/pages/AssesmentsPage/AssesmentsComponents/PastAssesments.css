@@ -1,9 +1,3 @@
-.custom-table-container {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 20px;
-}
-
 .heading-btn-box {
     display: flex;
     justify-content: space-between;
@@ -11,22 +5,8 @@
     margin-bottom: 20px;
 }
 
-.custom-table {
-    width: 100%;
-    margin-top: 20px;
-}
 
-.custom-table thead th {
-    font-weight: bold;
-    text-align: center;
-}
 
-.custom-table-row td {
-    text-align: center;
-    vertical-align: middle;
-    font-size: 0.9rem;
-
-}
 
 .status-attend {
     font-weight: bold;
@@ -38,10 +18,4 @@
 
 .high-score {
     font-weight: bold;
-}
-
-.custom-table-row:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }

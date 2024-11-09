@@ -1,10 +1,31 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './CreateAssesments.css';
 import CreateAssesmentBox from './CreateAssesmentBox';
 
-const CreateAssesments = () => {
+const CreateAssesments = ({ lectureNotes ,deleteCreatedAssesment}) => {
 
     const [selectedLecture, setSelectedLecture] = useState(null);
+    console.log(lectureNotes);
+    const [formattedLectures, setFormattedLectures] = useState([]);
+
+    useEffect(() => {
+
+        const formattedData = lectureNotes.map(lecture => {
+            const duration = lecture.lectureDuration.hours === 0
+                ? `${lecture.lectureDuration.minutes} minute(s)`
+                : lecture.lectureDuration.hours === 1 && lecture.lectureDuration.minutes === 0
+                    ? `${lecture.lectureDuration.hours} hour`
+                    : `${lecture.lectureDuration.hours} hour(s) ${lecture.lectureDuration.minutes} minute(s)`;
+            return {
+                note_id: lecture.note_id,
+                lectureTitle: lecture.lectureTitle,
+                duration: duration,
+                startDate: '2024-11-08'  // Dummy start date
+            };
+        });
+        setFormattedLectures(formattedData);
+    }, [lectureNotes]);
+
 
     const lectures = [
         {
@@ -37,12 +58,17 @@ const CreateAssesments = () => {
     const handleCreateAssesmentopne = () => {
         setOpenCreateAssesment(true);
     }
+    const handleDeleteAssesment = (lectureId) => {
+        deleteCreatedAssesment(lectureId);
+    }
+
+    
 
 
 
     return (
 
-        <div className="container mt-4 custom-table-container">
+        <div className="container-fluid mt-1 custom-table-container border">
             <div className="heading-btn-box d-flex justify-content-between align-items-center">
                 <h5>Schedule a Test</h5>
                 <button
@@ -54,7 +80,7 @@ const CreateAssesments = () => {
                 </button>
             </div>
 
-            <table className="table table-borderless custom-table">
+            {/* <table className="table table-borderless custom-table">
                 <thead>
                     <tr>
                         <th></th>
@@ -83,9 +109,39 @@ const CreateAssesments = () => {
                         </tr>
                     ))}
                 </tbody>
+            </table> */}
+
+            <table className="table table-borderless custom-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Lecture Title</th>
+                        <th>Start Date</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {formattedLectures.map((lecture, index) => (
+                        <tr key={index} className="custom-table-row">
+                            <td>
+                                <input
+                                    type="radio"
+                                    name="lecture"
+                                    onChange={() => setSelectedLecture(index)}
+                                />
+                            </td>
+                            <td>{lecture.lectureTitle}</td>
+                            <td className='lecture-date'>{lecture.startDate}</td>
+                            <td><span className="lecture-duration">{lecture.duration}</span></td>
+                        </tr>
+                    ))}
+                </tbody>
             </table>
 
-            <CreateAssesmentBox open={openCreateAssesment} onClose={handleCreateAssesmentClose} />
+            <CreateAssesmentBox open={openCreateAssesment} onClose={handleCreateAssesmentClose}
+                selectedLecture={lectureNotes[selectedLecture]}
+                handleDeleteAssesment={handleDeleteAssesment}
+                 />
 
         </div>
     )
