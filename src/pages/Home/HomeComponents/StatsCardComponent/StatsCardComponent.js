@@ -162,17 +162,18 @@ const StatsCardComponent = () => {
 				/>
 			</div>
 
-			<div className="col-md-3">
-				<div className="card h-100 shadow-sm border-0">
+			<div className="col-md-3 h-auto">
+				<div className="card card-box shadow-sm border-0 h-100">
 					<div className="card-body">
-						<div className="d-flex align-items-center gap-2 mb-3">
-							<div className="p-2 bg-warning bg-opacity-10 rounded">
-								<Award className="text-warning" size={20} />
+
+						<div className="d-flex align-items-center gap-2">
+							<div className="px-2 py-1 card-icon">
+								<Award size={20} />
 							</div>
-							<h6 className="card-title mb-0 text-secondary">Assessment Tracking</h6>
+							<p className="card-title-font mb-0">Assesments Tracking</p>
 						</div>
 
-						<div style={{ height: '160px' }} className="d-flex align-items-center justify-content-center">
+						<div style={{ height: '112px' }} className="d-flex align-items-center justify-content-center">
 							<ResponsiveContainer width="100%" height="100%">
 								<PieChart>
 									<Pie
@@ -192,22 +193,22 @@ const StatsCardComponent = () => {
 							</ResponsiveContainer>
 						</div>
 
-						<div className="d-flex justify-content-center gap-4 mt-3">
+						<div className="d-flex justify-content-center  gap-3 mt-3">
 							{assessmentData.map((item, index) => (
 								<div key={index} className="text-center">
-									<div className="d-flex align-items-center gap-2 mb-1">
+
+									<div className="d-flex align-items-center gap-1 mb-1">
 										<div className="rounded-circle" style={{ width: '8px', height: '8px', backgroundColor: COLORS[index] }}></div>
 										<span className="small text-secondary">{item.name}</span>
 									</div>
-									<div className="d-flex align-items-center justify-content-center gap-1">
+
+									<div className="d-flex align-items-center justify-content-center">
 										<span className="small fw-medium">{item.value}%</span>
-										<span className={`small ${item.growth > 0 ? 'text-success' : 'text-danger'}`}>
-											({item.growth > 0 ? '+' : ''}{item.growth}%)
-										</span>
 									</div>
 								</div>
 							))}
 						</div>
+
 					</div>
 				</div>
 			</div>
@@ -223,6 +224,7 @@ const StatsCardComponent = () => {
 					growth={getGrowthIndicator(55, 44)}
 				/>
 			</div>
+
 		</div>
 
 	)

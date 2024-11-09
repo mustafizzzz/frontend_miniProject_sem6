@@ -27,7 +27,7 @@ const AssesmentsPage = () => {
 
 				<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 					<TabList onChange={handleChange} aria-label="assessment tabs" centered className='assesments-tabs'>
-						<Tab label="Lecture Schedule" value="1" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
+						<Tab label="Create Assesments" value="1" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
 						<Tab label="Live Assessments" value="2" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
 						<Tab label="Past Assessments" value="3" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
 					</TabList>

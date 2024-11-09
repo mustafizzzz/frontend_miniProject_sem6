@@ -60,7 +60,12 @@
 
 .create-assesments-btn {
     border: none;
+    color: white;
+    background-color: #0d47a1;
+    height: 40px;
+    font-weight: 500;
     border-radius: 0.5rem;
+    transition: all 0.3s;
 }
 
 .create-assesments-btn:disabled {
@@ -68,6 +73,7 @@
     cursor: not-allowed;
 }
 
-.create-assesments-btn:hover:enabled {
-    background-color: #0056b3;
+.create-assesments-btn:hover {
+    color: white;
+    background-color: #053174;
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './CreateAssesments.css';
+import CreateAssesmentBox from './CreateAssesmentBox';
 
 const CreateAssesments = () => {
 
@@ -26,15 +27,28 @@ const CreateAssesments = () => {
         },
     ];
 
+    //craete assesment dialog
+    const [openCreateAssesment, setOpenCreateAssesment] = useState(false);
+
+    const handleCreateAssesmentClose = () => {
+        setOpenCreateAssesment(false);
+    }
+
+    const handleCreateAssesmentopne = () => {
+        setOpenCreateAssesment(true);
+    }
+
+
+
     return (
 
         <div className="container mt-4 custom-table-container">
             <div className="heading-btn-box d-flex justify-content-between align-items-center">
-                <h5>Lecture Schedule</h5>
+                <h5>Schedule a Test</h5>
                 <button
-                    className="btn btn-lg btn-primary create-assesments-btn"
+                    className="btn create-assesments-btn"
                     disabled={selectedLecture === null}
-                    onClick={() => alert(`Creating assessment for ${lectures[selectedLecture].lectureTitle}`)}
+                    onClick={handleCreateAssesmentopne}
                 >
                     Create
                 </button>
@@ -70,6 +84,9 @@ const CreateAssesments = () => {
                     ))}
                 </tbody>
             </table>
+
+            <CreateAssesmentBox open={openCreateAssesment} onClose={handleCreateAssesmentClose} />
+
         </div>
     )
 }
