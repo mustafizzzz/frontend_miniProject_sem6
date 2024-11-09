@@ -1,7 +1,11 @@
 import axios from 'axios';
+import { audioEmotion, getCurrentTimeStudent } from './roomApiCalls';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../firbaseConfig';
 
 // Function to start audio recording
-export const startListening = async (mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList) => {
+export const startListening = async (mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList, roomId, currentUser) => {
+
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaStreamRef.current = stream;
     mediaAudioRecorderRef.current = new MediaRecorder(stream);
@@ -10,10 +14,23 @@ export const startListening = async (mediaAudioRecorderRef, audioChunksRef, medi
         audioChunksRef.current.push(event.data);
     };
 
-    mediaAudioRecorderRef.current.onstop = () => {
+    mediaAudioRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioList((prev) => [...prev, { url: audioUrl, blob: audioBlob }]);
+
+        // Generate a timestamp for the audio filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const storagePath = `IncallAudio/${roomId}/${currentUser.pid}/audio_${timestamp}.wav`;
+        const storageRef = ref(storage, storagePath);
+
+        // Upload the audio blob to Firebase Storage
+        await uploadBytes(storageRef, audioBlob);
+        const firebaseAudioUrl = await getDownloadURL(storageRef);
+
+        // Call the audioEmotion API with the Firebase audio URL
+        audioEmotion(roomId, currentUser, firebaseAudioUrl);
+
         audioChunksRef.current = []; // Reset for next recording
     };
 
@@ -24,20 +41,7 @@ export const startListening = async (mediaAudioRecorderRef, audioChunksRef, medi
 export const stopListening = (mediaAudioRecorderRef, mediaStreamRef) => {
     mediaAudioRecorderRef.current.stop();
     mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+
 };
 
-// Function to call the emotion detection API
-export const audioEmotion = async (roomId, currentUser, getCurrentTimeTeacher, audioBlob) => {
-    try {
-        const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
-            meet_id: parseInt(roomId),
-            host_id: currentUser.pid,
-            time_stamp: getCurrentTimeTeacher(),
-            studentPID: currentUser.pid,
-            audio_message: audioBlob
-        });
-        console.log('Response from audio emotion API:', response);
-    } catch (error) {
-        console.error('Error in audio emotion detection:', error);
-    }
-};
+

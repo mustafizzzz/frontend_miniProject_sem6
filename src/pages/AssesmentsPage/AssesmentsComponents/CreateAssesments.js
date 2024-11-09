@@ -29,7 +29,7 @@ const CreateAssesments = () => {
     return (
 
         <div className="container mt-4 custom-table-container">
-            <div className="headind-btn-box d-flex justify-content-between align-items-center">
+            <div className="heading-btn-box d-flex justify-content-between align-items-center">
                 <h5>Lecture Schedule</h5>
                 <button
                     className="btn btn-lg btn-primary create-assesments-btn"

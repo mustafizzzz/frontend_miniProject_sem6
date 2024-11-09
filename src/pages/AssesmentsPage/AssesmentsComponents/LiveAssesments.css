@@ -1,0 +1,57 @@
+.custom-table-container {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.custom-table-row:hover {
+    background-color: #f1f1f1;
+
+    cursor: pointer;
+
+    transition: background-color 0.3s ease;
+}
+
+
+
+.heading-btn-box h5 {
+    font-weight: bold;
+}
+
+.custom-table {
+    width: 100%;
+}
+
+.custom-table thead th {
+    font-weight: bold;
+    text-align: center;
+}
+
+.custom-table-row td {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.status-complete {
+    color: #28a745;
+    /* Green for completed percentage */
+    font-weight: bold;
+}
+
+.status-pending {
+    color: #dc3545;
+    /* Red for pending percentage */
+    font-weight: bold;
+}
+
+.end-test-btn {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.end-test-btn:hover {
+    background-color: #c82333;
+    color: white;
+}

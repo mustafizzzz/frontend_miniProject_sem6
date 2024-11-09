@@ -42,7 +42,7 @@ const SidebarComponent = () => {
             <div className="logo-container">
 
               <div className="logo-circle">
-                <span>AZ</span>
+                <span>ML</span>
               </div>
 
               <span className="logo-text">Moodlens</span>

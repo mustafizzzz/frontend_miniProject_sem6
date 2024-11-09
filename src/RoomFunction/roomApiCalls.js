@@ -142,3 +142,21 @@ export const textEmotion = async (dataText, roomId, currentUser) => {
         console.error('Error in audio emotion detection:', error);
     }
 }
+
+//function of audio emotion detection
+export const audioEmotion = async (roomId, currentUser, firebaseAudioUrl) => {
+    console.log('firebaseAudioUrl:', firebaseAudioUrl);
+
+    try {
+        const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
+            meet_id: parseInt(roomId),
+            host_id: currentUser.pid,
+            studentPID: currentUser.pid,
+            audio_url: firebaseAudioUrl,
+            time_stamp: getCurrentTimeStudent(),
+        });
+        console.log('Response from audio emotion API:', response);
+    } catch (error) {
+        console.error('Error in audio emotion detection:', error);
+    }
+};

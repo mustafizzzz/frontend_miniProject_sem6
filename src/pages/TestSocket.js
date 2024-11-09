@@ -4,11 +4,11 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
-// let socket = io('wss://mood-lens-server.onrender.com', {
-//     reconnectionAttempts: 5,
-//     timeout: 10000,
-// });
-let socket = io('http://localhost:5000');
+let socket = io('wss://mood-lens-server.onrender.com', {
+    reconnectionAttempts: 5,
+    timeout: 10000,
+});
+// let socket = io('http://localhost:5000');
 
 const TestSocket = () => {
     const [question, setQuestion] = useState([]);

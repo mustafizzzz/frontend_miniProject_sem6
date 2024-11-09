@@ -84,7 +84,7 @@ const RoomFrame = () => {
                 setIsListening(prevIsListening => !prevIsListening);
                 console.log('Audio listening:', isListening);
                 if (isListening) {
-                    startListening(mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList);
+                    startListening(mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList, roomId, currentUser);
                 } else {
                     stopListening(mediaAudioRecorderRef, mediaStreamRef);
                 }
@@ -327,7 +327,7 @@ const RoomFrame = () => {
                 setIsCapturing(false);
                 setIsProcessing(false);
                 currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
-                navigate('/dashboard/join-meet');
+                navigate('/dashboard/home');
             },
 
 
