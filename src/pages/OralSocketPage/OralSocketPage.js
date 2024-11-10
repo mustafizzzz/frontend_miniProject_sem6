@@ -362,7 +362,7 @@ const OralSocketPage = () => {
 											setIsAISpeaking(false);
 										}}
 									>
-										{isListening ? <MicOff size={20} /> : <Mic size={20} />}
+										{isListening ? <Mic size={20} /> : <MicOff size={20} />}
 									</button>
 									<button className="btn btn-primary d-flex align-items-center gap-2"
 										onClick={handleAnswerSubmit}>
