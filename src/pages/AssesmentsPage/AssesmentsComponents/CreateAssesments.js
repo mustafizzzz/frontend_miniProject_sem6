@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './CreateAssesments.css';
 import CreateAssesmentBox from './CreateAssesmentBox';
 
-const CreateAssesments = ({ lectureNotes ,deleteCreatedAssesment}) => {
+const CreateAssesments = ({ lectureNotes, deleteCreatedAssesment }) => {
 
     const [selectedLecture, setSelectedLecture] = useState(null);
     console.log(lectureNotes);
@@ -58,11 +58,11 @@ const CreateAssesments = ({ lectureNotes ,deleteCreatedAssesment}) => {
     const handleCreateAssesmentopne = () => {
         setOpenCreateAssesment(true);
     }
-    const handleDeleteAssesment = (lectureId) => {
+    const handelDeleteAssesment = (lectureId) => {
         deleteCreatedAssesment(lectureId);
     }
 
-    
+
 
 
 
@@ -140,8 +140,8 @@ const CreateAssesments = ({ lectureNotes ,deleteCreatedAssesment}) => {
 
             <CreateAssesmentBox open={openCreateAssesment} onClose={handleCreateAssesmentClose}
                 selectedLecture={lectureNotes[selectedLecture]}
-                handleDeleteAssesment={handleDeleteAssesment}
-                 />
+                handelDeleteAssesment={handelDeleteAssesment}
+            />
 
         </div>
     )
