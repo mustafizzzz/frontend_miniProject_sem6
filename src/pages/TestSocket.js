@@ -97,7 +97,7 @@ const TestSocket = () => {
                     }
                     return prev - 1;
                 });
-            }, 1000);
+            }, 100000);
         }
         return () => clearInterval(timer);
     }, [selectedVoice, isTestStarted, startCountdown]);
@@ -224,6 +224,7 @@ const TestSocket = () => {
             {/* New Row for Voice Selection and Countdown */}
             <div className="row mb-4">
                 <div className="col-md-12 text-center">
+
                     {/* Voice Selection Dropdown */}
                     <div className="form-group mb-2 w-50 mx-auto">
                         <select
@@ -251,6 +252,7 @@ const TestSocket = () => {
             </div>
 
             <div className="row">
+
                 <div className="col-md-6 d-flex flex-column align-items-center">
                     <img
                         src="/AALE_face.png"
@@ -308,6 +310,7 @@ const TestSocket = () => {
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
 

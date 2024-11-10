@@ -31,6 +31,7 @@ import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
 import TestLayout from './pages/TestLayout/TestLayout';
 import AssesmentsPage from './pages/AssesmentsPage/AssesmentsPage';
+import OralSocketPage from './pages/OralSocketPage/OralSocketPage';
 
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
         <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/test-virtual' element={<TestVirtual />} />
         <Route path='/test-socket' element={<TestSocket />} />
+        <Route path='/test-socket-new' element={<OralSocketPage />} />
         <Route path='/test-11' element={<ElevenLabTest />} />
         <Route path='/test-sidebar' element={<TestLayout />}>
           <Route path='home' element={<Home />} />
