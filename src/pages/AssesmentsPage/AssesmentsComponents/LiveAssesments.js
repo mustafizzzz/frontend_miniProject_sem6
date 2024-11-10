@@ -3,8 +3,11 @@ import './LiveAssesments.css';
 import { RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import { REACT_APP_DEPLOY } from '../../../config';
+import { useNavigate } from 'react-router-dom';
 
 const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) => {
+
+  const navigate = useNavigate();
 
 
   // const liveAssessments = [
@@ -48,16 +51,26 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
     const liveAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, {
       createdBy: currentUser.hostId
     });
+    console.log('Refresh liveAssesmentsList:', liveAssesmentsList.data);
+
     updateLiveAssessment(liveAssesmentsList.data);
 
     setIsRefreshing(false);
   };
 
+  const handleStartTestStudent = (lectureId) => {
+
+    // navigate(`/test-socket-new/${lectureId}`);
+    const newWindowUrl = `/test-socket-new/${lectureId}`;
+    window.open(newWindowUrl, '_blank');
+
+
+  }
+
 
 
 
   return (
-
     <div className="container mt-1 custom-table-container border">
       <div className="heading-btn-box d-flex justify-content-between align-items-center">
         <h5>Live Assessments</h5>
@@ -94,19 +107,31 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
               <td>{formatDate(assessment.startDateAndTime)}</td>
               <td>{formatDate(assessment.endDateAndTime)}</td>
               <td>
-                <button
-                  className="btn btn-danger end-test-btn"
-                  onClick={() => alert(`Ending test for ${assessment.test?.testName || "Unknown Lecture"}`)}
-                >
-                  End Test
-                </button>
+                {currentUser.role === 'student' ? (
+                  <button
+                    className="btn btn-success start-test-btn"
+                    onClick={() => {
+
+                      handleStartTestStudent(assessment.test?._id);
+                    }
+                    }
+                  >
+                    Start Test
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-danger end-test-btn"
+                    onClick={() => alert(`Ending test for ${assessment.test?.testName || "Unknown Lecture"}`)}
+                  >
+                    End Test
+                  </button>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-
   )
 }
 

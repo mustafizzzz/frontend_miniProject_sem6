@@ -166,7 +166,7 @@ const RoomFrame = () => {
             intervalRef.current = setInterval(() => {
                 mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
                 mediaRecorderRef.current.start(); // Restart to begin a new segment
-            }, 60000); // 3 minutes or 1 min
+            }, 300000); // 3 minutes or 1 min
 
         } catch (error) {
             console.error("Error starting screen recording:", error);

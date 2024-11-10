@@ -27,22 +27,45 @@ const AssesmentsPage = () => {
 	useEffect(() => {
 
 		const fetchNotes = async () => {
+			let studentLiveAssesmentsList;
+			let studentPastAssesmentsList;
+			let liveAssesmentsList;
+			let lectureList;
+			let pastAssesmentsList;
 			try {
-				const lectureList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/fetch_lecture_with_notes`, {
-					host_id: currentUser.hostId
-				});
-				setNotes(lectureList.data);
 
-				const liveAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, {
-					createdBy: currentUser.hostId
-				});
-				setLiveAssesments(liveAssesmentsList.data);
+				if (currentUser.role === 'teacher') {
+					lectureList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/fetch_lecture_with_notes`, {
+						host_id: currentUser.hostId
+					});
+					setNotes(lectureList.data);
+
+					liveAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, {
+						createdBy: currentUser.hostId
+					});
+					setLiveAssesments(liveAssesmentsList.data);
+
+					pastAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_past_tests`, {
+						createdBy: currentUser.hostId
+					});
+					setPastAssesments(pastAssesmentsList.data);
+
+				} else {
+					studentLiveAssesmentsList = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_live_tests`);
+					setLiveAssesments(studentLiveAssesmentsList.data);
+
+					studentPastAssesmentsList = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_past_tests`);
+					setPastAssesments(studentPastAssesmentsList.data);
 
 
-				const pastAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_past_tests`, {
-					createdBy: currentUser.hostId
-				});
-				setPastAssesments(pastAssesmentsList.data);
+
+				}
+
+
+
+
+
+
 
 				console.log('lecture notes:', lectureList, 'liveAssesmentsList', liveAssesmentsList.data, 'pastAssesmentsList', pastAssesmentsList.data);
 
@@ -59,7 +82,7 @@ const AssesmentsPage = () => {
 
 	}, []);
 
-	const [value, setValue] = useState('1'); // Track selected tab value as string
+	const [value, setValue] = useState(currentUser.role === 'student' ? '2' : '1'); // Track selected tab value as string
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
@@ -77,22 +100,24 @@ const AssesmentsPage = () => {
 
 
 	return (
-
 		<Box sx={{ width: '100%' }} >
 			<TabContext value={value}>
-
 				<Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: 'white', borderRadius: '1rem' }}>
 					<TabList onChange={handleChange} aria-label="assessment tabs" centered className='assesments-tabs'>
-						<Tab label="Create Assesments" value="1" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
+						{currentUser.role !== 'student' && (
+							<Tab label="Create Assesments" value="1" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
+						)}
 						<Tab label="Live Assessments" value="2" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
 						<Tab label="Past Assessments" value="3" sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: '1rem' }} />
 					</TabList>
 				</Box>
 
 				{/* Lecture Schedule Tab Panel */}
-				<TabPanel value="1">
-					<CreateAssesments lectureNotes={notes} deleteCreatedAssesment={deleteCreatedAssesment} />
-				</TabPanel>
+				{currentUser.role !== 'student' && (
+					<TabPanel value="1">
+						<CreateAssesments lectureNotes={notes} deleteCreatedAssesment={deleteCreatedAssesment} />
+					</TabPanel>
+				)}
 
 				{/* Live Assessments Tab Panel */}
 				<TabPanel value="2">
@@ -103,11 +128,8 @@ const AssesmentsPage = () => {
 				<TabPanel value="3">
 					<PastAssesments pastAssesments={pastAssesments} />
 				</TabPanel>
-
 			</TabContext>
-
 		</Box>
-
 	);
 };
 

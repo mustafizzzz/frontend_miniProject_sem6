@@ -5,6 +5,7 @@ import './OralSocketPage.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { io } from 'socket.io-client';
 import { set } from 'firebase/database';
+import { useParams } from 'react-router-dom';
 
 // let socket = io('wss://mood-lens-server.onrender.com', {
 //     reconnectionAttempts: 5,
@@ -19,9 +20,10 @@ const OralSocketPage = () => {
 
 	const [question, setQuestion] = useState([]);
 	const [answer, setAnswer] = useState('');
+	const { lectureId } = useParams();
 	const test_id = '672f9768d34042ad5ab97c84';
 	const chatContainerRef = useRef(null);
-	const [apiKey, setApiKey] = useState('sk_bc62db37c6c8fdcc1d4b7b517f0535f3403064f850647760');
+	const [apiKey, setApiKey] = useState('sk_3b73def0e930bc9549e685c5c916afa3d749074a5e09ccf7');
 	const audioRef = useRef(new Audio());
 	const [selectedVoice, setSelectedVoice] = useState('');
 	const [stability, setStability] = useState(0.3);
@@ -153,50 +155,64 @@ const OralSocketPage = () => {
 		setIsVoiceLoaded(true);
 	};
 
-	const handleTextToSpeech = async (text) => {
-		if (!text || !isVoiceLoaded) {
-			console.error('Missing required data for TTS:', {
-				text: !!text,
-				selectedVoice: !!selectedVoice,
-				isVoiceLoaded
-			});
-			return;
-		}
+	// const handleTextToSpeech = async (text) => {
+	// 	if (!text || !isVoiceLoaded) {
+	// 		console.error('Missing required data for TTS:', {
+	// 			text: !!text,
+	// 			selectedVoice: !!selectedVoice,
+	// 			isVoiceLoaded
+	// 		});
+	// 		return;
+	// 	}
 
-		try {
-			const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
-				method: 'POST',
-				headers: {
-					'xi-api-key': apiKey,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					text,
-					voice_settings: {
-						stability,
-						similarity_boost: 0.8,
-					},
-				}),
-			});
+	// 	try {
+	// 		const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'xi-api-key': apiKey,
+	// 				'Content-Type': 'application/json',
+	// 			},
+	// 			body: JSON.stringify({
+	// 				text,
+	// 				voice_settings: {
+	// 					stability,
+	// 					similarity_boost: 0.8,
+	// 				},
+	// 			}),
+	// 		});
 
-			if (!response.ok) {
-				throw new Error(`Text to speech conversion failed: ${response.status}`);
-			}
+	// 		if (!response.ok) {
+	// 			throw new Error(`Text to speech conversion failed: ${response.status}`);
+	// 		}
 
-			const audioBlob = await response.blob();
-			const url = URL.createObjectURL(audioBlob);
+	// 		const audioBlob = await response.blob();
+	// 		const url = URL.createObjectURL(audioBlob);
 
-			if (audioRef.current.src) {
-				URL.revokeObjectURL(audioRef.current.src);
-			}
+	// 		if (audioRef.current.src) {
+	// 			URL.revokeObjectURL(audioRef.current.src);
+	// 		}
 
-			audioRef.current.src = url;
-			setIsAISpeaking(true);
-			await audioRef.current.play();
-		} catch (err) {
-			console.error('Error converting text to speech:', err);
-		}
+	// 		audioRef.current.src = url;
+	// 		setIsAISpeaking(true);
+	// 		await audioRef.current.play();
+	// 	} catch (err) {
+	// 		console.error('Error converting text to speech:', err);
+	// 	}
+	// };
+
+	const handleTextToSpeech = (text) => {
+		console.log("Speaking:", text);
+
+		window.speechSynthesis.cancel();
+
+		const utterance = new SpeechSynthesisUtterance(text);
+		utterance.pitch = 1;
+		utterance.rate = 0.9;
+		utterance.volume = 1;
+		setIsAISpeaking(true);
+		window.speechSynthesis.speak(utterance);
 	};
+
 
 	const handleAnswerSubmit = async () => {
 		if (answer.trim() !== '') {

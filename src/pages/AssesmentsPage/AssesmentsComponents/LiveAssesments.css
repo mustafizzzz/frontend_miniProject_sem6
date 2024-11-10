@@ -20,3 +20,17 @@
     background-color: #c82333;
     color: white;
 }
+
+.start-test-btn {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+
+}
+
+.start-test-btn:hover {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+
+}
