@@ -11,21 +11,21 @@ const Home = () => {
       <StatsCardComponent />
 
 
-      <div className="row m-0 p-0 mb-5">
-        <div className="col-md-6 border border-success">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus obcaecati nam odio mollitia autem accusamus aperiam deleniti, sequi nisi voluptatibus error quae. Nesciunt, beatae nam, ipsum eum, quisquam harum doloremque in id laborum odio explicabo commodi vel at a asperiores?
+      <div className="row m-0 p-0 mb-5 justify-content-evenly" style={{ height: '80px' }}>
+        <div className="col-md-5 border border-info" style={{ borderRadius: '0.5rem' }}>
+          OverAll Emotion Anslysis
         </div>
-        <div className="col-md-6 border border-success">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus obcaecati nam odio mollitia autem accusamus aperiam deleniti, sequi nisi voluptatibus error quae. Nesciunt, beatae nam, ipsum eum, quisquam harum doloremque in id laborum odio explicabo commodi vel at a asperiores?
+        <div className="col-md-5 border border-info" style={{ borderRadius: '0.5rem' }}>
+          Todo List for teacher
         </div>
       </div>
 
-      <div className="row m-0 p-0">
-        <div className="col-md-6 border border-success">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus obcaecati nam odio mollitia autem accusamus aperiam deleniti, sequi nisi voluptatibus error quae. Nesciunt, beatae nam, ipsum eum, quisquam harum doloremque in id laborum odio explicabo commodi vel at a asperiores?
+      <div className="row m-0 p-0 mb-3 justify-content-evenly" style={{ height: '80px' }}>
+        <div className="col-md-5 border border-info" style={{ borderRadius: '0.5rem' }}>
+          Activity Calender for Teacher
         </div>
-        <div className="col-md-6 border border-success">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus obcaecati nam odio mollitia autem accusamus aperiam deleniti, sequi nisi voluptatibus error quae. Nesciunt, beatae nam, ipsum eum, quisquam harum doloremque in id laborum odio explicabo commodi vel at a asperiores?
+        <div className="col-md-5 border border-info" style={{ borderRadius: '0.5rem' }}>
+          Importan Announcements for Student
         </div>
       </div>
 

@@ -16,6 +16,8 @@ import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-quer
 import { startListening, stopListening } from '../RoomFunction/audioRecorder';
 import { captureImage, emotionDetect, getCurrentTimeTeacher, textEmotion } from '../RoomFunction/roomApiCalls';
 import { deleteStudentImage } from '../RoomFunction/deleteStudentImage';
+import EndMeetProcess from './EndMeetingProcess/EndMeetProcess';
+import { set } from 'firebase/database';
 
 
 const queryClient = new QueryClient();
@@ -28,7 +30,7 @@ const RoomFrame = () => {
     const [isCapturing, setIsCapturing] = useState(false);
     const { currentUser } = useContext(UserContext);
     const navigate = useNavigate();
-    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
+    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions, videoUrls, setVideoUrls } = useContext(emotionsContext);
     const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
     const [displayHelperButton, setDisplayHelperButton] = useState(false);
 
@@ -107,12 +109,12 @@ const RoomFrame = () => {
     //<===================Video recording code test===============================>
 
     const [isRecording, setIsRecording] = useState(false);
-    const [videoDownloadURLs, setVideoDownloadURLs] = useState([]);
+    // const [videoDownloadURLs, setVideoDownloadURLs] = useState([]);
     const mediaRecorderRef = useRef(null);
     const chunks = useRef([]);
     const intervalRef = useRef(null);
     const videoCount = useRef(0);
-    const [simplifiedNotes, setSimplifiedNotes] = useState(null);
+    const [simplifiedNotes, setSimplifiedNotes] = useState([]);
 
     // Start recording
     const startRecording = async () => {
@@ -148,7 +150,7 @@ const RoomFrame = () => {
             // when screen sharing is manually stopped
             screenStream.getVideoTracks()[0].onended = () => {
                 console.log('Screen sharing manually stopped');
-                stopRecording(); // Automatically stop recording and save
+                stopRecording();
             };
 
             mediaRecorderRef.current.onstop = () => {
@@ -164,7 +166,8 @@ const RoomFrame = () => {
             intervalRef.current = setInterval(() => {
                 mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
                 mediaRecorderRef.current.start(); // Restart to begin a new segment
-            }, 180000); // 3 minutes
+            }, 60000); // 3 minutes or 1 min
+
         } catch (error) {
             console.error("Error starting screen recording:", error);
         }
@@ -181,22 +184,6 @@ const RoomFrame = () => {
 
             mediaRecorderRef.current.stop(); // Stop the MediaRecorder and save the video
         }
-    };
-
-
-    const callSimplifyNotesAPI = (notes) => {
-        // Call the API without waiting for its response
-        axios.post('http://localhost:5000/api/v1/notes/process_video', { videoUrl: notes, meet_id: roomId })
-            .then((response) => {
-                console.log('Simplified notes received:', response.data.CurrentNotes);
-                setSimplifiedNotes(response.data.CurrentNotes); // Store the response in state
-            })
-            .catch((error) => {
-                console.error('Error while simplifying notes:', error);
-            });
-
-        // Proceed without waiting for the response
-        console.log('API call made, waiting for response...');
     };
 
     // Save video/audio segment to Firebase
@@ -218,7 +205,7 @@ const RoomFrame = () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((url) => {
                     console.log("File available at:", url);
                     // callSimplifyNotesAPI(url);
-                    setVideoDownloadURLs((prevURLs) => [...prevURLs, url]);
+                    setVideoUrls((prevURLs) => [...prevURLs, url]);
                 });
             }
         );
@@ -230,6 +217,53 @@ const RoomFrame = () => {
             stopRecording();
         } else {
             startRecording();
+        }
+    };
+
+
+
+    //end meeting processing
+
+    const [isMakingNotes, setIsMakingNotes] = useState(false);
+
+
+
+    const callSimplifyNotesAPI = async (videoUrl) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/v1/notes/process_video', {
+                videoUrl: videoUrl,
+                meet_id: roomId
+            });
+            console.log('Simplified notes received:', response.data);
+
+        } catch (error) {
+            console.error('Error while simplifying notes:', error);
+            throw error;
+        }
+    };
+
+    const handelMakingNotes = async () => {
+        setIsMakingNotes(true);
+        console.log('Making notes...');
+
+        try {
+            // Loop over each video URL in the array and make an API call sequentially
+            for (let i = 0; i < videoUrls.length; i++) {
+                const url = videoUrls[i];
+                const response = await axios.post('http://localhost:5000/api/v1/notes/process_video', {
+                    meet_id: roomId,
+                    videoUrl: url
+                });
+                console.log(`Notes for video ${i + 1}:`, response.data);
+            }
+
+            alert('All notes saved successfully!');
+
+        } catch (error) {
+            console.error('Error while saving notes:', error);
+            alert('An error occurred while saving notes.');
+        } finally {
+            setIsMakingNotes(false);
         }
     };
 
@@ -278,6 +312,8 @@ const RoomFrame = () => {
                     await Promise.all(deletePromises); // Wait for all deletions to complete
 
                     console.log(`All files in folder ${folderPath} deleted successfully.`);
+
+
                 } catch (error) {
                     console.error("Error deleting files from Firebase:", error);
                 }
@@ -323,11 +359,13 @@ const RoomFrame = () => {
 
 
             },
+
             onReturnToHomeScreenClicked: () => {
                 setIsCapturing(false);
                 setIsProcessing(false);
                 currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
                 navigate('/dashboard/home');
+
             },
 
 
@@ -349,7 +387,22 @@ const RoomFrame = () => {
                     <i className="bi bi-filetype-ai fs-4" style={{ color: 'white' }}></i>
                     <span className="take-notes-text text-white p-0 m-0 fw-bold"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
                 </button>
+
+                <button className={`btn btn-primary ms-3`} onClick={handelMakingNotes} disabled={isMakingNotes}>
+                    {isMakingNotes ? (
+                        <div className="spinner-border spinner-border-sm text-light me-2" role="status">
+                            {/* <span className="visually-hidden">Loading...</span> */}
+                        </div>
+                    ) : (
+
+                        <i className="bi bi-journal-arrow-down fs-5 mx-2"></i>
+                    )}
+                    <span>{isMakingNotes ? '' : 'Save Notes'}</span>
+                </button>
+
             </div>
+
+
 
             <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
 

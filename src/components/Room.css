@@ -26,6 +26,13 @@
     z-index: 10000;
 }
 
+.button-save-box {
+    position: fixed;
+    top: 41.5rem;
+    left: 6.5rem;
+    z-index: 10000;
+}
+
 .button-record-box button {
     background-color: #313443;
     border-radius: 10px;

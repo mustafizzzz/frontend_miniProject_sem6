@@ -10,6 +10,7 @@ const EmotionsProvider = ({ children }) => {
     const [overAllEmotions, setOverAllEmotions] = useState(null);
     const [studentLiveEmotions, setStudentLiveEmotions] = useState(null);
     const [lastSync, setLastSync] = useState(0);
+    const [videoUrls, setVideoUrls] = useState([]);
 
 
     return (
@@ -17,7 +18,7 @@ const EmotionsProvider = ({ children }) => {
         <emotionsContext.Provider value={{
             textEmotions, setTextEmotions, videoEmotions,
             setVideoEmotions, audioEmotions, setAudioEmotions, overAllEmotions, setOverAllEmotions,
-            studentLiveEmotions, setStudentLiveEmotions, lastSync, setLastSync
+            studentLiveEmotions, setStudentLiveEmotions, lastSync, setLastSync, videoUrls, setVideoUrls
         }}>
             {children}
         </emotionsContext.Provider>

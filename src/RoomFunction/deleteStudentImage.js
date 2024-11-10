@@ -2,25 +2,15 @@ import { deleteObject, listAll, ref } from "firebase/storage";
 import { storage } from "../firbaseConfig";
 
 
+
+
 export const deleteStudentImage = async (roomId, currentUserPid) => {
+
     const folderRef = ref(storage, `InCallstudentsImage/${currentUserPid}/`); // Reference to the folder
     console.log('Deleting images...', roomId, currentUserPid);
 
 
     try {
-        // // List all items in the folder
-        // const result = await listAll(folderRef);
-
-        // if (result.items.length === 0) {
-        //     console.log('No images to delete.'); // Log if no images are found
-        //     return;
-        // }
-        // const deletePromises = result.items.map(item => deleteObject(item));
-
-        // // Wait for all delete promises to resolve
-        // await Promise.all(deletePromises);
-        // console.log('All images deleted successfully.'); // Log success message
-
         // List all items in the folder asynchronously (non-blocking)
         listAll(folderRef)
             .then((result) => {
