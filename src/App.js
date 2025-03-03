@@ -32,6 +32,7 @@ import TestVirtual from './pages/TestVirtual';
 import TestLayout from './pages/TestLayout/TestLayout';
 import AssesmentsPage from './pages/AssesmentsPage/AssesmentsPage';
 import OralSocketPage from './pages/OralSocketPage/OralSocketPage';
+import PostTestData from './pages/PostTestData';
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
 
   return (
     <div className="App">
+
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
@@ -58,6 +60,7 @@ function App() {
         <Route path='/test-virtual' element={<TestVirtual />} />
         <Route path='/test-socket' element={<TestSocket />} />
         <Route path='/test-socket-new' element={<OralSocketPage />} />
+        <Route path='/test-data' element={<PostTestData />} />
         <Route path='/test-11' element={<ElevenLabTest />} />
         <Route path='/test-sidebar' element={<TestLayout />}>
           <Route path='home' element={<Home />} />
@@ -93,6 +96,7 @@ function App() {
 
 
       </Routes>
+
       <VirtualAssistant />
 
     </div>

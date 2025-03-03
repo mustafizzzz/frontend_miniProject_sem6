@@ -21,7 +21,8 @@ const OralSocketPage = () => {
 	const [question, setQuestion] = useState([]);
 	const [answer, setAnswer] = useState('');
 	const { lectureId } = useParams();
-	const test_id = '672f9768d34042ad5ab97c84';
+	// const test_id = '672f9768d34042ad5ab97c84';
+	const test_id = '673046b9296cd97fe5444c7f';
 	const chatContainerRef = useRef(null);
 	const [apiKey, setApiKey] = useState('sk_3b73def0e930bc9549e685c5c916afa3d749074a5e09ccf7');
 	const audioRef = useRef(new Audio());
