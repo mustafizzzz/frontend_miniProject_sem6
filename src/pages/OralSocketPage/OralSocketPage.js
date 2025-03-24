@@ -8,8 +8,8 @@ import { set } from 'firebase/database';
 import { useParams } from 'react-router-dom';
 
 // let socket = io('wss://mood-lens-server.onrender.com', {
-//     reconnectionAttempts: 5,
-//     timeout: 10000,
+// 	reconnectionAttempts: 5,
+// 	timeout: 10000,
 // });
 let socket = io('http://localhost:5000');
 
