@@ -1,125 +1,86 @@
-// TestPage.js
-import React, { useState, useRef, useEffect } from "react";
-import { Switch } from "@mui/material";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "../firbaseConfig";
-
+import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
+import React, { useState } from 'react';
 
 const TestPage = () => {
-    const [isRecording, setIsRecording] = useState(false);
-    const [downloadURLs, setDownloadURLs] = useState([]);
-    const mediaRecorderRef = useRef(null);
-    const chunks = useRef([]);
-    const intervalRef = useRef(null);
-    const videoCount = useRef(0);
+    const [roomId, setRoomId] = useState('');
+    const [username, setUsername] = useState('');
+    const [isInCall, setIsInCall] = useState(false);
 
-    // Start recording
-    const startRecording = async () => {
-        try {
-            // Capture the screen stream
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                video: { width: 7680, height: 4320 }, // 4080p quality
-                audio: true, // Include system audio
-            });
-
-            // Capture the microphone audio stream
-            const audioStream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-            });
-
-            // Combine the screen and microphone streams
-            const combinedStream = new MediaStream([
-                ...screenStream.getVideoTracks(),
-                ...audioStream.getAudioTracks(),
-            ]);
-
-            mediaRecorderRef.current = new MediaRecorder(combinedStream, {
-                mimeType: "video/webm; codecs=vp9,opus",
-            });
-            chunks.current = [];
-
-            mediaRecorderRef.current.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    chunks.current.push(event.data);
-                }
-            };
-
-            mediaRecorderRef.current.onstop = () => {
-                const blob = new Blob(chunks.current, { type: "video/webm" });
-                saveSegment(blob); // Save the final segment
-                chunks.current = []; // Clear chunks after saving
-            };
-
-            mediaRecorderRef.current.start(1000); // Collect data every second
-            setIsRecording(true);
-
-            // Save segments every 3 minutes (180000 ms)
-            intervalRef.current = setInterval(() => {
-                mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
-                mediaRecorderRef.current.start(); // Restart to begin a new segment
-            }, 180000); // 3 minutes
-        } catch (error) {
-            console.error("Error starting screen recording:", error);
+    const handleJoinCall = () => {
+        if (!username || !roomId) {
+            alert('Please enter username and room ID');
+            return;
         }
+
+        setIsInCall(true);
     };
 
-    // Stop recording
-    const stopRecording = () => {
-        clearInterval(intervalRef.current);
-        mediaRecorderRef.current.stop();
-        setIsRecording(false);
-    };
+    const initializeZegoCloud = (element) => {
+        if (!element) return;
 
-    // Save video/audio segment to Firebase
-    const saveSegment = (blob) => {
-        const storageRef = ref(storage, `recordings/segment_${videoCount.current}.webm`);
-        videoCount.current += 1;
+        const appID = 1703483768; // Replace with your Zego App ID
+        const serverSecret = '07a7144d947c0f58c0d6284fc7c0bd8b'; // Replace with your server secret
 
-        const uploadTask = uploadBytesResumable(storageRef, blob);
-        uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log(`Upload is ${progress}% done`);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-            },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                    setDownloadURLs((prevURLs) => [...prevURLs, url]);
-                    console.log("File available at:", url);
-                });
-            }
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+            appID,
+            serverSecret,
+            roomId,
+            Date.now().toString(),
+            username
         );
-    };
 
-    // Handle switch toggle
-    const handleSwitchChange = (event) => {
-        if (event.target.checked) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
+        const zegoCloud = ZegoUIKitPrebuilt.create(kitToken);
+
+        zegoCloud.joinRoom({
+            container: element,
+            scenario: {
+                mode: ZegoUIKitPrebuilt.VideoConference
+            },
+            turnOnMicrophoneWhenJoining: true,
+            turnOnCameraWhenJoining: true,
+            showMyCameraToggleButton: true,
+            showMyMicrophoneToggleButton: true,
+            onLeaveRoom: () => {
+                setIsInCall(false);
+            }
+        });
     };
 
     return (
-        <div>
-            <h2>Screen Recorder</h2>
-            <Switch checked={isRecording} onChange={handleSwitchChange} />
-            <p>{isRecording ? "Recording..." : "Recording stopped"}</p>
-
-            {downloadURLs.length > 0 && (
-                <div>
-                    <h3>Uploaded Recordings</h3>
-                    {downloadURLs.map((url, index) => (
-                        <div key={index}>
-                            <a href={url} target="_blank" rel="noopener noreferrer">
-                                Download Segment {index + 1}
-                            </a>
-                        </div>
-                    ))}
+        <div className="container mt-5">
+            {!isInCall ? (
+                <div className="card">
+                    <div className="card-header">
+                        <h2>Join Video Call</h2>
+                    </div>
+                    <div className="card-body">
+                        <input
+                            type="text"
+                            className="form-control mb-3"
+                            placeholder="Your Name"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            className="form-control mb-3"
+                            placeholder="Room ID"
+                            value={roomId}
+                            onChange={(e) => setRoomId(e.target.value)}
+                        />
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleJoinCall}
+                        >
+                            Join Call
+                        </button>
+                    </div>
                 </div>
+            ) : (
+                <div
+                    ref={initializeZegoCloud}
+                    style={{ width: '100%', height: '100vh' }}
+                />
             )}
         </div>
     );

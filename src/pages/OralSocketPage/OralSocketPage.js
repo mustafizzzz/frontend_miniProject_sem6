@@ -1,45 +1,75 @@
-// App.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Send, Repeat } from 'lucide-react';
 import './OralSocketPage.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { io } from 'socket.io-client';
-import { set } from 'firebase/database';
 import { useParams } from 'react-router-dom';
 
-// let socket = io('wss://mood-lens-server.onrender.com', {
-// 	reconnectionAttempts: 5,
-// 	timeout: 10000,
-// });
-let socket = io('http://localhost:5000');
+// let socket = io('wss://mood-lens-server.onrender.com',
+// 	{
+// 		reconnectionAttempts: 5,
+// 		timeout: 10000,
+// 	});
+let socket = io('http://localhost:5000', {
+	reconnectionAttempts: 3,
+	timeout: 5000
+});
 
 const OralSocketPage = () => {
-
 	const [isAISpeaking, setIsAISpeaking] = useState(true);
-
-
 	const [question, setQuestion] = useState([]);
 	const [answer, setAnswer] = useState('');
 	const { lectureId } = useParams();
-	// const test_id = '672f9768d34042ad5ab97c84';
-	const test_id = '673046b9296cd97fe5444c7f';
+	const test_id = '67e1bc6fd4c56cb4650879be';
 	const chatContainerRef = useRef(null);
-	const [apiKey, setApiKey] = useState('sk_3b73def0e930bc9549e685c5c916afa3d749074a5e09ccf7');
 	const audioRef = useRef(new Audio());
 	const [selectedVoice, setSelectedVoice] = useState('');
-	const [stability, setStability] = useState(0.3);
-	const [isVoiceLoaded, setIsVoiceLoaded] = useState(false);
 	const [availableVoices, setAvailableVoices] = useState([]);
+	const [isVoiceLoaded, setIsVoiceLoaded] = useState(true);
 	const [isVoiceSelected, setIsVoiceSelected] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 
-	//react text to speech
+	// React speech recognition
 	const [isListening, setIsListening] = useState(false);
 	const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
-
-
 	const videoRef = useRef(null);
+
+	// Load default system voices
+	useEffect(() => {
+		if ('speechSynthesis' in window) {
+			const voices = window.speechSynthesis.getVoices();
+
+			// If voices are not immediately available, wait for the voiceschanged event
+			if (voices.length === 0) {
+				window.speechSynthesis.onvoiceschanged = () => {
+					const updatedVoices = window.speechSynthesis.getVoices();
+					setAvailableVoices(updatedVoices);
+
+					// Optionally set a default voice
+					const defaultVoice = updatedVoices.find(voice =>
+						voice.lang.startsWith('en-') && voice.name.toLowerCase().includes('female')
+					) || updatedVoices[0];
+
+					if (defaultVoice) {
+						setSelectedVoice(defaultVoice.name);
+					}
+				};
+			} else {
+				setAvailableVoices(voices);
+
+				// Set default voice
+				const defaultVoice = voices.find(voice =>
+					voice.lang.startsWith('en-') && voice.name.toLowerCase().includes('female')
+				) || voices[0];
+
+				if (defaultVoice) {
+					setSelectedVoice(defaultVoice.name);
+				}
+			}
+
+		}
+	}, []);
 
 	// Access webcam on component mount
 	useEffect(() => {
@@ -69,54 +99,15 @@ const OralSocketPage = () => {
 		};
 	}, []);
 
-	//Voices loade here
-	useEffect(() => {
-		if (apiKey) {
-			fetchVoices();
-		}
-	}, [apiKey]);
-
-	const fetchVoices = async () => {
-		try {
-			const response = await fetch('https://api.elevenlabs.io/v1/voices', {
-				headers: {
-					'xi-api-key': apiKey,
-				},
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch voices: ${response.status}`);
-			}
-
-			const data = await response.json();
-			setAvailableVoices(data.voices);
-
-			// Set default voice if Monika's voice is found
-			const monikaVoice = data.voices.find(voice =>
-				voice.name === 'Monika Sogam - Natural Conversations'
-			);
-			if (monikaVoice) {
-				setSelectedVoice(monikaVoice.voice_id);
-				setIsVoiceLoaded(true);
-			}
-		} catch (err) {
-			console.error('Error fetching voices:', err);
-			setIsVoiceLoaded(false);
-		}
-	};
-
-	//socket
+	// Socket connection
 	useEffect(() => {
 		console.log('Run socket');
-		if (window.location.pathname === '/test-socket-new' && isVoiceLoaded) {
+		if (window.location.pathname === '/test-socket-new') {
+			console.log("Start Audio");
 
 			socket.emit('start_test', { test_id });
 			socket.on('questions', (data) => {
-
-
-				if (isVoiceLoaded) {
-					handleTextToSpeech(data);
-				}
+				handleTextToSpeech(data);
 				setQuestion((prevMessages) => [...prevMessages, { type: 'question', text: data }]);
 
 				socket.emit('question_ack', { message: 'Question received' });
@@ -125,9 +116,7 @@ const OralSocketPage = () => {
 
 			socket.on('response', (response) => {
 				setQuestion((prevMessages) => [...prevMessages, { type: 'question', text: response }]);
-				if (isVoiceLoaded) {
-					handleTextToSpeech(response);
-				}
+				handleTextToSpeech(response);
 			});
 
 			socket.on('error', (errorMessage) => {
@@ -140,81 +129,51 @@ const OralSocketPage = () => {
 			socket.off('response');
 			socket.off('error');
 		};
-	}, [isVoiceLoaded]);
+	}, []);
 
-	//audio to text
+	// Update answer with transcript
 	useEffect(() => {
 		if (listening) {
 			setAnswer(transcript);
 		}
 	}, [transcript, listening]);
 
-	//function to help
+	// Handle voice selection
 	const handleVoiceChange = (event) => {
-		const voiceId = event.target.value;
-		setSelectedVoice(voiceId);
-		setIsVoiceLoaded(true);
+		const voiceName = event.target.value;
+		setSelectedVoice(voiceName);
 	};
 
-	// const handleTextToSpeech = async (text) => {
-	// 	if (!text || !isVoiceLoaded) {
-	// 		console.error('Missing required data for TTS:', {
-	// 			text: !!text,
-	// 			selectedVoice: !!selectedVoice,
-	// 			isVoiceLoaded
-	// 		});
-	// 		return;
-	// 	}
-
-	// 	try {
-	// 		const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
-	// 			method: 'POST',
-	// 			headers: {
-	// 				'xi-api-key': apiKey,
-	// 				'Content-Type': 'application/json',
-	// 			},
-	// 			body: JSON.stringify({
-	// 				text,
-	// 				voice_settings: {
-	// 					stability,
-	// 					similarity_boost: 0.8,
-	// 				},
-	// 			}),
-	// 		});
-
-	// 		if (!response.ok) {
-	// 			throw new Error(`Text to speech conversion failed: ${response.status}`);
-	// 		}
-
-	// 		const audioBlob = await response.blob();
-	// 		const url = URL.createObjectURL(audioBlob);
-
-	// 		if (audioRef.current.src) {
-	// 			URL.revokeObjectURL(audioRef.current.src);
-	// 		}
-
-	// 		audioRef.current.src = url;
-	// 		setIsAISpeaking(true);
-	// 		await audioRef.current.play();
-	// 	} catch (err) {
-	// 		console.error('Error converting text to speech:', err);
-	// 	}
-	// };
-
+	// Text to speech using browser's speech synthesis
 	const handleTextToSpeech = (text) => {
 		console.log("Speaking:", text);
 
+		// Cancel any ongoing speech
 		window.speechSynthesis.cancel();
 
+		// Create speech utterance
 		const utterance = new SpeechSynthesisUtterance(text);
+
+		// Select the chosen voice
+		if (selectedVoice) {
+			const voices = window.speechSynthesis.getVoices();
+			const voice = voices.find(v => v.name === selectedVoice);
+			if (voice) {
+				utterance.voice = voice;
+			}
+		}
+
+		// Configure speech properties
 		utterance.pitch = 1;
 		utterance.rate = 0.9;
 		utterance.volume = 1;
+
+		// Set speaking state and speak
 		setIsAISpeaking(true);
 		window.speechSynthesis.speak(utterance);
 	};
 
-
+	// Submit answer handler
 	const handleAnswerSubmit = async () => {
 		if (answer.trim() !== '') {
 			setIsSubmitted(true);
@@ -226,17 +185,15 @@ const OralSocketPage = () => {
 			resetTranscript();
 			setIsListening(false);
 
-
 			await new Promise(resolve => setTimeout(resolve, 4000));
 			setIsSubmitted(false);
 			setAnswer('');
-
-
 		} else {
 			alert('Please enter an answer before submitting.');
 		}
 	};
 
+	// Microphone toggle handler
 	const handleMicClick = () => {
 		if (isListening) {
 			SpeechRecognition.stopListening();
@@ -265,8 +222,8 @@ const OralSocketPage = () => {
 							>
 								<option value="">Select AI Voice</option>
 								{availableVoices.map((voice) => (
-									<option key={voice.voice_id} value={voice.voice_id}>
-										{voice.name}
+									<option key={voice.name} value={voice.name}>
+										{voice.name} ({voice.lang})
 									</option>
 								))}
 							</select>

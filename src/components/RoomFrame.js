@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -10,413 +10,310 @@ import { emotionsContext } from '../ContextApi/emotionsContext';
 
 //firebase Imports for recording
 import db, { storage } from '../firbaseConfig';
-import { deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable } from 'firebase/storage';
 
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { startListening, stopListening } from '../RoomFunction/audioRecorder';
 import { captureImage, emotionDetect, getCurrentTimeTeacher, textEmotion } from '../RoomFunction/roomApiCalls';
 import { deleteStudentImage } from '../RoomFunction/deleteStudentImage';
-import EndMeetProcess from './EndMeetingProcess/EndMeetProcess';
-import { set } from 'firebase/database';
+import { handleMakingNotes, printFormattedNotes, startRecording, stopRecording, uploadVideosToFirebase } from '../RoomFunction/videoRecorder';
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+
+import ReactMarkdown from 'react-markdown';
 
 
 const queryClient = new QueryClient();
 
 
-const RoomFrame = () => {
 
-    const { roomId } = useParams();
-    const [imageData, setImageData] = useState([]);
-    const [isCapturing, setIsCapturing] = useState(false);
-    const { currentUser } = useContext(UserContext);
-    const navigate = useNavigate();
-    const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions, videoUrls, setVideoUrls } = useContext(emotionsContext);
-    const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
-    const [displayHelperButton, setDisplayHelperButton] = useState(false);
+const TestMeet = () => {
 
-    //==================testing tanstack query====================
-    const { data } = useQuery({
-        queryKey: ['continuousProcess', roomId, currentUser.role],
-        queryFn: async () => {
-            if (currentUser.role === 'teacher') {
+  const { roomId } = useParams();
+  const [imageData, setImageData] = useState([]);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const { currentUser } = useContext(UserContext);
+  const { setTextEmotions, setVideoEmotions, setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions } = useContext(emotionsContext);
+  const [isProcessing, setIsProcessing] = useState(false); // To handle loading state
+  const [displayHelperButton, setDisplayHelperButton] = useState(false);
 
-                await emotionDetect(currentUser, roomId,
-                    setTextEmotions, setVideoEmotions, setAudioEmotions,
-                    setOverAllEmotions, setStudentLiveEmotions);
+  //==================testing tanstack query start====================
+  const { data } = useQuery({
+    queryKey: ['continuousProcess', roomId, currentUser.role],
+    queryFn: async () => {
+      if (currentUser.role === 'teacher') {
 
-                return { status: 'emotionDetect completed' };
-            } else if (currentUser.role === 'student') {
-                await captureImage(currentUser, roomId,
-                    setImageData, isCapturing);
-                return { status: 'captureImage completed' };
-            }
-            return { status: 'no action taken' }; // Handle the case where neither role matches
-        },
-        refetchInterval: currentUser.role === 'teacher' ? 10000 : 5000, // Interval based on role
-        refetchIntervalInBackground: true,
-        enabled: isProcessing, // Only run when processing is active
-        onSuccess: () => {
-            console.log('Process completed successfully.');
-        },
-        onError: (error) => {
-            console.error('Process failed:', error);
-        },
-        onSettled: () => {
-            console.log('Query has settled (either succeeded or failed).');
-        },
-    });
-    //==================testing tanstack query====================
+        await emotionDetect(currentUser, roomId,
+          setTextEmotions, setVideoEmotions, setAudioEmotions,
+          setOverAllEmotions, setStudentLiveEmotions);
 
-    //<===================audio emotion start===================>
-    const [isListening, setIsListening] = useState(true);
-    const [audioList, setAudioList] = useState([]);
-    const mediaAudioRecorderRef = useRef(null);
-    const audioChunksRef = useRef([]);
-    const mediaStreamRef = useRef(null);
+        return { status: 'emotionDetect completed' };
+      } else if (currentUser.role === 'student') {
+        await captureImage(currentUser, roomId,
+          setImageData, isCapturing);
+        return { status: 'captureImage completed' };
+      }
+      return { status: 'no action taken' }; // Handle the case where neither role matches
+    },
+    refetchInterval: currentUser.role === 'teacher' ? 10000 : 5000, // Interval based on role
+    refetchIntervalInBackground: true,
+    enabled: isProcessing, // Only run when processing is active
+    onSuccess: () => {
+      console.log('Process completed successfully.');
+    },
+    onError: (error) => {
+      console.error('Process failed:', error);
+    },
+    onSettled: () => {
+      console.log('Query has settled (either succeeded or failed).');
+    },
+  });
+  //==================testing tanstack query end====================
 
-    //audio button click event
-    useEffect(() => {
+  //<===================audio emotion start===================>
+  const [isListening, setIsListening] = useState(true);
+  const [audioList, setAudioList] = useState([]);
+  const mediaAudioRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const mediaStreamRef = useRef(null);
 
-        const handleClick = (event) => {
+  //audio button click event
 
-            if (currentUser.role === 'teacher') return; // Only for students
+  useEffect(() => {
 
-            if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7' || 'h2M8QwerO1XmsfrZlpv6')) {
-                console.log('Clicked on the audio button');
-                setIsListening(prevIsListening => !prevIsListening);
-                console.log('Audio listening:', isListening);
-                if (isListening) {
-                    startListening(mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList, roomId, currentUser);
-                } else {
-                    stopListening(mediaAudioRecorderRef, mediaStreamRef);
-                }
-            }
+    const handleClick = (event) => {
 
-        };
+      if (currentUser.role === 'teacher') return; // Only for students
 
-        // Add event listener to document for click events
-        document.addEventListener('click', handleClick);
-
-        // Cleanup function to remove event listener when component unmounts
-        return () => {
-            document.removeEventListener('click', handleClick);
-        };
-    }, [isListening]);
-
-    console.log('Audio list:', audioList);
-    //<===================audio emotion end===================>
-
-    //<===================Video recording code test===============================>
-
-    const [isRecording, setIsRecording] = useState(false);
-    // const [videoDownloadURLs, setVideoDownloadURLs] = useState([]);
-    const mediaRecorderRef = useRef(null);
-    const chunks = useRef([]);
-    const intervalRef = useRef(null);
-    const videoCount = useRef(0);
-    const [simplifiedNotes, setSimplifiedNotes] = useState([]);
-
-    // Start recording
-    const startRecording = async () => {
-        try {
-            // Capture the screen stream
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                video: { width: 7680, height: 4320 }, // 4080p quality
-                audio: true, // Include system audio
-            });
-
-            // Capture the microphone audio stream
-            const audioStream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-            });
-
-            // Combine the screen and microphone streams
-            const combinedStream = new MediaStream([
-                ...screenStream.getVideoTracks(),
-                ...audioStream.getAudioTracks(),
-            ]);
-
-            mediaRecorderRef.current = new MediaRecorder(combinedStream, {
-                mimeType: "video/webm; codecs=vp9,opus",
-            });
-            chunks.current = [];
-
-            mediaRecorderRef.current.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    chunks.current.push(event.data);
-                }
-            };
-
-            // when screen sharing is manually stopped
-            screenStream.getVideoTracks()[0].onended = () => {
-                console.log('Screen sharing manually stopped');
-                stopRecording();
-            };
-
-            mediaRecorderRef.current.onstop = () => {
-                const blob = new Blob(chunks.current, { type: "video/webm" });
-                saveSegment(blob); // Save the final segment
-                chunks.current = []; // Clear chunks after saving
-            };
-
-            mediaRecorderRef.current.start(1000); // Collect data every second
-            setIsRecording(true);
-
-            // Save segments 
-            intervalRef.current = setInterval(() => {
-                mediaRecorderRef.current.stop(); // Stop the recording to finalize the segment
-                mediaRecorderRef.current.start(); // Restart to begin a new segment
-            }, 300000); // 3 minutes or 1 min
-
-        } catch (error) {
-            console.error("Error starting screen recording:", error);
-        }
-    };
-
-    // Stop recording
-    const stopRecording = () => {
-        clearInterval(intervalRef.current);
-        setIsRecording(false);
-        // Stop all tracks of the screen stream
-        if (mediaRecorderRef.current) {
-            const tracks = mediaRecorderRef.current.stream.getTracks();
-            tracks.forEach(track => track.stop()); // Stop each track of the stream
-
-            mediaRecorderRef.current.stop(); // Stop the MediaRecorder and save the video
-        }
-    };
-
-    // Save video/audio segment to Firebase
-    const saveSegment = (blob) => {
-        const storageRef = ref(storage, `recordings/segment_${roomId}_${videoCount.current}.webm`);
-        videoCount.current += 1;
-
-        const uploadTask = uploadBytesResumable(storageRef, blob);
-        uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log(`Upload is ${progress}% done`);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-            },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                    console.log("File available at:", url);
-                    // callSimplifyNotesAPI(url);
-                    setVideoUrls((prevURLs) => [...prevURLs, url]);
-                });
-            }
-        );
-    };
-
-    // Handle switch toggle
-    const handleSwitchChange = () => {
-        if (isRecording) {
-            stopRecording();
+      if (event.target.classList.contains('QYvze2FiFrLlotTk5Iz7' || 'h2M8QwerO1XmsfrZlpv6')) {
+        console.log('Clicked on the audio button');
+        setIsListening(prevIsListening => !prevIsListening);
+        console.log('Audio listening:', isListening);
+        if (isListening) {
+          startListening(mediaAudioRecorderRef, audioChunksRef, mediaStreamRef, setAudioList, roomId, currentUser);
         } else {
-            startRecording();
+          stopListening(mediaAudioRecorderRef, mediaStreamRef);
         }
+      }
+
     };
 
+    // Add event listener to document for click events
+    document.addEventListener('click', handleClick);
 
-
-    //end meeting processing
-
-    const [isMakingNotes, setIsMakingNotes] = useState(false);
-
-
-
-    const callSimplifyNotesAPI = async (videoUrl) => {
-        try {
-            const response = await axios.post('http://localhost:5000/api/v1/notes/process_video', {
-                videoUrl: videoUrl,
-                meet_id: roomId
-            });
-            console.log('Simplified notes received:', response.data);
-
-        } catch (error) {
-            console.error('Error while simplifying notes:', error);
-            throw error;
-        }
+    // Cleanup function to remove event listener when component unmounts
+    return () => {
+      document.removeEventListener('click', handleClick);
     };
+  }, [isListening]);
 
-    const handelMakingNotes = async () => {
-        setIsMakingNotes(true);
-        console.log('Making notes...');
+  console.log('Audio list:', audioList);
 
-        try {
-            // Loop over each video URL in the array and make an API call sequentially
-            for (let i = 0; i < videoUrls.length; i++) {
-                const url = videoUrls[i];
-                const response = await axios.post('http://localhost:5000/api/v1/notes/process_video', {
-                    meet_id: roomId,
-                    videoUrl: url
-                });
-                console.log(`Notes for video ${i + 1}:`, response.data);
-            }
+  //<===================audio emotion end===================>
 
-            alert('All notes saved successfully!');
+  //<===================Video recording code test===============================>
+  const [isRecording, setIsRecording] = useState(false);
+  const [isMakingNotes, setIsMakingNotes] = useState(false);
+  const [videoUrls, setVideoUrls] = useState([]);
+  const [notes, setNotes] = useState("");
 
-        } catch (error) {
-            console.error('Error while saving notes:', error);
-            alert('An error occurred while saving notes.');
-        } finally {
-            setIsMakingNotes(false);
-        }
-    };
+  const mediaRecorderRef = useRef(null);
+  const screenStreamRef = useRef(null);
+  const recordedVideos = useRef([]);
+  const markdownRef = useRef(null);
 
-    // <===================Video recording code test end==============================>
+  const [openNotesDialogBox, setOpenNotesDialogBox] = useState(false);
 
-    //Meeting UI Code
-    const meetingUI = async (element) => {
-        const appID = 886356602;
-        const serverSecret = '21a0f6ef41ac20bdb3ebb9e790604b38';
-        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-            appID,
-            serverSecret,
-            roomId,
-            uuidv4(),
-            `${currentUser.userName || "Your Name"}`
-        );
-        if (!appID || !serverSecret) {
-            alert('Zego app ID or server secret is missing from environment variables.');
-        }
+  useEffect(() => {
+    if (notes) {
+      setOpenNotesDialogBox(true); // Automatically show dialog when notes are available
+    }
+  }, [notes]);
 
-        const ui = ZegoUIKitPrebuilt.create(kitToken);
+  // Handle switch toggle
+  const handleSwitchChange = () => {
+    if (!isRecording) {
+      startRecording(setIsRecording, mediaRecorderRef, screenStreamRef, recordedVideos);
+    } else {
+      stopRecording(setIsRecording, mediaRecorderRef, screenStreamRef);
+    }
+  };
 
+  //it will uploade the vide and make notes
+  const endMeetingMakeNotes = async () => {
 
-        //end the meet api call
-        const endMeetingCall = async () => {
+    if (currentUser.role === 'student') {
+      window.location.href = '/dashboard/home';
+      return;
+    }
 
-            try {
-                const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/meeting/end_meeting', {
-                    meet_id: parseInt(roomId),
-                    endTime: getCurrentTimeTeacher(),
-                });
-                console.log('Response from end meeting API:', response);
-
-                const folderPath = `InCallstudentsImage/${currentUser.pid}`; // Path to the folder in Firebase Storage
-                const folderRef = ref(storage, folderPath);
-
-                try {
-                    // List all items in the folder
-                    const listResult = await listAll(folderRef);
-
-                    // Delete each file in the folder
-                    const deletePromises = listResult.items.map((item) => {
-                        return deleteObject(item);
-                    });
-
-                    await Promise.all(deletePromises); // Wait for all deletions to complete
-
-                    console.log(`All files in folder ${folderPath} deleted successfully.`);
+    try {
+      setIsMakingNotes(true);
+      console.log("Ending meeting and uploading videos and making notes...");
+      const urls = await uploadVideosToFirebase(recordedVideos, storage, roomId, setVideoUrls);
+      if (urls.length > 0) {
+        await handleMakingNotes(urls, roomId, setNotes);
+      } else {
+        alert("No url found");
 
 
-                } catch (error) {
-                    console.error("Error deleting files from Firebase:", error);
-                }
+      }
+    } catch (error) {
+      console.log("Error in making notes:", error);
+      setIsMakingNotes(false);
+    } finally {
+      setIsMakingNotes(false);
+      window.location.href = '/dashboard/home';
+    }
+  };
 
-            } catch (error) {
-                console.error('Error in ending meeting:', error);
-            }
-        }
-
-
-        ui.joinRoom({
-            container: element,
-            sharedLinks: [
-                {
-                    name: 'Copy link',
-                    url: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-                },
-            ],
-            scenario: {
-                mode: ZegoUIKitPrebuilt.VideoConference,
-            },
-            turnOnMicrophoneWhenJoining: false,
-
-            onJoinRoom: () => {
-                // setIsCapturing(true);
-                setIsProcessing(true);
-                setDisplayHelperButton(true);
-                console.log('Joined the roommm');
-            },
+  //Note:when click on end meet all video uploade by a function 
 
 
-            onLeaveRoom: () => {
-                setIsProcessing(false);
-                setDisplayHelperButton(false);
-                console.log('room leave....');
+  // <===================Video recording code test end==============================>
 
-            },
+  //<====================End meeting from db api call====================>
 
-            onInRoomMessageReceived: (data) => {
-                console.log('In room message in text:', data);
-                if (currentUser.role !== 'teacher') return;
-                textEmotion(data, roomId, currentUser);
+  const endMeetingCall = async () => {
 
-
-            },
-
-            onReturnToHomeScreenClicked: () => {
-                setIsCapturing(false);
-                setIsProcessing(false);
-                currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
-                navigate('/dashboard/home');
-
-            },
+    try {
+      const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/meeting/end_meeting', {
+        meet_id: parseInt(roomId) || 123,
+        endTime: getCurrentTimeTeacher(),
+      });
+      console.log('Response from end meeting API:', response);
 
 
 
-        });
-    };
+    } catch (error) {
+      console.error('Error in ending meeting:', error);
+    }
+  }
 
-
-    return (
-        <>
-            <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' && displayHelperButton ? 'block' : 'none' }}>
-
-                <ChrisViewAnalytics />
-
-            </div>
-
-            <div className={`${currentUser.role === 'teacher' && displayHelperButton ? 'd-block' : 'd-none'}  button-record-box`}>
-                <button className={`btn ${isRecording ? 'recording' : ''}`} onClick={handleSwitchChange}>
-                    <i className="bi bi-filetype-ai fs-4" style={{ color: 'white' }}></i>
-                    <span className="take-notes-text text-white p-0 m-0 fw-bold"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
-                </button>
-
-                <button className={`btn btn-primary ms-3`} onClick={handelMakingNotes} disabled={isMakingNotes}>
-                    {isMakingNotes ? (
-                        <div className="spinner-border spinner-border-sm text-light me-2" role="status">
-                            {/* <span className="visually-hidden">Loading...</span> */}
-                        </div>
-                    ) : (
-
-                        <i className="bi bi-journal-arrow-down fs-5 mx-2"></i>
-                    )}
-                    <span>{isMakingNotes ? '' : 'Save Notes'}</span>
-                </button>
-
-            </div>
-
-
-
-            <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
-
-            </div>
-
-        </>
+  //===================Meeting UI Code===========================================>
+  const meetingUI = async (element) => {
+    const appID = 1703483768;
+    const serverSecret = '07a7144d947c0f58c0d6284fc7c0bd8b';
+    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+      appID,
+      serverSecret,
+      roomId || '123',
+      uuidv4(),
+      `${currentUser.userName || "Your Name"}`
     );
+    if (!appID || !serverSecret) {
+      alert('Zego app ID or server secret is missing from environment variables.');
+    }
+
+    const ui = ZegoUIKitPrebuilt.create(kitToken);
+
+    ui.joinRoom({
+      container: element,
+      sharedLinks: [
+        {
+          name: 'Copy link',
+          url: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+        },
+      ],
+      scenario: {
+        mode: ZegoUIKitPrebuilt.VideoConference,
+      },
+      turnOnMicrophoneWhenJoining: false,
+
+      onJoinRoom: () => {
+        console.log('Joined the roommm');
+        setIsProcessing(true);// to start the tanstack query
+        setDisplayHelperButton(true); // to show the view analytics button
+      },
+
+
+      onLeaveRoom: () => {
+        setIsProcessing(false);
+        setDisplayHelperButton(false);
+        console.log('room leave....');
+
+      },
+
+      onInRoomMessageReceived: (data) => {
+        console.log('In room message in text:', data.message);
+        if (currentUser.role === 'teacher') {
+          textEmotion(data, roomId, currentUser);
+        }
+
+      },
+
+
+      onReturnToHomeScreenClicked: async () => {
+        setIsCapturing(false);
+        setIsProcessing(false);
+        currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
+        // await videoNotesUploadEndMeet(recordedVideos.current, storage, setVideoUrls);
+        await endMeetingMakeNotes();
+        // window.location.href = '/dashboard/home';
+        // navigate('/dashboard/home');
+
+      },
+
+
+
+    });
+  };
+
+
+  return (
+    <>
+
+      <div className="analytic-btn-modal" style={{ display: currentUser.role === 'teacher' && displayHelperButton ? 'block' : 'none' }}>
+
+        <ChrisViewAnalytics />
+
+      </div>
+
+      <div className={`${currentUser.role === 'teacher' && displayHelperButton ? 'd-block' : 'd-none'}  button-record-box`}>
+        <button className={`btn ${isRecording ? 'recording' : ''}`} onClick={handleSwitchChange}>
+          <i className="bi bi-filetype-ai fs-4" style={{ color: 'white' }}></i>
+          <span className="take-notes-text text-white p-0 m-0 fw-bold"> {isRecording ? 'Stop Recording' : 'Take Notes'}</span>
+        </button>
+      </div>
+
+
+
+      {/* Dialog box for Note downloade and display  */}
+      <Dialog open={openNotesDialogBox} onClose={() => setOpenNotesDialogBox(false)} fullWidth maxWidth="md">
+        <DialogTitle>Notes Preview</DialogTitle>
+        <DialogContent dividers>
+          <div ref={markdownRef}>
+            <ReactMarkdown>{notes}</ReactMarkdown>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => printFormattedNotes(markdownRef, roomId)} variant="contained" color="primary">
+            Print / Save as PDF
+          </Button>
+          <Button onClick={() => (window.location.href = "/dashboard/home")} variant="outlined">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog >
+
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+        open={isMakingNotes}>
+        <CircularProgress color="inherit" />
+        <p className='m-0 p-0 fs-4 mx-2'>Creating notes please wait...</p>
+      </Backdrop>
+
+
+      <div className="mainFrame" ref={meetingUI} style={{ width: '100vw', height: '100vh' }} >
+
+      </div>
+
+    </>
+  );
 
 };
 
 const RoomFrameTanStack = () => (
-    <QueryClientProvider client={queryClient}>
-        <RoomFrame />
-    </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>
+    <TestMeet />
+  </QueryClientProvider>
 );
 
 export default RoomFrameTanStack;

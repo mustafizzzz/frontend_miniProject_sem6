@@ -4,7 +4,7 @@ import { storage } from "../firbaseConfig";
 
 
 
-export const deleteStudentImage = async (roomId, currentUserPid) => {
+export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
 
     const folderRef = ref(storage, `InCallstudentsImage/${currentUserPid}/`); // Reference to the folder
     console.log('Deleting images...', roomId, currentUserPid);
@@ -37,5 +37,7 @@ export const deleteStudentImage = async (roomId, currentUserPid) => {
 
     } catch (error) {
         console.error('Error deleting images:', error); // Log any error that occurs
+    } finally {
+        alert("All images delete successfully.");
     }
 } 

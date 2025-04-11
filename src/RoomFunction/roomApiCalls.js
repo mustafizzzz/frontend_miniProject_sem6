@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {
     deleteObject, getDownloadURL, listAll,
-    ref, uploadString
+    ref, uploadBytesResumable, uploadString
 } from 'firebase/storage';
 import { set, ref as dbref, get } from 'firebase/database';
 import db, { storage } from '../firbaseConfig';
@@ -88,7 +88,7 @@ export const captureImage = async (currentUser, roomId,
 
 // Function to detect emotion for teachers
 export const emotionDetect = async (
-    currentUser, roomId,
+    currentUser, roomId = '123',
     setTextEmotions, setVideoEmotions,
     setAudioEmotions, setOverAllEmotions, setStudentLiveEmotions) => {
     try {
@@ -125,7 +125,7 @@ export const emotionDetect = async (
 };
 
 //function of text emotion detection
-export const textEmotion = async (dataText, roomId, currentUser) => {
+export const textEmotion = async (dataText, roomId = '123', currentUser) => {
 
     try {
         const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/text/text_to_emotion', {
@@ -159,4 +159,46 @@ export const audioEmotion = async (roomId, currentUser, firebaseAudioUrl) => {
     } catch (error) {
         console.error('Error in audio emotion detection:', error);
     }
+};
+
+
+export const videoNotesUploadEndMeet = async (recordedVideos, storage, setVideoUrls) => {
+    if (recordedVideos.length === 0) {
+        console.warn("No recorded data to upload.");
+        return [];
+    }
+
+    console.log(`Uploading ${recordedVideos.length} videos...`);
+    const uploadedUrls = [];
+
+    for (let i = 0; i < recordedVideos.length; i++) {
+        const blob = recordedVideos[i];
+        const fileName = `LectureVideorecordings/${Date.now()}_${i + 1}.webm`;
+        const storageRef = ref(storage, fileName);
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+
+        await new Promise((resolve, reject) => {
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`Upload ${i + 1} is ${progress}% done`);
+                },
+                (error) => {
+                    console.error("Upload failed:", error);
+                    reject(error);
+                },
+                async () => {
+                    const url = await getDownloadURL(uploadTask.snapshot.ref);
+                    uploadedUrls.push(url);
+                    console.log(`Uploaded video ${i + 1}:`, url);
+                    resolve();
+                }
+            );
+        });
+    }
+
+    setVideoUrls(uploadedUrls); // Set uploaded URLs in state
+    recordedVideos.current = []; // Clear stored videos after upload
+    return uploadedUrls; // Return the list of URLs
 };

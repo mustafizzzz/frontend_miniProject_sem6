@@ -25,14 +25,12 @@ import TestPageNotesVideo from './pages/TestPageNotesVideo';
 import TestAudioList from './pages/TestAudioList';
 import TestImageDelete from './pages/TestImageDelete';
 import TestSidebar from './pages/SidebarTest/TestSidebar';
-import TestSocket from './pages/TestSocket';// => Commented out because it's Socket
-import ElevenLabTest from './pages/ElevenLabTest';
+// import TestSocket from './pages/TestSocket';// => Commented out because it's Socket
 import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
-import TestLayout from './pages/TestLayout/TestLayout';
 import AssesmentsPage from './pages/AssesmentsPage/AssesmentsPage';
-import OralSocketPage from './pages/OralSocketPage/OralSocketPage';
-import PostTestData from './pages/PostTestData';
+import OralSocketPage from './pages/OralSocketPage/OralSocketPage';// => Coment out because its a socket
+import TestMeet from './pages/TestMeet';
 
 
 function App() {
@@ -50,22 +48,27 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        {/* <=======================Test Pages====================> */}
+
+        {/* <=======================Test Pages Start====================> */}
         <Route path='/testVideo' element={<TestPage />} />
+
+        {/* Lecture video to notes  */}
         <Route path='/test-notes' element={<TestPageNotesVideo />} />
+
+
         <Route path='/testSecPhoto' element={<TestCapture />} />
         <Route path='/testPhoto' element={<LoginImageVerify />} />
         <Route path='/test-audio-list' element={<TestAudioList />} />
         <Route path='/test-image-delete' element={<TestImageDelete />} />
         <Route path='/test-virtual' element={<TestVirtual />} />
-        <Route path='/test-socket' element={<TestSocket />} />
+        {/* <Route path='/test-meet' element={<TestMeet />} /> for video lecture test */}
+
+        {/* <Route path='/test-socket' element={<TestSocket />} /> */}
         <Route path='/test-socket-new' element={<OralSocketPage />} />
-        <Route path='/test-data' element={<PostTestData />} />
-        <Route path='/test-11' element={<ElevenLabTest />} />
-        <Route path='/test-sidebar' element={<TestLayout />}>
-          <Route path='home' element={<Home />} />
-        </Route>
-        {/* <=======================Test Pages====================> */}
+
+
+
+        {/* <=======================Test Pages End====================> */}
         <Route path='/view' element={<ChrisViewAnalytics />} />
         <Route path='/*' element={<ErrorPage />} />
 
