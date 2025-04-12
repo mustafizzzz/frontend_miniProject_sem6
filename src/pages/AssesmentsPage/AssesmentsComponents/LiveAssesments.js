@@ -9,7 +9,7 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
 
   const navigate = useNavigate();
 
-
+  //dummy data
   // const liveAssessments = [
   //   {
   //     lectureTitle: 'Lecture 1',
@@ -99,37 +99,42 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
           </tr>
         </thead>
         <tbody>
-          {liveAssesments?.map((assessment, index) => (
-            <tr key={index} className="custom-table-row">
-              <td>{assessment.test?.testName || "Unknown Lecture"}</td>
-              <td className="status-complete">{assessment.completedCount}</td>
-              <td className="status-pending">{assessment.pendingCount}</td>
-              <td>{formatDate(assessment.startDateAndTime)}</td>
-              <td>{formatDate(assessment.endDateAndTime)}</td>
-              <td>
-                {currentUser.role === 'student' ? (
-                  <button
-                    className="btn btn-success start-test-btn"
-                    onClick={() => {
-
-                      handleStartTestStudent(assessment.test?._id);
-                    }
-                    }
-                  >
-                    Start Test
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-danger end-test-btn"
-                    onClick={() => alert(`Ending test for ${assessment.test?.testName || "Unknown Lecture"}`)}
-                  >
-                    End Test
-                  </button>
-                )}
+          {liveAssesments?.length === 0 ? (
+            <tr>
+              <td colSpan="6" style={{ textAlign: 'center', padding: '1rem' }}>
+                No live assessments available.
               </td>
             </tr>
-          ))}
+          ) : (
+            liveAssesments.map((assessment, index) => (
+              <tr key={index} className="custom-table-row">
+                <td>{assessment.test?.testName || "Unknown Lecture"}</td>
+                <td className="status-complete">{assessment.completedCount}</td>
+                <td className="status-pending">{assessment.pendingCount}</td>
+                <td>{formatDate(assessment.startDateAndTime)}</td>
+                <td>{formatDate(assessment.endDateAndTime)}</td>
+                <td>
+                  {currentUser.role === 'student' ? (
+                    <button
+                      className="btn btn-success start-test-btn"
+                      onClick={() => handleStartTestStudent(assessment.test?._id)}
+                    >
+                      Start Test
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-danger end-test-btn"
+                      onClick={() => alert(`Ending test for ${assessment.test?.testName || "Unknown Lecture"}`)}
+                    >
+                      End Test
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
+
       </table>
     </div>
   )

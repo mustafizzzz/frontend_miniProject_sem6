@@ -144,11 +144,11 @@ export const textEmotion = async (dataText, roomId = '123', currentUser) => {
 }
 
 //function of audio emotion detection
-export const audioEmotion = async (roomId, currentUser, firebaseAudioUrl) => {
+export const audioEmotion = async (roomId = '123', currentUser, firebaseAudioUrl) => {
     console.log('firebaseAudioUrl:', firebaseAudioUrl);
-
+    //old api key https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion
     try {
-        const response = await axios.post('https://mood-lens-server.onrender.com/api/v1/audio/audio_to_emotion', {
+        const response = await axios.post('https://moodlens-audio-component.onrender.com/api/v2/audio/audio_to_emotion', {
             meet_id: parseInt(roomId),
             host_id: currentUser.pid,
             studentPID: currentUser.pid,

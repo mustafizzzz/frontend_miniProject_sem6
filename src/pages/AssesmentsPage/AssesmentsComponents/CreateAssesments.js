@@ -26,7 +26,7 @@ const CreateAssesments = ({ lectureNotes, deleteCreatedAssesment }) => {
         setFormattedLectures(formattedData);
     }, [lectureNotes]);
 
-
+    //dummy data
     const lectures = [
         {
             lectureTitle: 'Lecture 1',

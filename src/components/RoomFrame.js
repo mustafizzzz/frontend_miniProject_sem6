@@ -245,10 +245,8 @@ const TestMeet = () => {
         setIsCapturing(false);
         setIsProcessing(false);
         currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
-        // await videoNotesUploadEndMeet(recordedVideos.current, storage, setVideoUrls);
         await endMeetingMakeNotes();
-        // window.location.href = '/dashboard/home';
-        // navigate('/dashboard/home');
+
 
       },
 

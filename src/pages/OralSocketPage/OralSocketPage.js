@@ -10,8 +10,10 @@ import { useParams } from 'react-router-dom';
 // 		reconnectionAttempts: 5,
 // 		timeout: 10000,
 // 	});
+
+
 let socket = io('http://localhost:5000', {
-	reconnectionAttempts: 3,
+	reconnectionAttempts: 2,
 	timeout: 5000
 });
 

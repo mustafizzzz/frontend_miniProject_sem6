@@ -14,93 +14,89 @@ import axios from 'axios';
 import { REACT_APP_DEPLOY } from '../../config';
 import { useContext } from 'react';
 import { UserContext } from '../../ContextApi/userContex';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
-const AssesmentsPage = () => {
+
+
+// Create a local query client
+const queryClient = new QueryClient();
+
+// All fetchers
+const fetchLectureNotes = async (hostId) => {
+	const res = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/fetch_lecture_with_notes`, { host_id: hostId });
+	return res.data;
+};
+
+const fetchTeacherLiveAssesments = async (hostId) => {
+	const res = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, { createdBy: hostId });
+	return res.data;
+};
+
+const fetchTeacherPastAssesments = async (hostId) => {
+	const res = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_past_tests`, { createdBy: hostId });
+	return res.data;
+};
+
+const fetchStudentLiveAssesments = async () => {
+	const res = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_live_tests`);
+	return res.data;
+};
+
+const fetchStudentPastAssesments = async () => {
+	const res = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_past_tests`);
+	return res.data;
+};
+
+
+const AssesmentsInner = () => {
 	const { currentUser } = useContext(UserContext);
+	const [value, setValue] = useState(currentUser.role === 'student' ? '2' : '1');
 
-	const [notes, setNotes] = useState([]);
-	const [liveAssesments, setLiveAssesments] = useState([]);
-	const [pastAssesments, setPastAssesments] = useState([]);
-	// console.log(REACT_APP_DEPLOY, currentUser);
+	const handleChange = (event, newValue) => setValue(newValue);
 
+	const {
+		data: lectureNotes = [],
+		isLoading: isNotesLoading,
+		isError: isNotesError
+	} = useQuery({
+		queryKey: ['lectureNotes'],
+		queryFn: () => fetchLectureNotes(currentUser.hostId),
+		enabled: currentUser.role === 'teacher'
+	});
 
-	useEffect(() => {
+	const {
+		data: liveAssesments = [],
+		isLoading: isLiveLoading,
+		isError: isLiveError,
+		refetch: refetchLive
+	} = useQuery({
+		queryKey: ['liveAssesments'],
+		queryFn: () => currentUser.role === 'teacher'
+			? fetchTeacherLiveAssesments(currentUser.hostId)
+			: fetchStudentLiveAssesments()
+	});
 
-		const fetchNotes = async () => {
-			let studentLiveAssesmentsList;
-			let studentPastAssesmentsList;
-			let liveAssesmentsList;
-			let lectureList;
-			let pastAssesmentsList;
-			try {
-
-				if (currentUser.role === 'teacher') {
-					lectureList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/fetch_lecture_with_notes`, {
-						host_id: currentUser.hostId
-					});
-					setNotes(lectureList.data);
-
-					liveAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_live_tests`, {
-						createdBy: currentUser.hostId
-					});
-					setLiveAssesments(liveAssesmentsList.data);
-
-					pastAssesmentsList = await axios.post(`${REACT_APP_DEPLOY}/api/v1/test/view_past_tests`, {
-						createdBy: currentUser.hostId
-					});
-					setPastAssesments(pastAssesmentsList.data);
-
-				} else {
-					studentLiveAssesmentsList = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_live_tests`);
-					setLiveAssesments(studentLiveAssesmentsList.data);
-
-					studentPastAssesmentsList = await axios.get(`${REACT_APP_DEPLOY}/api/v1/student_test/view_past_tests`);
-					setPastAssesments(studentPastAssesmentsList.data);
-
-
-
-				}
-
-
-
-
-
-
-
-				console.log('lecture notes:', lectureList, 'liveAssesmentsList', liveAssesmentsList.data, 'pastAssesmentsList', pastAssesmentsList.data);
-
-
-
-
-			} catch (error) {
-				console.log(error);
-
-			}
-		};
-
-		fetchNotes();
-
-	}, []);
-
-	const [value, setValue] = useState(currentUser.role === 'student' ? '2' : '1'); // Track selected tab value as string
-
-	const handleChange = (event, newValue) => {
-		setValue(newValue);
-	};
-
-	const updateLiveAssessment = (liveAssesmentsList) => {
-		setLiveAssesments(liveAssesmentsList);
-	}
+	const {
+		data: pastAssesments = [],
+		isLoading: isPastLoading,
+		isError: isPastError
+	} = useQuery({
+		queryKey: ['pastAssesments'],
+		queryFn: () => currentUser.role === 'teacher'
+			? fetchTeacherPastAssesments(currentUser.hostId)
+			: fetchStudentPastAssesments()
+	});
 
 	const deleteCreatedAssesment = (lectureId) => {
-		const updatedLectures = notes.filter(lecture => lecture.lectureId !== lectureId);
-		setNotes(updatedLectures);
-	}
+		lectureNotes = lectureNotes.filter(lecture => lecture.lectureId !== lectureId);
+		// Only local state logic;
+	};
 
+	console.log('liveAssesment:', liveAssesments);
 
 
 	return (
-		<Box sx={{ width: '100%' }} >
+		<Box sx={{ width: '100%' }}>
 			<TabContext value={value}>
 				<Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: 'white', borderRadius: '1rem' }}>
 					<TabList onChange={handleChange} aria-label="assessment tabs" centered className='assesments-tabs'>
@@ -112,25 +108,47 @@ const AssesmentsPage = () => {
 					</TabList>
 				</Box>
 
-				{/* Lecture Schedule Tab Panel */}
 				{currentUser.role !== 'student' && (
 					<TabPanel value="1">
-						<CreateAssesments lectureNotes={notes} deleteCreatedAssesment={deleteCreatedAssesment} />
+						{isNotesLoading ? (
+							<p>Loading Lecture Notes...</p>
+						) : isNotesError ? (
+							<p>Error loading lecture notes.</p>
+						) : (
+							<CreateAssesments lectureNotes={lectureNotes} deleteCreatedAssesment={deleteCreatedAssesment} />
+						)}
 					</TabPanel>
 				)}
 
-				{/* Live Assessments Tab Panel */}
 				<TabPanel value="2">
-					<LiveAssesments liveAssesments={liveAssesments} updateLiveAssessment={updateLiveAssessment} currentUser={currentUser} />
+					{isLiveLoading ? (
+						<p>Loading Live Assessments...</p>
+					) : isLiveError ? (
+						<p>Error loading live assessments.</p>
+					) : (
+						<LiveAssesments liveAssesments={liveAssesments} updateLiveAssessment={refetchLive} currentUser={currentUser} />
+					)}
 				</TabPanel>
 
-				{/* Past Assessments Tab Panel */}
 				<TabPanel value="3">
-					<PastAssesments pastAssesments={pastAssesments} />
+					{isPastLoading ? (
+						<p>Loading Past Assessments...</p>
+					) : isPastError ? (
+						<p>Error loading past assessments.</p>
+					) : (
+						<PastAssesments pastAssesments={pastAssesments} />
+					)}
 				</TabPanel>
 			</TabContext>
 		</Box>
 	);
 };
+
+
+const AssesmentsPage = () => (
+	<QueryClientProvider client={queryClient}>
+		<AssesmentsInner />
+	</QueryClientProvider>
+);
 
 export default AssesmentsPage;

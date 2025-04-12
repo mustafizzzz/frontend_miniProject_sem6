@@ -26,9 +26,11 @@ export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
                 Promise.all(deletePromises)
                     .then(() => {
                         console.log(`All images deleted successfully form roomID:${roomId} of StudentPID:${currentUserPid}.`); // Log success message
+                        alert("All images deleted successfully.")
                     })
                     .catch((error) => {
                         console.error('Error deleting images:', error); // Log any deletion error
+                        alert("error in deleting images.")
                     });
             })
             .catch((error) => {
@@ -37,7 +39,5 @@ export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
 
     } catch (error) {
         console.error('Error deleting images:', error); // Log any error that occurs
-    } finally {
-        alert("All images delete successfully.");
     }
 } 
