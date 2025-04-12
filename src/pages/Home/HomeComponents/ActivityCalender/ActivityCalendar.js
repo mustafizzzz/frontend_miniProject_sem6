@@ -29,8 +29,6 @@ const initialEvents = [
     { id: 1, title: "Staff Meeting", date: "2025-04-12", time: "09:00 AM", type: "meeting" },
     { id: 2, title: "Science Fair", date: "2025-04-15", time: "01:00 PM", type: "event" },
     { id: 3, title: "Parent-Teacher Conference", date: "2025-04-18", time: "03:30 PM", type: "meeting" },
-    { id: 4, title: "Professional Development", date: "2025-04-20", time: "10:00 AM", type: "training" },
-    { id: 5, title: "End of Term Grading Due", date: "2025-04-25", time: "05:00 PM", type: "deadline" },
 ]
 
 function ActivityCalendar() {
@@ -109,8 +107,6 @@ function ActivityCalendar() {
             <CardContent>
                 <Tabs value={tabValue} onChange={handleTabChange} className="mb-3">
                     <Tab label="Upcoming" />
-                    <Tab label="Weekly View" />
-                    <Tab label="Monthly View" />
                 </Tabs>
 
                 {/* Upcoming Events Tab */}
@@ -176,98 +172,6 @@ function ActivityCalendar() {
                             </Box>
                         )}
                     </Box>
-                )}
-
-                {/* Weekly View Tab */}
-                {tabValue === 1 && (
-                    <Grid container spacing={1}>
-                        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                            <Grid item xs={12 / 7} key={day}>
-                                <Paper className="p-2 text-center bg-light">
-                                    <Typography variant="body2" fontWeight="medium">
-                                        {day}
-                                    </Typography>
-                                </Paper>
-                            </Grid>
-                        ))}
-                        {Array.from({ length: 7 }).map((_, index) => (
-                            <Grid item xs={12 / 7} key={index}>
-                                <Paper className="p-2" style={{ height: "120px", overflow: "auto" }}>
-                                    <Typography variant="caption" color="textSecondary">
-                                        {index + 10}
-                                    </Typography>
-                                    {index === 2 && (
-                                        <Box className="p-1 mt-1 rounded" style={{ backgroundColor: "#cfe2ff", fontSize: "0.75rem" }}>
-                                            Staff Meeting (9:00 AM)
-                                        </Box>
-                                    )}
-                                    {index === 5 && (
-                                        <Box className="p-1 mt-1 rounded" style={{ backgroundColor: "#e2d9f3", fontSize: "0.75rem" }}>
-                                            Science Fair (1:00 PM)
-                                        </Box>
-                                    )}
-                                </Paper>
-                            </Grid>
-                        ))}
-                    </Grid>
-                )}
-
-                {/* Monthly View Tab */}
-                {tabValue === 2 && (
-                    <Grid container spacing={1}>
-                        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                            <Grid item xs={12 / 7} key={day}>
-                                <Typography variant="caption" className="text-center d-block">
-                                    {day}
-                                </Typography>
-                            </Grid>
-                        ))}
-                        {Array.from({ length: 35 }).map((_, index) => {
-                            const isCurrentMonth = index >= 3 && index <= 33
-                            const day = isCurrentMonth ? index - 2 : index < 3 ? 29 + index : index - 33
-
-                            return (
-                                <Grid item xs={12 / 7} key={index}>
-                                    <Paper
-                                        className="p-1"
-                                        style={{
-                                            height: "60px",
-                                            backgroundColor: isCurrentMonth ? "white" : "#f8f9fa",
-                                            overflow: "hidden",
-                                        }}
-                                    >
-                                        <Typography variant="caption" color={isCurrentMonth ? "textPrimary" : "textSecondary"}>
-                                            {day}
-                                        </Typography>
-                                        {index === 10 && (
-                                            <Box
-                                                className="mt-1 p-1 rounded text-truncate"
-                                                style={{ backgroundColor: "#cfe2ff", fontSize: "0.65rem" }}
-                                            >
-                                                Staff Meeting
-                                            </Box>
-                                        )}
-                                        {index === 13 && (
-                                            <Box
-                                                className="mt-1 p-1 rounded text-truncate"
-                                                style={{ backgroundColor: "#e2d9f3", fontSize: "0.65rem" }}
-                                            >
-                                                Science Fair
-                                            </Box>
-                                        )}
-                                        {index === 16 && (
-                                            <Box
-                                                className="mt-1 p-1 rounded text-truncate"
-                                                style={{ backgroundColor: "#cfe2ff", fontSize: "0.65rem" }}
-                                            >
-                                                Parent-Teacher
-                                            </Box>
-                                        )}
-                                    </Paper>
-                                </Grid>
-                            )
-                        })}
-                    </Grid>
                 )}
             </CardContent>
 

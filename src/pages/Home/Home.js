@@ -24,7 +24,7 @@ const Home = () => {
         </div>
 
         <div className="col-md-6">
-          <div className="card h-100">
+          <div className="card  border-info h-100">
             <div className="card-body">
               <TodoList />
             </div>
@@ -43,7 +43,7 @@ const Home = () => {
         </div>
 
         <div className="col-md-6">
-          <div className="card h-100">
+          <div className="card  border-info h-100">
             <div className="card-body">
               <ImportantAnnouncements />
             </div>

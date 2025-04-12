@@ -36,13 +36,6 @@ const initialAnnouncements = [
         date: "2025-04-08",
         priority: "medium",
     },
-    {
-        id: 3,
-        title: "Holiday Break",
-        content: "School will be closed for spring break from April 15-22. Classes will resume on April 23.",
-        date: "2025-04-05",
-        priority: "low",
-    },
 ]
 
 function ImportantAnnouncements() {
