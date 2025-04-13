@@ -88,7 +88,8 @@ const AssesmentsInner = () => {
 	});
 
 	const deleteCreatedAssesment = (lectureId) => {
-		lectureNotes = lectureNotes.filter(lecture => lecture.lectureId !== lectureId);
+		// lectureNotes.filter(lecture => lecture.lectureId !== lectureId);
+		fetchLectureNotes(currentUser.hostId);
 		// Only local state logic;
 	};
 

@@ -109,7 +109,7 @@ const TestMeet = () => {
 
   //<===================audio emotion end===================>
 
-  //<===================Video recording code test===============================>
+  //<===================Video recording  and meeting ending and delet students image code test===============================>
   const [isRecording, setIsRecording] = useState(false);
   const [isMakingNotes, setIsMakingNotes] = useState(false);
   const [videoUrls, setVideoUrls] = useState([]);
@@ -121,6 +121,7 @@ const TestMeet = () => {
   const markdownRef = useRef(null);
 
   const [openNotesDialogBox, setOpenNotesDialogBox] = useState(false);
+  const [backDropMessage, setBackDropMessage] = useState("Createing notes please wait...");
 
   useEffect(() => {
     if (notes) {
@@ -137,31 +138,35 @@ const TestMeet = () => {
     }
   };
 
-  //it will uploade the vide and make notes
+  //it will uploade the vide and make notes and end the meet and delet the student image
   const endMeetingMakeNotes = async () => {
-
-    if (currentUser.role === 'student') {
-      window.location.href = '/dashboard/home';
-      return;
-    }
-
     try {
       setIsMakingNotes(true);
+
+      if (currentUser.role === 'student') {
+        setBackDropMessage("Wait deleting images...");
+        await deleteStudentImage(roomId, currentUser.pid);
+        //adding delay of 2min 
+        await new Promise((resolve => setTimeout(resolve, 1200000)));
+        window.location.href = '/dashboard/home';
+        return;
+      }
+
+      setBackDropMessage("Ending meet...")
+      await endMeetingCall();
+      setBackDropMessage("Creating notes...")
       console.log("Ending meeting and uploading videos and making notes...");
       const urls = await uploadVideosToFirebase(recordedVideos, storage, roomId, setVideoUrls);
       if (urls.length > 0) {
         await handleMakingNotes(urls, roomId, setNotes);
       } else {
         alert("No url found");
-
-
       }
     } catch (error) {
       console.log("Error in making notes:", error);
       setIsMakingNotes(false);
     } finally {
       setIsMakingNotes(false);
-      window.location.href = '/dashboard/home';
     }
   };
 
@@ -244,7 +249,7 @@ const TestMeet = () => {
       onReturnToHomeScreenClicked: async () => {
         setIsCapturing(false);
         setIsProcessing(false);
-        currentUser.role === 'teacher' ? endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
+        currentUser.role === 'teacher' ? await endMeetingCall() : deleteStudentImage(roomId, currentUser.pid);
         await endMeetingMakeNotes();
 
 
@@ -295,7 +300,7 @@ const TestMeet = () => {
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
         open={isMakingNotes}>
         <CircularProgress color="inherit" />
-        <p className='m-0 p-0 fs-4 mx-2'>Creating notes please wait...</p>
+        <p className='m-0 p-0 fs-4 mx-2'>{backDropMessage}</p>
       </Backdrop>
 
 

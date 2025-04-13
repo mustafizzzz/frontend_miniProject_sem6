@@ -4,40 +4,67 @@ import { storage } from "../firbaseConfig";
 
 
 
-export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
+// export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
 
-    const folderRef = ref(storage, `InCallstudentsImage/${currentUserPid}/`); // Reference to the folder
+//     const folderRef = ref(storage, `InCallstudentsImage/${currentUserPid}/`); // Reference to the folder
+//     console.log('Deleting images...', roomId, currentUserPid);
+
+
+//     try {
+//         // List all items in the folder asynchronously (non-blocking)
+//         listAll(folderRef)
+//             .then((result) => {
+//                 if (result.items.length === 0) {
+//                     console.log('No images to delete.'); // Log if no images are found
+//                     return;
+//                 }
+
+//                 // Map each item to a delete request
+//                 const deletePromises = result.items.map((item) => deleteObject(item));
+
+//                 // Execute delete in the background without awaiting
+//                 Promise.all(deletePromises)
+//                     .then(() => {
+//                         console.log(`All images deleted successfully form roomID:${roomId} of StudentPID:${currentUserPid}.`); // Log success message
+//                         alert("All images deleted successfully.")
+//                     })
+//                     .catch((error) => {
+//                         console.error('Error deleting images:', error); // Log any deletion error
+//                         alert("error in deleting images.")
+//                     });
+//             })
+//             .catch((error) => {
+//                 console.error('Error listing images:', error); // Log any error that occurs while listing items
+//             });
+
+//     } catch (error) {
+//         console.error('Error deleting images:', error); // Log any error that occurs
+//     }
+
+// }
+
+
+export const deleteStudentImage = async (roomId = '123', currentUserPid) => {
+    const folderRef = ref(storage, `InCallstudentsImage/${currentUserPid}/`);
     console.log('Deleting images...', roomId, currentUserPid);
 
-
     try {
-        // List all items in the folder asynchronously (non-blocking)
-        listAll(folderRef)
-            .then((result) => {
-                if (result.items.length === 0) {
-                    console.log('No images to delete.'); // Log if no images are found
-                    return;
-                }
+        // Await the listing of all items
+        const result = await listAll(folderRef);
 
-                // Map each item to a delete request
-                const deletePromises = result.items.map((item) => deleteObject(item));
+        if (result.items.length === 0) {
+            console.log('No images to delete.');
+            return;
+        }
 
-                // Execute delete in the background without awaiting
-                Promise.all(deletePromises)
-                    .then(() => {
-                        console.log(`All images deleted successfully form roomID:${roomId} of StudentPID:${currentUserPid}.`); // Log success message
-                        alert("All images deleted successfully.")
-                    })
-                    .catch((error) => {
-                        console.error('Error deleting images:', error); // Log any deletion error
-                        alert("error in deleting images.")
-                    });
-            })
-            .catch((error) => {
-                console.error('Error listing images:', error); // Log any error that occurs while listing items
-            });
+        // Await the deletion of all items
+        await Promise.all(result.items.map((item) => deleteObject(item)));
+
+        console.log(`All images deleted successfully from roomID:${roomId} of StudentPID:${currentUserPid}.`);
+        alert("All images deleted successfully.");
 
     } catch (error) {
-        console.error('Error deleting images:', error); // Log any error that occurs
+        console.error('Error deleting images:', error);
+        alert("Error in deleting images.");
     }
-} 
+};
