@@ -30,7 +30,7 @@ import VirtualAssistant from './components/VirtualAssistance/VirtualAssistance';
 import TestVirtual from './pages/TestVirtual';
 import AssesmentsPage from './pages/AssesmentsPage/AssesmentsPage';
 import OralSocketPage from './pages/OralSocketPage/OralSocketPage';// => Coment out because its a socket
-import TestMeet from './pages/TestMeet';
+// import TestMeet from './pages/TestMeet'// vidoe meet testing page ;
 
 
 function App() {
@@ -64,7 +64,7 @@ function App() {
         {/* <Route path='/test-meet' element={<TestMeet />} /> for video lecture test */}
 
         {/* <Route path='/test-socket' element={<TestSocket />} /> */}
-        <Route path='/test-socket-new' element={<OralSocketPage />} />
+        <Route path='/test-socket-new/:testId?' element={<OralSocketPage />} />
 
 
 

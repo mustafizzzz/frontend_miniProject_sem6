@@ -38,11 +38,20 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
 
+  const formatDate = (isoDateString) => {
+    const date = new Date(isoDateString);
+    return date.toLocaleString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'UTC',
+    });
+  };
 
 
   const refreshLiveAssessment = async () => {
@@ -117,7 +126,7 @@ const LiveAssesments = ({ liveAssesments, updateLiveAssessment, currentUser }) =
                   {currentUser.role === 'student' ? (
                     <button
                       className="btn btn-success start-test-btn"
-                      onClick={() => handleStartTestStudent(assessment.test?._id)}
+                      onClick={() => handleStartTestStudent(assessment?.test?._id)}
                     >
                       Start Test
                     </button>

@@ -147,7 +147,7 @@ const TestMeet = () => {
         setBackDropMessage("Wait deleting images...");
         await deleteStudentImage(roomId, currentUser.pid);
         //adding delay of 2min 
-        await new Promise((resolve => setTimeout(resolve, 1200000)));
+        await new Promise((resolve => setTimeout(resolve, 120000)));
         window.location.href = '/dashboard/home';
         return;
       }
@@ -161,6 +161,11 @@ const TestMeet = () => {
         await handleMakingNotes(urls, roomId, setNotes);
       } else {
         alert("No url found");
+        //i want to show something  with button to go home screen
+        setBackDropMessage("returning to home screen in 10 sec...");
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        window.location.href = '/dashboard/home';
+
       }
     } catch (error) {
       console.log("Error in making notes:", error);

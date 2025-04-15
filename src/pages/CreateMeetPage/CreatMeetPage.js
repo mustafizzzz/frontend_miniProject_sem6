@@ -182,22 +182,6 @@ const CreatMeetPage = () => {
               </div>
 
 
-              {/* Meeting ID  */}
-              {/* <div className="mb-5">
-                <label htmlFor="meetingId" className="form-label">Meeting Id</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="meetingId"
-                  name="meetingId"
-                  value={formData.meetingId}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  aria-describedby="meetingIdError"
-                />
-                {errors.meetingId && <p className="text-danger" id="meetingIdError">{errors.meetingId}</p>}
-              </div> */}
-
               <div className="btn-meet d-flex  justify-content-end">
                 <button type="submit" className="btn btn-secondary me-3" onClick={handleCancel}>Cancel</button>
                 <button type="submit" className="btn btn-primary" >Create Meeting</button>

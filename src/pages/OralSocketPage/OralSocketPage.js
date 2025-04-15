@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Send, Repeat } from 'lucide-react';
 import './OralSocketPage.css';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { io } from 'socket.io-client';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import axios from 'axios';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { storage } from '../../firbaseConfig';
+import { UserContext } from '../../ContextApi/userContex';
 
 // let socket = io('wss://mood-lens-server.onrender.com',
 // 	{
@@ -12,22 +17,26 @@ import { useParams } from 'react-router-dom';
 // 	});
 
 
+const DEFAULT_TEST_ID = '67fba40656122a4e9558cc69';
+
 let socket = io('http://localhost:5000', {
 	reconnectionAttempts: 2,
 	timeout: 5000
 });
 
 const OralSocketPage = () => {
+	const { testId } = useParams();
+	const location = useLocation();
+	const { currentUser } = useContext(UserContext);
+
+
 	const [isAISpeaking, setIsAISpeaking] = useState(true);
 	const [question, setQuestion] = useState([]);
 	const [answer, setAnswer] = useState('');
-	const { lectureId } = useParams();
-	const test_id = '67e1bc6fd4c56cb4650879be';
-	const chatContainerRef = useRef(null);
+	const test_id = testId || DEFAULT_TEST_ID;
 	const audioRef = useRef(new Audio());
 	const [selectedVoice, setSelectedVoice] = useState('');
 	const [availableVoices, setAvailableVoices] = useState([]);
-	const [isVoiceLoaded, setIsVoiceLoaded] = useState(true);
 	const [isVoiceSelected, setIsVoiceSelected] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -35,7 +44,46 @@ const OralSocketPage = () => {
 	const [isListening, setIsListening] = useState(false);
 	const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
+
+	//test data states
+	const [remainingTime, setRemainingTime] = useState(null); // Timer in seconds
+	const [testData, setTestData] = useState(null);
+	const [isEnding, setIsEnding] = useState(false);
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [evaluationData, setEvaluationData] = useState(null);
+	const [backDropMessage, setBackDropMessage] = useState("Loding test please wait...")
+	const navigate = useNavigate();
+
+	//video record data
 	const videoRef = useRef(null);
+	const mediaRecorderRef = useRef(null);
+	const recordedChunksRef = useRef([]);
+
+	//get the test data using testid
+	useEffect(() => {
+		const fetchTestDetails = async () => {
+			try {
+				const res = await axios.get(`https://mood-lens-server.onrender.com/api/v1/api/tests/${testId}`);
+				setTestData(res.data);
+				setRemainingTime(res.data.duration * 60); // assume duration in minutes
+			} catch (err) {
+				console.error("Failed to fetch test data:", err);
+			}
+		};
+
+		fetchTestDetails();
+	}, [testId]);
+
+	//set the timer
+	useEffect(() => {
+		if (!remainingTime || remainingTime <= 0) return;
+
+		const interval = setInterval(() => {
+			setRemainingTime((prev) => prev - 1);
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, [remainingTime]);
 
 	// Load default system voices
 	useEffect(() => {
@@ -74,38 +122,78 @@ const OralSocketPage = () => {
 	}, []);
 
 	// Access webcam on component mount
+	// useEffect(() => {
+	// 	const startVideo = async () => {
+	// 		try {
+	// 			const stream = await navigator.mediaDevices.getUserMedia({
+	// 				video: true,
+	// 				audio: true
+	// 			});
+
+	// 			if (videoRef.current) {
+	// 				videoRef.current.srcObject = stream;
+	// 			}
+	// 		} catch (err) {
+	// 			console.error("Error accessing webcam:", err);
+	// 		}
+	// 	};
+
+	// 	startVideo();
+
+	// 	// Cleanup function to stop all tracks when component unmounts
+	// 	return () => {
+	// 		if (videoRef.current && videoRef.current.srcObject) {
+	// 			const tracks = videoRef.current.srcObject.getTracks();
+	// 			tracks.forEach(track => track.stop());
+	// 		}
+	// 	};
+	// }, []);
+
 	useEffect(() => {
-		const startVideo = async () => {
+		const startVideoAndRecording = async () => {
 			try {
-				const stream = await navigator.mediaDevices.getUserMedia({
-					video: true,
-					audio: true
-				});
+				const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
 				if (videoRef.current) {
 					videoRef.current.srcObject = stream;
 				}
+
+				const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+				mediaRecorder.ondataavailable = (e) => {
+					if (e.data.size > 0) {
+						recordedChunksRef.current.push(e.data);
+					}
+				};
+
+				mediaRecorder.start(); // start recording
+				mediaRecorderRef.current = mediaRecorder;
 			} catch (err) {
-				console.error("Error accessing webcam:", err);
+				console.error("Error accessing webcam/mic:", err);
 			}
 		};
 
-		startVideo();
+		startVideoAndRecording();
 
-		// Cleanup function to stop all tracks when component unmounts
+		// Cleanup: stop tracks & recording
 		return () => {
-			if (videoRef.current && videoRef.current.srcObject) {
-				const tracks = videoRef.current.srcObject.getTracks();
-				tracks.forEach(track => track.stop());
+			if (mediaRecorderRef.current?.state !== "inactive") {
+				mediaRecorderRef.current.stop();
+			}
+
+			if (videoRef.current?.srcObject) {
+				videoRef.current.srcObject.getTracks().forEach(track => track.stop());
 			}
 		};
 	}, []);
 
+
 	// Socket connection
 	useEffect(() => {
 		console.log('Run socket');
-		if (window.location.pathname === '/test-socket-new') {
-			console.log("Start Audio");
+
+		if (location.pathname.startsWith("/test-socket")) {
+			console.log("Start Audio with test id: ", test_id);
 
 			socket.emit('start_test', { test_id });
 			socket.on('questions', (data) => {
@@ -131,7 +219,7 @@ const OralSocketPage = () => {
 			socket.off('response');
 			socket.off('error');
 		};
-	}, []);
+	}, [location.pathname, testId]);
 
 	// Update answer with transcript
 	useEffect(() => {
@@ -140,6 +228,13 @@ const OralSocketPage = () => {
 		}
 	}, [transcript, listening]);
 
+	//format the time
+	const formatTime = (timeInSec) => {
+		const minutes = Math.floor(timeInSec / 60).toString().padStart(2, '0');
+		const seconds = (timeInSec % 60).toString().padStart(2, '0');
+		return `${minutes}:${seconds}`;
+	};
+
 	// Handle voice selection
 	const handleVoiceChange = (event) => {
 		const voiceName = event.target.value;
@@ -147,7 +242,7 @@ const OralSocketPage = () => {
 	};
 
 	// Text to speech using browser's speech synthesis
-	const handleTextToSpeech = (text) => {
+	const handleTextToSpeech = (text = "Default text") => {
 		console.log("Speaking:", text);
 
 		// Cancel any ongoing speech
@@ -207,7 +302,76 @@ const OralSocketPage = () => {
 		}
 	};
 
+	//end test
+	const uploadSingleVideoToFirebase = async (storage, testId, studentName) => {
+		if (recordedChunksRef.current.length === 0) {
+			console.warn("No video recorded.");
+			return null;
+		}
+
+		const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+		const fileName = `AssessmentVideoProctor/${testId}/${studentName}_${Date.now()}.webm`;
+		const storageRef = ref(storage, fileName);
+		const uploadTask = uploadBytesResumable(storageRef, blob);
+
+		return new Promise((resolve, reject) => {
+			uploadTask.on(
+				"state_changed",
+				(snapshot) => {
+					const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+					setBackDropMessage(`Uploading video... ${progress.toFixed(2)}%`)
+					console.log(`Upload is ${progress}% done`);
+				},
+				(error) => {
+					setBackDropMessage("Upload failed, please try again.")
+					console.error("Upload failed:", error);
+					reject(error);
+				},
+				async () => {
+					const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+					console.log("Uploaded video URL:", downloadURL);
+					recordedChunksRef.current = []; // clear after upload
+					resolve(downloadURL);
+				}
+			);
+		});
+	};
+
+	const handleEndExam = async () => {
+		setIsEnding(true);
+		setBackDropMessage("Ending exam, please wait...")
+
+		try {
+			// Stop recording before upload
+			if (mediaRecorderRef.current?.state !== "inactive") {
+				mediaRecorderRef.current.stop();
+			}
+
+			// Wait a bit for the last chunk
+			setTimeout(async () => {
+				const videoUrl = await uploadSingleVideoToFirebase(storage, testId, currentUser.name);
+				setBackDropMessage("Evaluating your test,please wait...");
+
+				socket.emit("end_test", {
+					test_id: testId,
+					student_id: currentUser.hostId,
+					videoUrl,
+				});
+			}, 4000);
+			socket.on('evaluation', (data) => {
+				setEvaluationData(data);
+				setDialogOpen(true);
+				setIsEnding(false);
+			});
+		} catch (err) {
+			console.error("Error ending exam:", err);
+			setIsEnding(false);
+		}
+	};
+
+
 	return (
+
 		<div className="min-vh-100 bg-light p-4">
 			<div className="container">
 
@@ -255,7 +419,7 @@ const OralSocketPage = () => {
 										onClick={() => setIsAISpeaking(true)}
 									>
 										<Repeat size={16} onClick={() => {
-											handleTextToSpeech(question[question.length - 1].text);
+											handleTextToSpeech(question[question.length - 1]?.text);
 										}} />
 
 									</button>
@@ -336,7 +500,8 @@ const OralSocketPage = () => {
 										onClick={handleAnswerSubmit}>
 										Next Question
 									</button>
-									<button className="btn btn-danger">
+									<button className="btn btn-danger"
+										onClick={handleEndExam}>
 										End Exam
 									</button>
 								</div>
@@ -344,9 +509,35 @@ const OralSocketPage = () => {
 
 						</div>
 					</div>
+
 				</div>
+
+
+				{/* BackDrop */}
+				<Backdrop
+					sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'rgba(0, 0, 0, 0.9)' }}
+					open={isEnding}
+				>
+					<CircularProgress color="inherit" />
+					<p className='m-0 p-0 fs-4 mx-2'>{backDropMessage}</p>
+				</Backdrop>
+
+				{/* Dialog for test result */}
+				<Dialog open={dialogOpen} onClose={() => { }} fullWidth maxWidth="sm">
+					<DialogTitle>Test Evaluation</DialogTitle>
+					<DialogContent>
+						<p><strong>Feedback:</strong> {evaluationData?.feedback}</p>
+						<p><strong>Summary:</strong> {evaluationData?.summary}</p>
+						<p><strong>Marks:</strong> {evaluationData?.marks}</p>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={() => navigate('/dashboard')} color="primary">Close</Button>
+					</DialogActions>
+				</Dialog>
+
 			</div>
 		</div>
+
 	);
 };
 
