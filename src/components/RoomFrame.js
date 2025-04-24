@@ -200,8 +200,8 @@ const TestMeet = () => {
 
   //===================Meeting UI Code===========================================>
   const meetingUI = async (element) => {
-    const appID = 1703483768;
-    const serverSecret = '07a7144d947c0f58c0d6284fc7c0bd8b';
+    const appID = 253758875;
+    const serverSecret = 'd1679ad2cf916a2690a2937e49bdd770';
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appID,
       serverSecret,

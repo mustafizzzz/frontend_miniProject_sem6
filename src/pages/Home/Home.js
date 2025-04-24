@@ -1,11 +1,31 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import StatsCardComponent from './HomeComponents/StatsCardComponent/StatsCardComponent'
 import TodoList from './HomeComponents/TodoList/TodoList'
 import ImportantAnnouncements from './HomeComponents/Announcements/ImportantAnnouncements'
 import ActivityCalendar from './HomeComponents/ActivityCalender/ActivityCalendar'
+import OverallEmotion from './HomeComponents/OverallEmotion/OverallEmotion'
+import axios from 'axios'
+import { REACT_APP_DEPLOY } from '../../config'
+import { UserContext } from '../../ContextApi/userContex'
 
 
 const Home = () => {
+  const [overallEmotionData, setOverallEmotionData] = useState(null);
+  const { currentUser } = useContext(UserContext);
+  useEffect(() => {
+    async function fectData() {
+      try {
+        const response = await axios.post(`${REACT_APP_DEPLOY}/api/v1/teacher_reports/get_emotions_totals`, { host_id: currentUser.hostId });
+        console.log(response.data.totalEmotions);
+        setOverallEmotionData(response.data.totalEmotions)
+      } catch (error) {
+        console.error("Error in getting the overall emotion");
+
+
+      }
+    }
+    fectData();
+  }, [])
   return (
     <div className="container-fluid px-3 py-3">
 
@@ -18,7 +38,7 @@ const Home = () => {
           <div className="card border-info h-100">
             <div className="card-body">
               <h5 className="card-title">Overall Emotion Analysis</h5>
-              {/* Add content here if needed */}
+              <OverallEmotion overallEmotionData={overallEmotionData} />
             </div>
           </div>
         </div>
